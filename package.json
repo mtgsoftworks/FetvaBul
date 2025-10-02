@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
-    "@netlify/plugin-nextjs": "^5.13.4",
     "@next/swc-wasm-nodejs": "13.5.1",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -87,6 +86,8 @@
     "jsdom": "^26.1.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.5",
-    "vitest": "^3.2.4"
+    "vite": "^5.4.10",
+    "vitest": "^3.2.4",
+    "@netlify/plugin-nextjs": "^5.13.4"
   }
 }
