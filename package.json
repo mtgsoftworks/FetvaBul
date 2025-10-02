@@ -14,7 +14,7 @@
     "migrate:dev": "tsx scripts/migrate-data.ts",
     "firebase:deploy": "firebase deploy",
     "build:firebase": "npm run build && cd functions && npm install && cd .. && firebase deploy",
-    "build:netlify": "npm run build",
+    "build:netlify": "next build",
     "netlify:deploy": "netlify deploy --prod --dir=.next"
   },
   "dependencies": {

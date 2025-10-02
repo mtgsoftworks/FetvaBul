@@ -8,13 +8,21 @@ const nextConfig = {
   },
   // Add compression
   compress: true,
-  // Enable experimental features
+  // Serverless function optimization for Netlify
   experimental: {
-    optimizeCss: true,
+    serverComponentsExternalPackages: [],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-*'],
   },
-  // Netlify environment variables
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  // Reduce server function size
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Exclude large unused dependencies from server bundle
+      config.externals = config.externals || [];
+      config.externals.push({
+        'sharp': 'commonjs sharp',
+      });
+    }
+    return config;
   },
 };
 
