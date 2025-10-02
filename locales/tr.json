@@ -1,0 +1,43 @@
+{
+  "common": {
+    "search": "Ara",
+    "home": "Ana Sayfa",
+    "categories": "Kategoriler",
+    "about": "Hakkında",
+    "popular": "Popüler Fetvalar",
+    "loading": "Yükleniyor...",
+    "error": "Hata oluştu",
+    "noResults": "Sonuç bulunamadı"
+  },
+  "header": {
+    "title": "FetvaBul",
+    "searchPlaceholder": "İslami sorularınızı buraya yazın..."
+  },
+  "home": {
+    "title": "İslami Sorularınıza",
+    "titleHighlight": "Güvenilir Cevaplar",
+    "subtitle": "Binlerce fetva arasından aradığınız soruların cevaplarını kolayca bulun. Güvenilir kaynaklardan derlenmiş İslami bilgi arşivi.",
+    "searchPlaceholder": "Sorunuzu yazın... (örn: namaz kaç rekattır?)",
+    "stats": {
+      "fatwas": "Fetva",
+      "categories": "Kategori",
+      "users": "Kullanıcı"
+    }
+  },
+  "categories": {
+    "title": "Fetva Kategorileri",
+    "subtitle": "İslami konulara göre düzenlenmiş fetva kategorilerimizi keşfedin",
+    "searchPlaceholder": "Kategori ara..."
+  },
+  "about": {
+    "title": "Hakkımızda",
+    "mission": "Misyonumuz",
+    "vision": "Vizyonumuz",
+    "team": "Ekibimiz",
+    "contact": "İletişim"
+  },
+  "footer": {
+    "copyright": "© 2025 FetvaBul. Tüm hakları saklıdır.",
+    "description": "Güvenilir İslami bilgi kaynağınız"
+  }
+}

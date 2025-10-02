@@ -1,0 +1,43 @@
+{
+  "common": {
+    "search": "Search",
+    "home": "Home",
+    "categories": "Categories",
+    "about": "About",
+    "popular": "Popular Fatwas",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "noResults": "No results found"
+  },
+  "header": {
+    "title": "FetvaBul",
+    "searchPlaceholder": "Type your Islamic questions here..."
+  },
+  "home": {
+    "title": "Reliable Answers to",
+    "titleHighlight": "Your Islamic Questions",
+    "subtitle": "Easily find answers to your questions among thousands of fatwas. Islamic knowledge archive compiled from reliable sources.",
+    "searchPlaceholder": "Type your question... (e.g: how many rakats in prayer?)",
+    "stats": {
+      "fatwas": "Fatwas",
+      "categories": "Categories",
+      "users": "Users"
+    }
+  },
+  "categories": {
+    "title": "Fatwa Categories",
+    "subtitle": "Discover our fatwa categories organized by Islamic topics",
+    "searchPlaceholder": "Search categories..."
+  },
+  "about": {
+    "title": "About Us",
+    "mission": "Our Mission",
+    "vision": "Our Vision",
+    "team": "Our Team",
+    "contact": "Contact"
+  },
+  "footer": {
+    "copyright": "© 2025 FetvaBul. All rights reserved.",
+    "description": "Your reliable Islamic knowledge source"
+  }
+}
