@@ -324,6 +324,11 @@
     @apply absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-islamic-green-600;
   }
 
+  .search-icon-button {
+    @apply absolute right-5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center
+           bg-transparent hover:bg-islamic-green-50 rounded-full transition-all duration-200;
+  }
+
   .search-button {
     @apply absolute left-2 top-1/2 transform -translate-y-1/2 
            bg-islamic-green-600 hover:bg-islamic-green-700 

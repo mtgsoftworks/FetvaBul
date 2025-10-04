@@ -202,18 +202,6 @@ export default function AramaPage() {
         {/* Search Form */}
         <form onSubmit={handleSearch} className="search-container mb-8 w-full lg:max-w-3xl lg:mx-0">
           <div className="relative">
-            <button
-              type="submit"
-              disabled={isSearching}
-              className="search-button disabled:opacity-60 disabled:cursor-not-allowed"
-              aria-label="Ara"
-            >
-              {isSearching ? (
-                <Loader2 className="w-5 h-5 animate-spin text-white" />
-              ) : (
-                <Search className="w-5 h-5 text-white" />
-              )}
-            </button>
             <input
               type="text"
               value={query}
@@ -226,7 +214,18 @@ export default function AramaPage() {
               aria-controls={listboxId}
               aria-expanded={inputFocused && autocompleteSuggestions.length > 0}
             />
-            <Search className="search-icon" aria-hidden="true" />
+            <button
+              type="submit"
+              disabled={isSearching}
+              className="search-icon-button disabled:opacity-60 disabled:cursor-not-allowed"
+              aria-label="Ara"
+            >
+              {isSearching ? (
+                <Loader2 className="w-5 h-5 animate-spin text-islamic-green-600" />
+              ) : (
+                <Search className="w-5 h-5 text-islamic-green-600" />
+              )}
+            </button>
           </div>
 
           {/* Autocomplete Suggestions */}
