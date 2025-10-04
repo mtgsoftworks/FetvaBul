@@ -4,7 +4,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    unoptimized: true, // Netlify için image optimization devre dışı
+    unoptimized: true,
   },
   // Add compression
   compress: true,

@@ -10,20 +10,14 @@ cd FetvaBul
 npm install
 npm run dev
 ```
+## Dağıtım Rehberi
 
-## Teknolojiler
-
-- Next.js 13 App Router
-- TypeScript & React
-- Tailwind CSS + Radix UI
-- Firebase Firestore
-- Netlify / Vercel dağıtım desteği
+### Vercel
 
 ## Dizin Yapısı
 
 ```
 app/           # Sayfalar, API rotaları, layout
-components/    # Kartlar, layout ve UI bileşenleri
 hooks/         # Özel React hook'ları (arama, toast)
 lib/           # Veri servisi, arama indexi, yardımcı fonksiyonlar
 data/          # JSONL veri dosyaları
