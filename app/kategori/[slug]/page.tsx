@@ -1,8 +1,10 @@
 'use client';
 
 import { BookOpen, Tag, Clock, ArrowRight, Filter, Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Header } from '@/components/layout/Header';
+import { getCategoryIconInfo } from '@/lib/category-icons';
 
 export default function KategoriPage({ params }: { params: { slug: string } }) {
   const [sortBy, setSortBy] = useState<'relevance'|'date'|'popular'|'views'|'alphabetical'|'most-liked'>('popular');
@@ -73,32 +75,11 @@ export default function KategoriPage({ params }: { params: { slug: string } }) {
   // Reset page when sort changes or slug changes
   useEffect(() => { setPage(1); }, [sortBy, params.slug]);
 
+  const categoryIcon = useMemo(() => getCategoryIconInfo(category?.name).emoji, [category?.name]);
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-islamic rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-primary">FetvaBul</h1>
-            </Link>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
-                Ana Sayfa
-              </Link>
-              <a href="#" className="text-primary font-medium">
-                Kategoriler
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Hakkında
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -113,7 +94,7 @@ export default function KategoriPage({ params }: { params: { slug: string } }) {
         {/* Category Header */}
         <div className="card-islamic p-8 mb-8">
           <div className="flex items-start space-x-6">
-            <div className="text-6xl">{category?.icon || '🕌'}</div>
+            <div className="text-6xl" aria-hidden="true">{categoryIcon}</div>
             <div className="flex-1">
               <h1 className="text-4xl font-bold text-primary mb-4">{category?.name || 'Kategori'}</h1>
               {category?.description && (

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Calendar, Eye, Heart, Share2, Tag } from 'lucide-react';
+import { BookOpen, Calendar, Eye, Heart, MessageCircle, Share2, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -17,14 +17,111 @@ interface FetvaCardProps {
   likes: number;
 }
 
-export function FetvaCard({ id, question, answer, category, source, date, views, likes }: FetvaCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(likes);
+const STORAGE_KEY = 'fetvabul_liked_fatwas';
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
-  };
+function getStoredLikes(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return new Set(parsed.map(String));
+    }
+    return new Set();
+  } catch (error) {
+    console.warn('Failed to parse stored likes', error);
+    return new Set();
+  }
+}
+
+function persistLikes(set: Set<string>) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(set)));
+}
+
+export function FetvaCard({ id, question, answer, category, source, date, views, likes }: FetvaCardProps) {
+  const [likeCount, setLikeCount] = useState<number>(likes);
+  const [commentsCount, setCommentsCount] = useState<number>(0);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [pending, setPending] = useState<boolean>(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchInteraction = async () => {
+      try {
+        const res = await fetch(`/api/fetva/${encodeURIComponent(id)}/like`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        if (typeof data?.likes === 'number') {
+          setLikeCount(data.likes);
+        }
+        if (typeof data?.commentsCount === 'number') {
+          setCommentsCount(data.commentsCount);
+        }
+      } catch (error) {
+        console.error('Failed to load interactions for card', error);
+      }
+    };
+
+    fetchInteraction();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    const stored = getStoredLikes();
+    setIsLiked(stored.has(id));
+  }, [id]);
+
+  const handleLike = useCallback(async () => {
+    if (pending) return;
+
+    const stored = getStoredLikes();
+    const willLike = !stored.has(id);
+    const action = willLike ? 'like' : 'unlike';
+
+    setPending(true);
+    const previousLiked = isLiked;
+    const previousCountRef = likeCount;
+    setIsLiked(willLike);
+    setLikeCount(prev => Math.max(0, prev + (willLike ? 1 : -1)));
+
+    try {
+      const res = await fetch(`/api/fetva/${encodeURIComponent(id)}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const nextSet = new Set(stored);
+      if (willLike) {
+        nextSet.add(id);
+      } else {
+        nextSet.delete(id);
+      }
+      persistLikes(nextSet);
+
+      const data = await res.json().catch(() => null);
+      if (data && typeof data.likes === 'number') {
+        setLikeCount(data.likes);
+      }
+    } catch (error) {
+      console.error('Like toggle failed', error);
+      setIsLiked(previousLiked);
+      setLikeCount(previousCountRef);
+    } finally {
+      setPending(false);
+    }
+  }, [id, pending, isLiked, likeCount]);
 
   const truncatedAnswer = answer.length > 200 ? answer.substring(0, 200) + '...' : answer;
 
@@ -74,13 +171,23 @@ export function FetvaCard({ id, question, answer, category, source, date, views,
             </div>
             <button
               onClick={handleLike}
+              disabled={pending}
               className={`flex items-center space-x-1 transition-colors ${
                 isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
-              }`}
+              } disabled:opacity-60`}
+              aria-pressed={isLiked}
+              aria-label={isLiked ? 'Beğeniyi geri al' : 'Beğen'}
             >
               <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
               <span>{likeCount}</span>
             </button>
+            <Link
+              href={`/fetva/${id}#yorumlar`}
+              className="flex items-center space-x-1 text-muted-foreground hover:text-islamic-green-600 transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>{commentsCount}</span>
+            </Link>
           </div>
         </div>
       </div>

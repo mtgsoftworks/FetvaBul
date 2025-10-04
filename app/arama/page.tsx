@@ -1,13 +1,22 @@
 'use client';
 
-import { Search, Filter, ArrowLeft, BookOpen, Clock, Tag, Loader2 } from 'lucide-react';
+import { Search, Filter, Clock, Tag, Loader2, BookOpen, Calendar } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useSearch, useCategories } from '@/hooks/use-search';
 import { useToast } from '@/hooks/use-toast';
+import { Header } from '@/components/layout/Header';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
 export default function AramaPage() {
+  const formatDate = (input: string) => {
+    const date = new Date(input);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('tr-TR', { dateStyle: 'long' });
+  };
+
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
 
@@ -44,6 +53,80 @@ export default function AramaPage() {
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const FiltersPanel = () => (
+    <div className="space-y-6">
+      <div>
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter className="w-5 h-5 text-islamic-green-600" />
+          <h3 className="font-semibold">Filtreler</h3>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-medium mb-3">Kategori</h4>
+            {categoriesLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                <span className="text-sm">Yükleniyor...</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="category"
+                    value=""
+                    checked={selectedCategory === ''}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="text-islamic-green-600 focus:ring-islamic-green-500"
+                  />
+                  <span className="text-sm">Tümü</span>
+                </label>
+                {categories.map((category) => (
+                  <label key={category.name} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="category"
+                      value={category.name}
+                      checked={selectedCategory === category.name}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="text-islamic-green-600 focus:ring-islamic-green-500"
+                    />
+                    <span className="text-sm">{category.name} ({category.count})</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h4 className="font-medium mb-3">Sıralama</h4>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="w-full p-2 border border-islamic-green-200 rounded-lg focus:border-islamic-green-500 focus:ring-2 focus:ring-islamic-green-100"
+            >
+              <option value="relevance">İlgili Olanlar</option>
+              <option value="date">En Yeni</option>
+              <option value="popular">En Popüler</option>
+              <option value="views">En Çok Görüntülenen</option>
+            </select>
+          </div>
+
+          {searchStats && (
+            <div className="p-4 bg-islamic-green-50 rounded-lg">
+              <h4 className="font-medium mb-2 text-sm">İstatistikler</h4>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div>Toplam Fetva: {searchStats.totalFatwas.toLocaleString('tr-TR')}</div>
+                <div>Toplam Anahtar Kelime: {searchStats.totalKeywords.toLocaleString('tr-TR')}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     if (!hasMoreResults || isSearching) return;
@@ -106,30 +189,7 @@ export default function AramaPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-islamic rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-primary">FetvaBul</h1>
-            </Link>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
-                Ana Sayfa
-              </Link>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Kategoriler
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Hakkında
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -140,14 +200,15 @@ export default function AramaPage() {
         </div>
 
         {/* Search Form */}
-        <form onSubmit={handleSearch} className="mb-8">
-          <div className="relative max-w-2xl">
+        <form onSubmit={handleSearch} className="search-container mb-8 w-full lg:max-w-3xl lg:mx-0">
+          <div className="relative">
+            <Search className="search-icon" aria-hidden="true" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Sorunuzu yazın..."
-              className="w-full px-6 py-4 text-lg bg-white border-2 border-islamic-green-200 rounded-2xl focus:border-islamic-green-500 focus:ring-4 focus:ring-islamic-green-100 transition-all duration-300 placeholder:text-islamic-green-400"
+              className="search-input"
               onFocus={() => setInputFocused(true)}
               onBlur={() => setInputFocused(false)}
               onKeyDown={handleKeyDown}
@@ -157,10 +218,14 @@ export default function AramaPage() {
             <button
               type="submit"
               disabled={isSearching}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-islamic-green-600 hover:bg-islamic-green-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="search-button flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isSearching ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Search className="w-5 h-5 mr-2" />}
-              {isSearching ? 'Aranıyor...' : 'Ara'}
+              {isSearching ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Search className="w-5 h-5" />
+              )}
+              <span>{isSearching ? 'Aranıyor...' : 'Ara'}</span>
             </button>
           </div>
 
@@ -169,7 +234,7 @@ export default function AramaPage() {
             <div
               id={listboxId}
               role="listbox"
-              className="absolute z-10 w-full max-w-2xl mt-2 bg-white border border-islamic-green-200 rounded-xl shadow-lg"
+              className="absolute left-0 right-0 z-10 mt-2 bg-white border border-islamic-green-200 rounded-xl shadow-lg"
             >
               {autocompleteSuggestions.map((suggestion, index) => (
                 <div
@@ -194,94 +259,51 @@ export default function AramaPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-1">
             <div className="card-islamic p-6 sticky top-24">
-              <div className="flex items-center space-x-2 mb-4">
-                <Filter className="w-5 h-5 text-islamic-green-600" />
-                <h3 className="font-semibold">Filtreler</h3>
-              </div>
-
-              {/* Category Filter */}
-              <div className="mb-6">
-                <h4 className="font-medium mb-3">Kategori</h4>
-                {categoriesLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    <span className="text-sm">Yükleniyor...</span>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        value=""
-                        checked={selectedCategory === ''}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="text-islamic-green-600 focus:ring-islamic-green-500"
-                      />
-                      <span className="text-sm">Tümü</span>
-                    </label>
-                    {categories.map((category) => (
-                      <label key={category.name} className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="category"
-                          value={category.name}
-                          checked={selectedCategory === category.name}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="text-islamic-green-600 focus:ring-islamic-green-500"
-                        />
-                        <span className="text-sm">{category.name} ({category.count})</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Sort Filter */}
-              <div>
-                <h4 className="font-medium mb-3">Sıralama</h4>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="w-full p-2 border border-islamic-green-200 rounded-lg focus:border-islamic-green-500 focus:ring-2 focus:ring-islamic-green-100"
-                >
-                  <option value="relevance">İlgili Olanlar</option>
-                  <option value="date">En Yeni</option>
-                  <option value="popular">En Popüler</option>
-                  <option value="views">En Çok Görüntülenen</option>
-                </select>
-              </div>
-
-              {/* Search Stats */}
-              {searchStats && (
-                <div className="mt-6 p-4 bg-islamic-green-50 rounded-lg">
-                  <h4 className="font-medium mb-2 text-sm">İstatistikler</h4>
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <div>Toplam Fetva: {searchStats.totalFatwas.toLocaleString('tr-TR')}</div>
-                    <div>Toplam Anahtar Kelime: {searchStats.totalKeywords.toLocaleString('tr-TR')}</div>
-                  </div>
-                </div>
-              )}
+              <FiltersPanel />
             </div>
           </div>
 
           {/* Results */}
-        <div className="lg:col-span-3">
-          {/* Results Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-semibold mb-2">Arama Sonuçları</h2>
-              <p className="text-muted-foreground">
-                &quot;{query}&quot; için {totalResults.toLocaleString('tr-TR')} sonuç bulundu
-              </p>
-              {/* A11y: announce result updates */}
-              <span className="sr-only" aria-live="polite">
-                {isSearching ? 'Arama sürüyor' : `${totalResults} sonuç bulundu`}
-              </span>
+          <div className="lg:col-span-3">
+            {/* Results Header */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-semibold mb-2">Arama Sonuçları</h2>
+                <p className="text-muted-foreground">
+                  &quot;{query}&quot; için {totalResults.toLocaleString('tr-TR')} sonuç bulundu
+                </p>
+                {/* A11y: announce result updates */}
+                <span className="sr-only" aria-live="polite">
+                  {isSearching ? 'Arama sürüyor' : `${totalResults} sonuç bulundu`}
+                </span>
+              </div>
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="inline-flex items-center space-x-2 lg:hidden"
+                  >
+                    <Filter className="w-4 h-4" />
+                    <span>Filtreler</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+                  <div className="mt-2 space-y-6">
+                    <h2 className="text-lg font-semibold text-foreground">Filtreler</h2>
+                    <FiltersPanel />
+                    <SheetClose asChild>
+                      <Button className="w-full bg-islamic-green-600 hover:bg-islamic-green-700 text-white">
+                        Uygula
+                      </Button>
+                    </SheetClose>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
-          </div>
 
             {/* Error Message */}
             {searchError && (
@@ -355,21 +377,20 @@ export default function AramaPage() {
 
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
                           <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-1">
-                              <BookOpen className="w-4 h-4" />
-                              <span>{result.fetva.source || 'Kaynak Belirtilmemiş'}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Clock className="w-4 h-4" />
-                              <span>
-                                {result.fetva.date
-                                  ? new Date(result.fetva.date).toLocaleDateString('tr-TR')
-                                  : 'Tarih Belirtilmemiş'
-                                }
-                              </span>
-                            </div>
+                            {result.fetva.source && (
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                <BookOpen className="h-3.5 w-3.5" />
+                                <span>{result.fetva.source}</span>
+                              </div>
+                            )}
+                            {result.fetva.date && (
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                <Calendar className="h-3.5 w-3.5" />
+                                <span>{formatDate(result.fetva.date)}</span>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center space-x-2 text-xs">
+                          <div className="flex items-center space-x-3 text-xs text-muted-foreground">
                             <span>{result.fetva.views || 0} görüntülenme</span>
                             <span>•</span>
                             <span>{result.matchedTerms.length} eşleşme</span>
@@ -382,7 +403,6 @@ export default function AramaPage() {
 
                 {/* Infinite Scroll Sentinel */}
                 <div ref={sentinelRef} className="h-1" />
-
                 {/* Load More Button */}
                 {currentPage < totalPages && (
                   <div className="flex items-center justify-center mt-12">

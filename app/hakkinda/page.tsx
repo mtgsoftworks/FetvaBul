@@ -1,9 +1,65 @@
 'use client';
 
-import { BookOpen, Users, Target, Heart, Mail, Phone, MapPin } from 'lucide-react';
+import { BookOpen, Users, Target, Heart, Mail, Phone, MapPin, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { FormEvent, useState } from 'react';
 
 export default function HakkindaPage() {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitState, setSubmitState] = useState<'idle' | 'success' | 'error'>('idle');
+  const [formMessage, setFormMessage] = useState<string>('');
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const payload = {
+      name: formData.get('name')?.toString() ?? '',
+      email: formData.get('email')?.toString() ?? '',
+      subject: formData.get('subject')?.toString() ?? '',
+      message: formData.get('message')?.toString() ?? '',
+    };
+
+    if (!payload.email || !/.+@.+\..+/.test(payload.email)) {
+      setSubmitState('error');
+      setFormMessage('Geçerli bir e-posta adresi giriniz.');
+      return;
+    }
+
+    if (!payload.message || payload.message.trim().length < 10) {
+      setSubmitState('error');
+      setFormMessage('Mesaj en az 10 karakter olmalıdır.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setSubmitState('idle');
+      setFormMessage('');
+
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error ?? 'Mesaj gönderilemedi.');
+      }
+
+      form.reset();
+      setSubmitState('success');
+      setFormMessage('Mesajınız başarıyla iletildi. En kısa sürede dönüş yapacağız.');
+    } catch (error: any) {
+      setSubmitState('error');
+      setFormMessage(error?.message ?? 'Mesaj gönderilirken bir hata oluştu.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const team = [
     {
       name: 'Necati Koçkeseni',
@@ -49,10 +105,10 @@ export default function HakkindaPage() {
   ];
 
   const stats = [
-    { number: '2,500+', label: 'Fetva' },
-    { number: '15+', label: 'Kategori' },
-    { number: '50K+', label: 'Kullanıcı' },
-    { number: '100K+', label: 'Arama' }
+    { number: '497', label: 'Fetva Kaydı' },
+    { number: '11', label: 'Kategori' },
+    { number: '237K+', label: 'Arama Anahtar Terimi' },
+    { number: '100%', label: 'Mobil Uyumluluk' }
   ];
 
   return (
@@ -236,14 +292,90 @@ export default function HakkindaPage() {
               </div>
             </div>
 
-            <div className="text-center mt-8">
-              <Link
-                href="/iletisim"
-                className="inline-flex items-center space-x-2 px-6 py-3 bg-islamic-green-600 hover:bg-islamic-green-700 text-white rounded-xl font-medium transition-all duration-300 hover:scale-105"
-              >
-                <Mail className="w-5 h-5" />
-                <span>İletişim Formu</span>
-              </Link>
+            <div className="mt-12">
+              <h3 className="text-2xl font-semibold text-primary text-center mb-6">Bize Yazın</h3>
+              <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2" htmlFor="name">
+                      Adınız Soyadınız
+                    </label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder="Adınız"
+                      className="w-full rounded-xl border border-islamic-green-200 bg-white px-4 py-3 focus:border-islamic-green-500 focus:ring-2 focus:ring-islamic-green-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2" htmlFor="email">
+                      E-posta Adresiniz
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="ornek@fetvabul.com"
+                      className="w-full rounded-xl border border-islamic-green-200 bg-white px-4 py-3 focus:border-islamic-green-500 focus:ring-2 focus:ring-islamic-green-100"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2" htmlFor="subject">
+                    Konu
+                  </label>
+                  <input
+                    id="subject"
+                    name="subject"
+                    type="text"
+                    placeholder="Mesajınızın konusu"
+                    className="w-full rounded-xl border border-islamic-green-200 bg-white px-4 py-3 focus:border-islamic-green-500 focus:ring-2 focus:ring-islamic-green-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2" htmlFor="message">
+                    Mesajınız
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    required
+                    rows={5}
+                    placeholder="Sorunuzu veya geri bildiriminizi yazınız..."
+                    className="w-full rounded-xl border border-islamic-green-200 bg-white px-4 py-3 focus:border-islamic-green-500 focus:ring-2 focus:ring-islamic-green-100 resize-none"
+                  />
+                </div>
+
+                {submitState !== 'idle' && formMessage && (
+                  <div
+                    className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm ${
+                      submitState === 'success'
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border-red-200 bg-red-50 text-red-700'
+                    }`}
+                  >
+                    {submitState === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4" />
+                    )}
+                    <span>{formMessage}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 px-8 py-3.5 text-lg font-semibold text-black shadow-[0_15px_35px_-12px_rgba(217,119,6,0.7)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_50px_-12px_rgba(217,119,6,0.65)] focus:outline-none focus:ring-4 focus:ring-amber-300 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+                  >
+                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mail className="w-5 h-5" />}
+                    <span>{submitting ? 'Gönderiliyor...' : 'Mesaj Gönder'}</span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
