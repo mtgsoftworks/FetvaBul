@@ -144,22 +144,36 @@ export default function HakkindaPage() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
-                <div className="flex flex-col space-y-6 mt-6">
+                <div className="flex flex-col space-y-3 mt-6">
                   <Link
                     href="/"
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Ana Sayfa
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-lg font-semibold h-14 px-4 border-2 border-islamic-green-300 hover:border-islamic-green-500 hover:bg-islamic-green-50 text-islamic-green-800"
+                    >
+                      Ana Sayfa
+                    </Button>
                   </Link>
                   <Link
                     href="/kategoriler"
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Kategoriler
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-lg font-semibold h-14 px-4 border-2 border-islamic-green-300 hover:border-islamic-green-500 hover:bg-islamic-green-50 text-islamic-green-800"
+                    >
+                      Kategoriler
+                    </Button>
                   </Link>
-                  <span className="text-lg font-medium text-primary">Hakkında</span>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start text-lg font-semibold h-14 px-4 border-2 border-islamic-green-300 bg-islamic-green-50 text-islamic-green-800"
+                    disabled
+                  >
+                    Hakkında
+                  </Button>
                 </div>
               </SheetContent>
             </Sheet>

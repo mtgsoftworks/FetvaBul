@@ -98,12 +98,6 @@ export default function FetvaDetailPage() {
   const [commentMessage, setCommentMessage] = useState<string>("");
   const [commentSubmitting, setCommentSubmitting] = useState<boolean>(false);
 
-  const formattedDate = useMemo(() => {
-    if (!fetva?.date) return null;
-    const parsed = new Date(fetva.date);
-    return Number.isNaN(parsed.getTime()) ? null : parsed.toLocaleDateString("tr-TR", { dateStyle: "long" });
-  }, [fetva?.date]);
-
   useEffect(() => {
     setIsLiked(getStoredLikes().has(id));
   }, [id]);
@@ -375,12 +369,6 @@ export default function FetvaDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             <span>Geri</span>
           </Button>
-          {formattedDate && (
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              <span>{formattedDate}</span>
-            </div>
-          )}
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -421,17 +409,6 @@ export default function FetvaDetailPage() {
                 <p className="leading-relaxed whitespace-pre-wrap text-foreground">{fetva.answer}</p>
               )}
             </div>
-
-            {fetva.references && fetva.references.length > 0 && (
-              <div className="mt-8 rounded-xl border border-islamic-green-200 bg-islamic-green-50 p-4">
-                <h2 className="mb-3 text-lg font-semibold text-islamic-green-800">Kaynaklar</h2>
-                <ul className="list-disc space-y-1 pl-5 text-sm text-islamic-green-700">
-                  {fetva.references.map((reference, index) => (
-                    <li key={index}>{reference}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
 
             <div className="mt-10 flex flex-wrap gap-3">
               <Button
