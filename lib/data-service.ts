@@ -16,7 +16,7 @@ import {
   Category
 } from '@/types';
 
-const DATA_FILE_NAME = 'processed_fetvas.jsonl';
+const DATA_FILE_NAME = 'consolidated_fetvas.jsonl';
 
 type RawFetvaRecord = RawFetvaData & Record<string, any>;
 
@@ -310,19 +310,25 @@ export class DataService {
     this.ensureInitialized();
 
     const fetva = this.fetvaById.get(id);
-    return fetva ? this.withRuntimeViews(fetva) : null;
+    return fetva ? await this.withRuntimeViews(fetva) : null;
   }
 
   public async getAllFatwas(): Promise<Fetva[]> {
     this.ensureInitialized();
-    return this.fetvas.map(fetva => this.withRuntimeViews(fetva));
+    const fetvasWithViews = await Promise.all(
+      this.fetvas.map(fetva => this.withRuntimeViews(fetva))
+    );
+    return fetvasWithViews;
   }
 
   public async getFatwasByCategory(categoryName: string): Promise<Fetva[]> {
     this.ensureInitialized();
-    return this.fetvas
-      .filter(fetva => fetva.categories.includes(categoryName))
-      .map(fetva => this.withRuntimeViews(fetva));
+    const filtered = this.fetvas
+      .filter(fetva => fetva.categories.includes(categoryName));
+    const fetvasWithViews = await Promise.all(
+      filtered.map(fetva => this.withRuntimeViews(fetva))
+    );
+    return fetvasWithViews;
   }
 
   public async getAllCategories(): Promise<Category[]> {
@@ -346,10 +352,14 @@ export class DataService {
       }))
     );
 
-    return fetvasWithViews
+    const sortedFetvas = fetvasWithViews
       .sort((a, b) => b.viewCount - a.viewCount || b.fetva.likes - a.fetva.likes)
       .slice(0, limit)
-      .map(item => this.withRuntimeViews(item.fetva));
+      .map(item => item.fetva);
+    
+    return await Promise.all(
+      sortedFetvas.map(fetva => this.withRuntimeViews(fetva))
+    );
   }
 
   public async incrementViews(id: string): Promise<void> {
@@ -566,8 +576,41 @@ export class DataService {
   }
 
   private buildCategories(counts: Map<string, number>): Category[] {
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'tr'))
+    // Önceden tanımlanmış 11 ana kategori
+    const mainCategories = [
+      'Genel Sorular', 'Helal Gıda & Beslenme', 'İbadet', 'İnanç', 
+      'Aile Hukuku & Sosyal İlişkiler', 'Ahlak & Tasavvuf', 'Muamelat & Ekonomi', 
+      'Sağlık', 'Ölüm & Ahiret', 'İslam İlimleri', 'Mahremiyet & Tesettür'
+    ];
+    
+    // Ana kategorileri oluştur ve sayıları topla
+    const categoryMap = new Map<string, number>();
+    
+    // Önce ana kategorileri sıfır değerle ekle
+    mainCategories.forEach(cat => categoryMap.set(cat, 0));
+    
+    // Veri dosyasındaki kategorileri ana kategorilere eşleştir
+    for (const [name, count] of counts.entries()) {
+      const normalizedName = name.toLowerCase().trim();
+      
+      // Her ana kategori için eşleşme kontrolü yap
+      for (const mainCat of mainCategories) {
+        const mainCatLower = mainCat.toLowerCase();
+        
+        // Eğer kategori adı ana kategori adını içeriyorsa veya ana kategori adı kategori adını içeriyorsa
+        if (normalizedName.includes(mainCatLower) || mainCatLower.includes(normalizedName)) {
+          // Mevcut değere yeni sayıyı ekle
+          const currentCount = categoryMap.get(mainCat) || 0;
+          categoryMap.set(mainCat, currentCount + count);
+          break; // Eşleşme bulundu, diğer ana kategorileri kontrol etme
+        }
+      }
+    }
+    
+    // Sadece fetva içeren kategorileri al ve sırala
+    return Array.from(categoryMap.entries())
+      .filter(([_, count]) => count > 0) // Sadece fetva içeren kategorileri tut
+      .sort((a, b) => b[1] - a[1]) // Fetva sayısına göre azalan sırada sırala
       .map(([name, count], index) => {
         const slug = createCategorySlug(name);
         return {
