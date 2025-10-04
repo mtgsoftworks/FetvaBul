@@ -105,7 +105,13 @@ export default function Home() {
             {/* Search Form */}
             <form onSubmit={handleSearch} className="search-container mb-12">
               <div className="relative">
-                <Search className="search-icon" aria-hidden="true" />
+                <button
+                  type="submit"
+                  className="search-button"
+                  aria-label="Ara"
+                >
+                  <Search className="w-5 h-5 text-white" />
+                </button>
                 <input
                   type="text"
                   value={searchQuery}
@@ -113,13 +119,7 @@ export default function Home() {
                   placeholder="Sorunuzu yazın... (örn: namaz kaç rekattır?)"
                   className="search-input"
                 />
-                <button
-                  type="submit"
-                  className="search-button"
-                >
-                  <Search className="w-5 h-5 mr-2 text-islamic-green-700" />
-                  Ara
-                </button>
+                <Search className="search-icon" aria-hidden="true" />
               </div>
             </form>
 

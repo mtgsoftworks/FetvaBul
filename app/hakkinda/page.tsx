@@ -1,13 +1,16 @@
 'use client';
 
-import { BookOpen, Users, Target, Heart, Mail, Phone, MapPin, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { BookOpen, Users, Target, Heart, Mail, Phone, MapPin, Loader2, CheckCircle2, AlertCircle, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export default function HakkindaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<'idle' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState<string>('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -114,7 +117,7 @@ export default function HakkindaPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border bg-white/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
@@ -132,6 +135,34 @@ export default function HakkindaPage() {
               </Link>
               <span className="text-primary font-medium">Hakkında</span>
             </nav>
+            
+            {/* Mobile Menu */}
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="sm" className="p-3 min-h-[44px] min-w-[44px]">
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <div className="flex flex-col space-y-6 mt-6">
+                  <Link
+                    href="/"
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Ana Sayfa
+                  </Link>
+                  <Link
+                    href="/kategoriler"
+                    className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Kategoriler
+                  </Link>
+                  <span className="text-lg font-medium text-primary">Hakkında</span>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
