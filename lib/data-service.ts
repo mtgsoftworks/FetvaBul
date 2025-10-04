@@ -93,7 +93,7 @@ export class DataService {
     } = options;
 
     if (!query || query.trim().length < 2) {
-      return this.getAllFatvasForSearch({ ...options, limit, offset, sortBy });
+      return await this.getAllFatvasForSearch({ ...options, limit, offset, sortBy });
     }
 
     try {
@@ -167,14 +167,13 @@ export class DataService {
 
       const results: InternalSearchResult[] = [];
 
-      matchedIds.forEach(id => {
-        const fetva = this.fetvaById.get(id);
-        if (!fetva) {
-          return;
+      for (const [id, fetva] of Array.from(this.fetvaById.entries())) {
+        if (!matchedIds.has(id)) {
+          continue;
         }
 
         if (category && category.trim() && !fetva.categories.includes(category)) {
-          return;
+          continue;
         }
 
         results.push({
@@ -184,7 +183,7 @@ export class DataService {
           highlightedQuestion: this.highlightText(fetva.question, normalizedKeywords),
           highlightedAnswer: this.highlightText(fetva.answer, normalizedKeywords)
         });
-      });
+      }
 
       const sorted = await this.sortResults(results, sortBy);
       return sorted.slice(offset, offset + limit);
@@ -648,18 +647,19 @@ export class DataService {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  private getAllFatvasForSearch(options: InternalSearchOptions): InternalSearchResult[] {
+  private async getAllFatvasForSearch(options: InternalSearchOptions): Promise<InternalSearchResult[]> {
     const { category, sortBy = 'views', limit = 20, offset = 0 } = options;
 
-    const filtered = this.fetvas
+    const filteredPromises = this.fetvas
       .filter(fetva => (category ? fetva.categories.includes(category) : true))
-      .map(fetva => ({
-        fetva: this.withRuntimeViews(fetva),
+      .map(async (fetva) => ({
+        fetva: await this.withRuntimeViews(fetva),
         score: 0,
         matchedTerms: []
       }));
 
-    const sorted = this.sortResults(filtered, sortBy);
+    const filtered = await Promise.all(filteredPromises);
+    const sorted = await this.sortResults(filtered, sortBy);
     return sorted.slice(offset, offset + limit);
   }
 
