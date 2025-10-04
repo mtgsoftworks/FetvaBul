@@ -50,7 +50,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80">
-              <div className="flex flex-col space-y-4 mt-6">
+              <div className="flex flex-col space-y-3 mt-6">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
@@ -58,8 +58,8 @@ export function Header() {
                     onClick={() => setIsOpen(false)}
                   >
                     <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-lg font-medium h-12 px-4"
+                      variant="outline" 
+                      className="w-full justify-start text-lg font-semibold h-14 px-4 border-2 border-islamic-green-300 hover:border-islamic-green-500 hover:bg-islamic-green-50 text-islamic-green-800"
                     >
                       {item.name}
                     </Button>
