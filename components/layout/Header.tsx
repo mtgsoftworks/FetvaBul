@@ -50,15 +50,19 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80">
-              <div className="flex flex-col space-y-6 mt-6">
+              <div className="flex flex-col space-y-4 mt-6">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-lg font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    {item.name}
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-lg font-medium h-12 px-4"
+                    >
+                      {item.name}
+                    </Button>
                   </Link>
                 ))}
               </div>
