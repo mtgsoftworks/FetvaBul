@@ -3,6 +3,7 @@ import path from 'path';
 import * as readline from 'readline';
 import { createHash } from 'crypto';
 import { SearchIndex, TurkishNormalizer } from './search-index';
+import { incrementViewCount, getViewCount } from './firebase';
 import {
   RawFetvaData,
   DataServiceError,
@@ -116,7 +117,7 @@ export class DataService {
         }
 
         filtered.push({
-          fetva: this.withRuntimeViews(fetva),
+          fetva: await this.withRuntimeViews(fetva),
           score: result.score,
           matchedTerms: result.matchedTerms,
           highlightedQuestion: this.highlightText(fetva.question, result.matchedTerms),
@@ -124,7 +125,7 @@ export class DataService {
         });
       }
 
-      const sorted = this.sortResults(filtered, sortBy);
+      const sorted = await this.sortResults(filtered, sortBy);
       return sorted.slice(offset, offset + limit);
     } catch (error) {
       console.error('Search error:', error);
@@ -177,7 +178,7 @@ export class DataService {
         }
 
         results.push({
-          fetva: this.withRuntimeViews(fetva),
+          fetva: await this.withRuntimeViews(fetva),
           score: normalizedKeywords.length,
           matchedTerms: normalizedKeywords,
           highlightedQuestion: this.highlightText(fetva.question, normalizedKeywords),
@@ -185,7 +186,7 @@ export class DataService {
         });
       });
 
-      const sorted = this.sortResults(results, sortBy);
+      const sorted = await this.sortResults(results, sortBy);
       return sorted.slice(offset, offset + limit);
     } catch (error) {
       console.error('Keyword search error:', error);
@@ -307,18 +308,32 @@ export class DataService {
   public async getPopularFatwas(limit: number = 10): Promise<Fetva[]> {
     this.ensureInitialized();
 
-    return this.fetvas
-      .slice()
-      .sort((a, b) => this.getViewCount(b.id) - this.getViewCount(a.id) || b.likes - a.likes)
+    // Tüm fetvalar için görüntüleme sayılarını al
+    const fetvasWithViews = await Promise.all(
+      this.fetvas.map(async (fetva) => ({
+        fetva,
+        viewCount: await this.getViewCount(fetva.id)
+      }))
+    );
+
+    return fetvasWithViews
+      .sort((a, b) => b.viewCount - a.viewCount || b.fetva.likes - a.fetva.likes)
       .slice(0, limit)
-      .map(fetva => this.withRuntimeViews(fetva));
+      .map(item => this.withRuntimeViews(item.fetva));
   }
 
   public async incrementViews(id: string): Promise<void> {
     this.ensureInitialized();
 
-    const current = this.viewsOverrides.get(id) ?? 0;
-    this.viewsOverrides.set(id, current + 1);
+    try {
+      // Firebase Firestore'da görüntüleme sayısını artır
+      await incrementViewCount(id);
+    } catch (error) {
+      console.error('Failed to increment view count in Firestore:', error);
+      // Hata durumunda eski yönteme geri dön (geçici çözüm)
+      const current = this.viewsOverrides.get(id) ?? 0;
+      this.viewsOverrides.set(id, current + 1);
+    }
   }
 
   public async getStats(): Promise<SiteStats> {
@@ -327,7 +342,13 @@ export class DataService {
     try {
       const totalFatwas = this.fetvas.length;
       const totalCategories = this.categories.length;
-      const totalViews = this.fetvas.reduce((sum, fetva) => sum + this.getViewCount(fetva.id), 0);
+      
+      // Tüm fetvalar için görüntüleme sayılarını al
+      const viewCounts = await Promise.all(
+        this.fetvas.map(async (fetva) => await this.getViewCount(fetva.id))
+      );
+      const totalViews = viewCounts.reduce((sum, count) => sum + count, 0);
+      
       const popularCategories = this.categories
         .slice()
         .sort((a, b) => b.fatwaCount - a.fatwaCount)
@@ -530,7 +551,7 @@ export class DataService {
       });
   }
 
-  private sortResults(results: InternalSearchResult[], sortBy: InternalSearchOptions['sortBy']): InternalSearchResult[] {
+  private async sortResults(results: InternalSearchResult[], sortBy: InternalSearchOptions['sortBy']): Promise<InternalSearchResult[]> {
     switch (sortBy) {
       case 'date':
         return results.slice().sort((a, b) => {
@@ -540,26 +561,60 @@ export class DataService {
         });
       case 'popular':
       case 'views':
-        return results.slice().sort((a, b) => this.getViewCount(b.fetva.id) - this.getViewCount(a.fetva.id));
+        // Görüntüleme sayılarına göre sıralama
+        const resultsWithViews = await Promise.all(
+          results.map(async (result) => ({
+            result,
+            viewCount: await this.getViewCount(result.fetva.id)
+          }))
+        );
+        
+        return resultsWithViews
+          .sort((a, b) => b.viewCount - a.viewCount)
+          .map(item => item.result);
       case 'relevance':
       default:
         return results.slice().sort((a, b) => b.score - a.score);
     }
   }
 
-  private withRuntimeViews(fetva: Fetva): Fetva {
-    const overrides = this.viewsOverrides.get(fetva.id) ?? 0;
-    if (!overrides) {
-      return fetva;
+  private async withRuntimeViews(fetva: Fetva): Promise<Fetva> {
+    try {
+      // Firebase Firestore'dan güncel görüntüleme sayısını al
+      const firestoreViews = await getViewCount(fetva.id);
+      const overrides = this.viewsOverrides.get(fetva.id) ?? 0;
+      
+      // Firestore'da veri varsa onu kullan, yoksa yerel veriyi kullan
+      const totalViews = firestoreViews > 0 ? firestoreViews : fetva.views + overrides;
+      
+      return { ...fetva, views: totalViews };
+    } catch (error) {
+      console.error('Failed to get view count from Firestore:', error);
+      // Hata durumunda eski yönteme geri dön
+      const overrides = this.viewsOverrides.get(fetva.id) ?? 0;
+      if (!overrides) {
+        return fetva;
+      }
+      return { ...fetva, views: fetva.views + overrides };
     }
-
-    return { ...fetva, views: fetva.views + overrides };
   }
 
-  private getViewCount(id: string): number {
-    const baseViews = this.fetvaById.get(id)?.views ?? 0;
-    const overrides = this.viewsOverrides.get(id) ?? 0;
-    return baseViews + overrides;
+  private async getViewCount(id: string): Promise<number> {
+    try {
+      // Önce Firebase Firestore'dan görüntüleme sayısını al
+      const firestoreViews = await getViewCount(id);
+      const baseViews = this.fetvaById.get(id)?.views ?? 0;
+      const overrides = this.viewsOverrides.get(id) ?? 0;
+      
+      // Firestore'daki sayı varsa onu kullan, yoksa yerel sayıyı kullan
+      return firestoreViews > 0 ? firestoreViews : baseViews + overrides;
+    } catch (error) {
+      console.error('Failed to get view count from Firestore:', error);
+      // Hata durumunda eski yönteme geri dön
+      const baseViews = this.fetvaById.get(id)?.views ?? 0;
+      const overrides = this.viewsOverrides.get(id) ?? 0;
+      return baseViews + overrides;
+    }
   }
 
   private normalizeKeyword(keyword: string): string {

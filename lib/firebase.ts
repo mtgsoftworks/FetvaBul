@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc, increment, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY || 'AIzaSyDkStkaUFNloLc3Ji7vL_A_30Vcrp7dia0',
@@ -18,6 +18,51 @@ const db = getFirestore(app);
 let analyticsPromise: Promise<ReturnType<typeof getAnalytics> | null> | null = null;
 if (typeof window !== 'undefined') {
   analyticsPromise = isSupported().then(supported => (supported ? getAnalytics(app) : null));
+}
+
+// Görüntüleme sayısı yönetimi için fonksiyonlar
+export async function incrementViewCount(fetvaId: string): Promise<number> {
+  try {
+    const fetvaRef = doc(db, 'fetvas', fetvaId);
+    const fetvaDoc = await getDoc(fetvaRef);
+    
+    if (fetvaDoc.exists()) {
+      // Mevcut dokümanı güncelle
+      await updateDoc(fetvaRef, {
+        views: increment(1),
+        lastViewedAt: serverTimestamp()
+      });
+      return (fetvaDoc.data().views || 0) + 1;
+    } else {
+      // Yeni doküman oluştur
+      await setDoc(fetvaRef, {
+        id: fetvaId,
+        views: 1,
+        createdAt: serverTimestamp(),
+        lastViewedAt: serverTimestamp()
+      });
+      return 1;
+    }
+  } catch (error) {
+    console.error('Error incrementing view count:', error);
+    throw error;
+  }
+}
+
+export async function getViewCount(fetvaId: string): Promise<number> {
+  try {
+    const fetvaRef = doc(db, 'fetvas', fetvaId);
+    const fetvaDoc = await getDoc(fetvaRef);
+    
+    if (fetvaDoc.exists()) {
+      return fetvaDoc.data().views || 0;
+    }
+    
+    return 0;
+  } catch (error) {
+    console.error('Error getting view count:', error);
+    return 0;
+  }
 }
 
 export { app, db, analyticsPromise as analytics };
