@@ -330,10 +330,18 @@ export class SearchIndex {
       matchedTerms: Set<string>;
     }>();
 
-    for (const term of processedTerms) {
+    // Performans için terim sayısını sınırla
+    const maxTermsToProcess = Math.min(processedTerms.length, 5);
+    
+    for (let i = 0; i < maxTermsToProcess; i++) {
+      const term = processedTerms[i];
       const matches = this.findTermMatches(term, fuzzy);
       
-      for (const matchedTerm of matches) {
+      // Performans için eşleşme sayısını sınırla
+      const maxMatchesPerTerm = Math.min(matches.length, 100);
+      
+      for (let j = 0; j < maxMatchesPerTerm; j++) {
+        const matchedTerm = matches[j];
         const entry = this.index.get(matchedTerm);
         if (!entry) continue;
 

@@ -43,6 +43,10 @@ export class DataService {
   private keywordFrequency: Map<string, number> = new Map();
   private searchIndex = new SearchIndex();
   private viewsOverrides: Map<string, number> = new Map();
+  
+  // Arama önbelleği
+  private searchCache: Map<string, { results: InternalSearchResult[]; timestamp: number }> = new Map();
+  private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika
 
   private constructor() {}
 
@@ -96,17 +100,31 @@ export class DataService {
       return await this.getAllFatvasForSearch({ ...options, limit, offset, sortBy });
     }
 
+    // Önbellek anahtarı oluştur
+    const cacheKey = `${query.trim().toLowerCase()}-${category || ''}-${sortBy}-${limit}-${offset}-${minScore}`;
+    
+    // Önbelleği kontrol et
+    const cached = this.searchCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
+      return cached.results;
+    }
+
     try {
+      // Performans için maxResults sınırlaması
+      const maxResults = Math.min(500, limit * 3 + offset); // Daha küçük bir limit
+      
       const searchResults = this.searchIndex.search(query, {
         fuzzy: true,
         stemming: true,
-        maxResults: Math.min(this.fetvas.length, limit * 5 + offset),
+        maxResults,
         minScore
       });
 
       const filtered: InternalSearchResult[] = [];
+      const processedCount = Math.min(searchResults.length, 200); // İşlenecek maksimum sonuç sayısı
 
-      for (const result of searchResults) {
+      for (let i = 0; i < processedCount; i++) {
+        const result = searchResults[i];
         const fetva = this.fetvaById.get(result.documentId);
         if (!fetva) {
           continue;
@@ -123,10 +141,23 @@ export class DataService {
           highlightedQuestion: this.highlightText(fetva.question, result.matchedTerms),
           highlightedAnswer: this.highlightText(fetva.answer, result.matchedTerms)
         });
+
+        // Performans için erken durma
+        if (filtered.length >= limit + offset) {
+          break;
+        }
       }
 
       const sorted = await this.sortResults(filtered, sortBy);
-      return sorted.slice(offset, offset + limit);
+      const finalResults = sorted.slice(offset, offset + limit);
+      
+      // Önbelleği güncelle
+      this.searchCache.set(cacheKey, {
+        results: finalResults,
+        timestamp: Date.now()
+      });
+
+      return finalResults;
     } catch (error) {
       console.error('Search error:', error);
       throw new DataServiceError(

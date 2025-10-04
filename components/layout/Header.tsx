@@ -22,7 +22,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
+          <Link href="/" className="flex items-center space-x-3 group flex-shrink-0">
             <div className="w-10 h-10 bg-gradient-islamic rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
@@ -45,7 +45,7 @@ export function Header() {
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="sm" className="p-3 min-h-[44px] min-w-[44px]">
+              <Button variant="ghost" size="sm" className="p-3 min-h-[44px] min-w-[44px] flex-shrink-0">
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
