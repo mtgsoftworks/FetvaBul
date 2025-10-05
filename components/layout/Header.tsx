@@ -3,6 +3,7 @@
 import React from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { BookOpen, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -10,6 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   const navigation = [
     { name: 'Ana Sayfa', href: '/' },
@@ -35,7 +37,9 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+                className={`text-muted-foreground hover:text-primary transition-colors font-medium ${
+                  pathname === item.href ? 'text-primary font-semibold' : ''
+                }`}
               >
                 {item.name}
               </Link>
@@ -51,20 +55,26 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-80">
               <div className="flex flex-col space-y-3 mt-6">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start text-lg font-semibold h-14 px-4 border-2 border-islamic-green-300 hover:border-islamic-green-500 hover:bg-islamic-green-50 text-islamic-green-800"
+                {navigation.map((item) => {
+                  const isActive = pathname === item.href;
+                  return isActive ? (
+                    <div
+                      key={item.name}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input py-2 w-full text-lg font-semibold h-14 px-4 border-2 border-islamic-green-500 bg-islamic-green-100 text-islamic-green-800 cursor-default"
                     >
                       {item.name}
-                    </Button>
-                  </Link>
-                ))}
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 w-full text-lg font-semibold h-14 px-4 border-2 border-islamic-green-300 hover:border-islamic-green-500 hover:bg-islamic-green-50 text-islamic-green-800"
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
               </div>
             </SheetContent>
           </Sheet>
