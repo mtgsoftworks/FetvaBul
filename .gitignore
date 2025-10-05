@@ -43,11 +43,6 @@ firebase-debug.*.log
 # netlify
 .netlify
 
-# data files (keep consolidated data)
-/data/*.jsonl
-!/data/consolidated_fetvas.jsonl
-!/data/processed_fetvas.jsonl
-
 # IDE
 .vscode/
 .idea/
