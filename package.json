@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NEXT_TYPESCRIPT_CHECK=false next build",
+    "build": "copy data\\consolidated_fetvas.jsonl data\\processed_fetvas.jsonl && NEXT_TYPESCRIPT_CHECK=false next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
