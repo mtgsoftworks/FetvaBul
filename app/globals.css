@@ -5,73 +5,99 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* İslami Yeşil Renk Paleti */
-  --islamic-green-50: #f0f9f0;
-  --islamic-green-100: #dcf2dc;
-  --islamic-green-200: #bae5ba;
-  --islamic-green-300: #8dd48d;
-  --islamic-green-400: #5cb85c;
-  --islamic-green-500: #4caf50;
-  --islamic-green-600: #2e7d32;
-  --islamic-green-700: #1b5e20;
-  --islamic-green-800: #0d4f12;
-  --islamic-green-900: #064208;
-  
-  /* Neutral Tonlar */
+  /* Primary brand system */
+  --primary-hex: #17cf17;
+  --primary-hex-dark: #12a812;
+
+  /* Surface tokens */
+  --background-light: #f6f8f6;
+  --background-dark: #112111;
+  --surface-light: #ffffff;
+  --surface-muted: #e9f2e9;
+  --surface-dark: #1a2e1a;
+  --surface-deep: #0f1c0f;
+
+  /* Text tokens */
+  --text-light: #112111;
+  --text-light-subtle: #375837;
+  --text-dark: #e6f3e6;
+  --text-dark-subtle: #b6d9b6;
+
+  /* Accent palette */
+  --accent-soft: #c9f2c9;
+  --accent-strong: #17cf17;
+  --accent-amber: #f7d37a;
+  --accent-sky: #9cd9d9;
+
+  /* Legacy islamic greens kept for gradients & utilities */
+  --islamic-green-50: #eef8ee;
+  --islamic-green-100: #d5f0d5;
+  --islamic-green-200: #ace4ac;
+  --islamic-green-300: #7fd77f;
+  --islamic-green-400: #43c943;
+  --islamic-green-500: #17cf17;
+  --islamic-green-600: #12a812;
+  --islamic-green-700: #0d8110;
+  --islamic-green-800: #0a6010;
+  --islamic-green-900: #053b09;
+
+  /* Neutral greys */
   --neutral-50: #fafafa;
-  --neutral-100: #f5f5f5;
-  --neutral-200: #e5e5e5;
-  --neutral-300: #d4d4d4;
-  --neutral-400: #a3a3a3;
-  --neutral-500: #737373;
-  --neutral-600: #525252;
-  --neutral-700: #404040;
-  --neutral-800: #262626;
-  --neutral-900: #171717;
+  --neutral-100: #f1f3f1;
+  --neutral-200: #dde2dd;
+  --neutral-300: #c4cdc4;
+  --neutral-400: #9aa99a;
+  --neutral-500: #728072;
+  --neutral-600: #576557;
+  --neutral-700: #3c463c;
+  --neutral-800: #283028;
+  --neutral-900: #161a16;
 }
 
 @layer base {
   :root {
-    --background: var(--islamic-green-50);
-    --foreground: var(--islamic-green-900);
-    --card: #ffffff;
-    --card-foreground: var(--islamic-green-800);
-    --popover: #ffffff;
-    --popover-foreground: var(--islamic-green-800);
-    --primary: var(--islamic-green-700);
-    --primary-foreground: #ffffff;
-    --secondary: var(--islamic-green-100);
-    --secondary-foreground: var(--islamic-green-800);
-    --muted: var(--islamic-green-100);
-    --muted-foreground: var(--islamic-green-600);
-    --accent: var(--islamic-green-200);
-    --accent-foreground: var(--islamic-green-800);
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: var(--islamic-green-200);
-    --input: var(--islamic-green-100);
-    --ring: var(--islamic-green-500);
-    --radius: 0.75rem;
+    --background: 120 12% 97%;
+    --foreground: 124 24% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 124 24% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 124 24% 16%;
+    --primary: 120 76% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 120 28% 90%;
+    --secondary-foreground: 124 26% 25%;
+    --muted: 120 20% 88%;
+    --muted-foreground: 124 20% 36%;
+    --accent: 120 32% 84%;
+    --accent-foreground: 124 26% 24%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 120 20% 84%;
+    --input: 120 20% 84%;
+    --ring: 120 76% 45%;
+    --radius: 0.875rem;
   }
 
   .dark {
-    --background: var(--islamic-green-900);
-    --foreground: var(--islamic-green-50);
-    --card: var(--islamic-green-800);
-    --card-foreground: var(--islamic-green-50);
-    --popover: var(--islamic-green-800);
-    --popover-foreground: var(--islamic-green-50);
-    --primary: var(--islamic-green-400);
-    --primary-foreground: var(--islamic-green-900);
-    --secondary: var(--islamic-green-800);
-    --secondary-foreground: var(--islamic-green-100);
-    --muted: var(--islamic-green-800);
-    --muted-foreground: var(--islamic-green-300);
-    --accent: var(--islamic-green-700);
-    --accent-foreground: var(--islamic-green-100);
-    --border: var(--islamic-green-700);
-    --input: var(--islamic-green-800);
-    --ring: var(--islamic-green-400);
+    --background: 120 45% 12%;
+    --foreground: 120 24% 92%;
+    --card: 120 30% 18%;
+    --card-foreground: 120 24% 90%;
+    --popover: 120 30% 18%;
+    --popover-foreground: 120 24% 90%;
+    --primary: 120 70% 55%;
+    --primary-foreground: 120 40% 12%;
+    --secondary: 120 28% 22%;
+    --secondary-foreground: 120 32% 88%;
+    --muted: 120 24% 24%;
+    --muted-foreground: 120 22% 70%;
+    --accent: 120 26% 30%;
+    --accent-foreground: 120 36% 85%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 120 18% 28%;
+    --input: 120 18% 28%;
+    --ring: 120 70% 55%;
   }
 }
 
@@ -81,42 +107,74 @@
   }
   
   body {
-    @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    line-height: 1.6;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--background-light);
+    color: var(--text-light);
+    line-height: 1.7;
+  }
+
+  .dark body {
+    background-color: var(--background-dark);
+    color: var(--text-dark);
   }
 
   /* Typography Hierarchy */
   h1 {
-    @apply text-4xl md:text-5xl font-bold text-primary leading-tight;
+    @apply text-4xl md:text-5xl font-bold leading-tight tracking-tight;
+    color: var(--text-light);
   }
-  
+
   h2 {
-    @apply text-3xl md:text-4xl font-semibold text-primary leading-tight;
+    @apply text-3xl md:text-4xl font-semibold leading-tight tracking-tight;
+    color: var(--text-light);
   }
-  
+
   h3 {
-    @apply text-2xl md:text-3xl font-semibold text-foreground leading-snug;
+    @apply text-2xl md:text-3xl font-semibold leading-snug;
+    color: var(--text-light);
   }
-  
+
   h4 {
-    @apply text-xl md:text-2xl font-medium text-foreground leading-snug;
+    @apply text-xl md:text-2xl font-medium leading-snug;
+    color: var(--text-light);
   }
-  
+
   h5 {
-    @apply text-lg md:text-xl font-medium text-foreground;
+    @apply text-lg md:text-xl font-medium;
+    color: var(--text-light);
   }
-  
+
   h6 {
-    @apply text-base md:text-lg font-medium text-foreground;
+    @apply text-base md:text-lg font-medium;
+    color: var(--text-light);
   }
-  
+
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    color: var(--text-dark);
+  }
+
   p {
-    @apply text-base text-foreground leading-relaxed;
+    @apply text-base leading-relaxed;
+    color: var(--text-light-subtle);
   }
-  
+
+  .dark p {
+    color: var(--text-dark-subtle);
+  }
+
   .text-muted {
-    @apply text-muted-foreground;
+    @apply text-sm;
+    color: var(--neutral-500);
+  }
+
+  .dark .text-muted {
+    color: var(--text-dark-subtle);
   }
   
   /* Arapça metinler için özel stil */
@@ -131,20 +189,26 @@
 @layer components {
   /* Custom Islamic Design Elements */
   .islamic-pattern {
-    background-image: 
-      radial-gradient(circle at 25% 25%, var(--islamic-green-100) 2px, transparent 2px),
-      radial-gradient(circle at 75% 75%, var(--islamic-green-100) 2px, transparent 2px);
-    background-size: 40px 40px;
-    background-position: 0 0, 20px 20px;
+    background-image:
+      radial-gradient(circle at 25% 25%, rgba(23, 207, 23, 0.12) 1px, transparent 1px),
+      radial-gradient(circle at 75% 75%, rgba(23, 207, 23, 0.1) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: 0 0, 24px 24px;
   }
-  
+
   .gradient-islamic {
-    background: linear-gradient(135deg, var(--islamic-green-600) 0%, var(--islamic-green-500) 100%);
+    background: linear-gradient(135deg, rgba(17, 207, 23, 0.92) 0%, rgba(14, 148, 20, 0.88) 100%);
+    color: #fff;
   }
   
   .card-islamic {
-    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-300;
-    background: linear-gradient(145deg, #ffffff 0%, var(--islamic-green-50) 100%);
+    @apply bg-card border border-border rounded-2xl shadow-sm transition-all duration-300;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(221, 236, 221, 0.7) 100%);
+  }
+
+  .dark .card-islamic {
+    background: linear-gradient(160deg, rgba(26, 46, 26, 0.85) 0%, rgba(17, 33, 17, 0.92) 100%);
+    border-color: rgba(59, 105, 59, 0.6);
   }
 
   /* Kategori kartları için özel stiller */
@@ -314,48 +378,67 @@
   }
   
   .search-input {
-    @apply w-full pl-6 pr-14 py-4 text-lg bg-white border-2 border-islamic-green-200 rounded-2xl 
-           focus:border-islamic-green-500 focus:ring-4 focus:ring-islamic-green-100 
-           transition-all duration-300 placeholder:text-islamic-green-400;
-    box-shadow: 0 4px 20px rgba(27, 94, 32, 0.08);
+    @apply w-full pl-6 pr-16 py-4 text-base md:text-lg border border-border rounded-2xl
+           focus:border-primary focus:ring-4 focus:ring-primary transition-all duration-300
+           placeholder:text-neutral-400 shadow-md;
+    background-color: var(--background-light);
+    box-shadow: 0 16px 40px rgba(17, 207, 23, 0.08);
   }
- 
+
+  .dark .search-input {
+    background-color: var(--surface-dark);
+    border-color: rgba(23, 207, 23, 0.25);
+    color: var(--text-dark);
+  }
+
   .search-icon {
     @apply absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-islamic-green-600;
   }
 
   .search-icon-button {
-    @apply absolute right-5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center
-           bg-transparent hover:bg-islamic-green-50 rounded-full transition-all duration-200;
+    @apply absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center
+           bg-primary/10 text-primary rounded-full transition-colors duration-200 hover:bg-primary/20;
   }
 
   .search-button {
-    @apply absolute left-2 top-1/2 transform -translate-y-1/2 
-           bg-islamic-green-600 hover:bg-islamic-green-700 
-           text-white p-2 rounded-xl font-medium
-           transition-all duration-300 hover:scale-105 active:scale-95;
+    @apply absolute left-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-2
+           bg-primary text-white px-4 py-2 rounded-xl font-medium shadow-sm
+           transition-transform duration-300 hover:scale-105 active:scale-95;
   }
   
   .category-chip {
-    @apply inline-flex items-center px-4 py-2 bg-islamic-green-100 
-           hover:bg-islamic-green-200 text-islamic-green-800 
-           rounded-full text-sm font-medium cursor-pointer
-           transition-all duration-200 hover:scale-105;
+    @apply inline-flex items-center px-4 py-2 rounded-full text-sm font-medium cursor-pointer
+           bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-200 hover:scale-105;
   }
   
   .fetva-card {
-    @apply card-islamic p-6 cursor-pointer hover:scale-[1.02] 
-           border-l-4 border-l-islamic-green-500;
+    @apply card-islamic p-6 cursor-pointer hover:scale-[1.02]
+           border border-border hover:border-primary/40;
+    box-shadow: 0 10px 30px rgba(15, 60, 20, 0.08);
+  }
+
+  .dark .fetva-card {
+    box-shadow: 0 14px 40px rgba(10, 30, 12, 0.45);
   }
   
   .hero-section {
-    @apply relative py-20 px-4 text-center islamic-pattern;
-    background: linear-gradient(135deg, var(--islamic-green-50) 0%, #ffffff 100%);
+    @apply relative py-20 px-4 text-center;
+    background-image:
+      linear-gradient(120deg, rgba(246, 248, 246, 0.9) 0%, rgba(206, 236, 210, 0.75) 100%),
+      radial-gradient(circle at top right, rgba(23, 207, 23, 0.15), transparent 45%),
+      radial-gradient(circle at bottom left, rgba(12, 90, 18, 0.12), transparent 50%);
+  }
+
+  .dark .hero-section {
+    background-image:
+      linear-gradient(120deg, rgba(17, 33, 17, 0.92) 0%, rgba(26, 46, 26, 0.88) 100%),
+      radial-gradient(circle at top right, rgba(40, 180, 40, 0.2), transparent 45%),
+      radial-gradient(circle at bottom left, rgba(10, 60, 12, 0.4), transparent 55%);
   }
   
   /* Loading States */
   .loading-shimmer {
-    @apply animate-pulse bg-gradient-to-r from-islamic-green-100 via-islamic-green-50 to-islamic-green-100;
+    @apply relative overflow-hidden isolate rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10;
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
@@ -372,13 +455,11 @@
     h3 { @apply text-xl; }
     .search-input { @apply px-4 py-3 text-base; }
 
-    /* Mobil için özel düzeltmeler */
     .container {
       padding-left: 1rem;
       padding-right: 1rem;
     }
 
-    /* Sheet mobil menü için daha iyi z-index */
     .fixed.inset-0.z-50 {
       z-index: 9999;
     }

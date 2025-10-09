@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fetvabul - Ask a Question</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#17cf17",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112111",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1A2E1A",
+                        "text-light": "#0E1B0E",
+                        "text-dark": "#E3F3E3",
+                        "subtle-light": "#4E974E",
+                        "subtle-dark": "#A8D8A8",
+                        "border-light": "#E7F3E7",
+                        "border-dark": "#2A4B2A"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<style>
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%234E974E' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+       .dark .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23A8D8A8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+       }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+<div class="flex flex-col min-h-screen">
+<header class="sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16 border-b border-border-light dark:border-border-dark">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<svg class="h-6 w-6" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path></svg>
+</div>
+<h1 class="text-xl font-bold">Fetvabul</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Fatwas</a>
+<a class="text-sm font-medium text-primary dark:text-primary font-bold" href="#">Ask a Question</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+<svg class="text-subtle-light dark:text-subtle-dark" fill="currentColor" height="20" viewBox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"></path></svg>
+</button>
+<div class="w-10 h-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC_50eLNpyk27h52hjVu8tmoDDzSD-RADvlRvJL8z3q6q6oV4UuC5pFtYYHw6TIdcrC4AxSCVA21cuUFPiPgr3INETxtSQ2-hOWcWuBLHX5O9C14XiPu1LYF_cswbtcNJhOIeI4gEgoaKXmy9JvpZyEDXnwbYh3OVcKNKF3XFlOoEBIPaah7nL8XnqsriHl5aCkYUy44wzewabj6dNQUi0Pw8eZh8_-j_SdgWzWBekP5HFIBIMVlDnEUqDIi6jkF6ZlzLU1Srb3b7o");'></div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
+<div class="max-w-2xl mx-auto">
+<div class="text-center mb-8">
+<h2 class="text-3xl md:text-4xl font-bold tracking-tight text-text-light dark:text-text-dark">Ask a Question</h2>
+<p class="mt-2 text-lg text-subtle-light dark:text-subtle-dark">Submit your religious questions to our esteemed scholars.</p>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-6 sm:p-8 rounded-lg shadow-sm border border-border-light dark:border-border-dark">
+<form class="space-y-6">
+<div>
+<label class="block text-sm font-medium mb-2" for="question-title">Question Title</label>
+<input class="form-input w-full bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark rounded-lg px-4 py-3 placeholder:text-subtle-light dark:placeholder:text-subtle-dark focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors" id="question-title" placeholder="e.g., Is fasting obligatory during travel?" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2" for="question-details">Question Details</label>
+<textarea class="form-textarea w-full bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark rounded-lg px-4 py-3 placeholder:text-subtle-light dark:placeholder:text-subtle-dark focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors" id="question-details" placeholder="Provide all the necessary details for our scholars to understand your situation..." rows="6"></textarea>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2" for="category">Category (Optional)</label>
+<select class="form-select w-full bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark rounded-lg px-4 py-3 text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors" id="category">
+<option>Select a category</option>
+<option value="prayer">Prayer (Salah)</option>
+<option value="fasting">Fasting (Sawm)</option>
+<option value="charity">Charity (Zakat)</option>
+<option value="pilgrimage">Pilgrimage (Hajj)</option>
+<option value="family">Family &amp; Marriage</option>
+<option value="finance">Finance &amp; Business</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div class="flex justify-end pt-4">
+<button class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-black bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark focus:ring-primary transition-all" type="submit">
+                                Submit Question
+                            </button>
+</div>
+</form>
+</div>
+</div>
+</main>
+<footer class="bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-subtle-light dark:text-subtle-dark">
+<p>© 2024 Fetvabul. All rights reserved.</p>
+</div>
+</footer>
+</div>
+
+</body></html>

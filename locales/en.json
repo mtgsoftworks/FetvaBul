@@ -38,6 +38,8 @@
   },
   "footer": {
     "copyright": "© 2025 FetvaBul. All rights reserved.",
-    "description": "Your reliable Islamic knowledge source"
+    "description": "Your reliable Islamic knowledge source",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy"
   }
 }

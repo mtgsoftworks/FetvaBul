@@ -43,43 +43,71 @@ export class DataService {
   private keywordFrequency: Map<string, number> = new Map();
   private searchIndex = new SearchIndex();
   private viewsOverrides: Map<string, number> = new Map();
+  private viewCountCache: Map<string, { value: number; expiresAt: number }> = new Map();
+  private readonly VIEW_CACHE_TTL_MS = 60 * 1000; // 1 dakika
+  private readonly enableRealtimeViews = process.env.ENABLE_REALTIME_VIEWS === 'true';
   
   // Arama önbelleği
   private searchCache: Map<string, { results: InternalSearchResult[]; timestamp: number }> = new Map();
   private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika
+  private fatwaCache: Map<string, { data: Fetva[]; expiresAt: number }> = new Map();
+  private readonly DATA_CACHE_TTL_MS = 2 * 60 * 1000; // 2 dakika
 
   private constructor() {}
 
   public static getInstance(): DataService {
-    if (!DataService.instance) {
-      DataService.instance = new DataService();
+    const globalStore = globalThis as typeof globalThis & {
+      __dataServiceInstance?: DataService;
+    };
+
+    if (!globalStore.__dataServiceInstance) {
+      globalStore.__dataServiceInstance = new DataService();
     }
+
+    DataService.instance = globalStore.__dataServiceInstance;
     return DataService.instance;
   }
 
   public async initialize(): Promise<void> {
-    if (this.isInitialized) {
+    const globalStore = globalThis as typeof globalThis & {
+      __dataServiceInitPromise?: Promise<void>;
+      __dataServiceInitialized?: boolean;
+    };
+
+    if (this.isInitialized || globalStore.__dataServiceInitialized) {
+      this.isInitialized = true;
       return;
     }
 
-    if (!this.initializePromise) {
-      this.initializePromise = this.loadDataFromFile()
-        .then(() => {
-          this.isInitialized = true;
-        })
-        .catch(error => {
-          this.isInitialized = false;
-          this.initializePromise = undefined;
-
-          throw error instanceof DataServiceError
-            ? error
-            : new DataServiceError(
-                'INITIALIZATION_FAILED',
-                `Failed to initialize data service: ${error instanceof Error ? error.message : 'Unknown error'}`,
-                500
-              );
-        });
+    const existingPromise = this.initializePromise ?? globalStore.__dataServiceInitPromise;
+    if (existingPromise) {
+      await existingPromise;
+      this.isInitialized = true;
+      globalStore.__dataServiceInitialized = true;
+      return;
     }
+
+    this.initializePromise = this.loadDataFromFile()
+      .then(() => {
+        this.isInitialized = true;
+        globalStore.__dataServiceInitialized = true;
+      })
+      .catch(error => {
+        this.isInitialized = false;
+        this.initializePromise = undefined;
+        globalStore.__dataServiceInitPromise = undefined;
+        globalStore.__dataServiceInitialized = false;
+
+        throw error instanceof DataServiceError
+          ? error
+          : new DataServiceError(
+              'INITIALIZATION_FAILED',
+              `Failed to initialize data service: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              500
+            );
+      });
+
+    globalStore.__dataServiceInitPromise = this.initializePromise;
 
     await this.initializePromise;
   }
@@ -315,9 +343,22 @@ export class DataService {
 
   public async getAllFatwas(): Promise<Fetva[]> {
     this.ensureInitialized();
+    const cacheKey = 'all';
+    const cached = this.fatwaCache.get(cacheKey);
+    const now = Date.now();
+    if (cached && cached.expiresAt > now) {
+      return cached.data;
+    }
+
     const fetvasWithViews = await Promise.all(
       this.fetvas.map(fetva => this.withRuntimeViews(fetva))
     );
+
+    this.fatwaCache.set(cacheKey, {
+      data: fetvasWithViews,
+      expiresAt: now + this.DATA_CACHE_TTL_MS,
+    });
+
     return fetvasWithViews;
   }
 
@@ -348,7 +389,7 @@ export class DataService {
     const fetvasWithViews = await Promise.all(
       this.fetvas.map(async (fetva) => ({
         fetva,
-        viewCount: await this.getViewCount(fetva.id)
+        viewCount: await this.getViewCountCached(fetva.id, fetva.views)
       }))
     );
 
@@ -366,8 +407,15 @@ export class DataService {
     this.ensureInitialized();
 
     try {
-      // Firebase Firestore'da görüntüleme sayısını artır
-      await incrementViewCount(id);
+      if (this.enableRealtimeViews) {
+        // Firebase Firestore'da görüntüleme sayısını artır
+        await incrementViewCount(id);
+        this.viewCountCache.delete(id);
+        return;
+      }
+
+      const current = this.viewsOverrides.get(id) ?? 0;
+      this.viewsOverrides.set(id, current + 1);
     } catch (error) {
       console.error('Failed to increment view count in Firestore:', error);
       // Hata durumunda eski yönteme geri dön (geçici çözüm)
@@ -385,7 +433,7 @@ export class DataService {
       
       // Tüm fetvalar için görüntüleme sayılarını al
       const viewCounts = await Promise.all(
-        this.fetvas.map(async (fetva) => await this.getViewCount(fetva.id))
+        this.fetvas.map(async (fetva) => await this.getViewCountCached(fetva.id, fetva.views))
       );
       const totalViews = viewCounts.reduce((sum, count) => sum + count, 0);
       
@@ -638,7 +686,7 @@ export class DataService {
         const resultsWithViews = await Promise.all(
           results.map(async (result) => ({
             result,
-            viewCount: await this.getViewCount(result.fetva.id)
+            viewCount: await this.getViewCountCached(result.fetva.id, result.fetva.views)
           }))
         );
         
@@ -652,40 +700,41 @@ export class DataService {
   }
 
   private async withRuntimeViews(fetva: Fetva): Promise<Fetva> {
-    try {
-      // Firebase Firestore'dan güncel görüntüleme sayısını al
-      const firestoreViews = await getViewCount(fetva.id);
-      const overrides = this.viewsOverrides.get(fetva.id) ?? 0;
-      
-      // Firestore'da veri varsa onu kullan, yoksa yerel veriyi kullan
-      const totalViews = firestoreViews > 0 ? firestoreViews : fetva.views + overrides;
-      
-      return { ...fetva, views: totalViews };
-    } catch (error) {
-      console.error('Failed to get view count from Firestore:', error);
-      // Hata durumunda eski yönteme geri dön
-      const overrides = this.viewsOverrides.get(fetva.id) ?? 0;
-      if (!overrides) {
-        return fetva;
-      }
-      return { ...fetva, views: fetva.views + overrides };
-    }
+    const views = await this.getViewCountCached(fetva.id, fetva.views);
+    return { ...fetva, views };
   }
 
-  private async getViewCount(id: string): Promise<number> {
+  private async getViewCountCached(id: string, fallback: number): Promise<number> {
+    const now = Date.now();
+    const cached = this.viewCountCache.get(id);
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
+    }
+
+    const value = await this.getViewCount(id, fallback);
+    this.viewCountCache.set(id, { value, expiresAt: now + this.VIEW_CACHE_TTL_MS });
+    return value;
+  }
+
+  private async getViewCount(id: string, fallback: number): Promise<number> {
+    if (!this.enableRealtimeViews) {
+      const overrides = this.viewsOverrides.get(id) ?? 0;
+      const baseViews = this.fetvaById.get(id)?.views ?? fallback;
+      return baseViews + overrides;
+    }
+
     try {
       // Önce Firebase Firestore'dan görüntüleme sayısını al
       const firestoreViews = await getViewCount(id);
-      const baseViews = this.fetvaById.get(id)?.views ?? 0;
       const overrides = this.viewsOverrides.get(id) ?? 0;
-      
-      // Firestore'daki sayı varsa onu kullan, yoksa yerel sayıyı kullan
-      return firestoreViews > 0 ? firestoreViews : baseViews + overrides;
+      const baseViews = this.fetvaById.get(id)?.views ?? fallback;
+
+      const value = firestoreViews > 0 ? firestoreViews : baseViews + overrides;
+      return value;
     } catch (error) {
       console.error('Failed to get view count from Firestore:', error);
-      // Hata durumunda eski yönteme geri dön
-      const baseViews = this.fetvaById.get(id)?.views ?? 0;
       const overrides = this.viewsOverrides.get(id) ?? 0;
+      const baseViews = this.fetvaById.get(id)?.views ?? fallback;
       return baseViews + overrides;
     }
   }
@@ -724,15 +773,11 @@ export class DataService {
   private async getAllFatvasForSearch(options: InternalSearchOptions): Promise<InternalSearchResult[]> {
     const { category, sortBy = 'views', limit = 20, offset = 0 } = options;
 
-    const filteredPromises = this.fetvas
+    const fetvas = await this.getAllFatwas();
+    const filtered = fetvas
       .filter(fetva => (category ? fetva.categories.includes(category) : true))
-      .map(async (fetva) => ({
-        fetva: await this.withRuntimeViews(fetva),
-        score: 0,
-        matchedTerms: []
-      }));
+      .map(fetva => ({ fetva, score: 0, matchedTerms: [] }));
 
-    const filtered = await Promise.all(filteredPromises);
     const sorted = await this.sortResults(filtered, sortBy);
     return sorted.slice(offset, offset + limit);
   }

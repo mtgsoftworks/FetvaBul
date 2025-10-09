@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 
@@ -87,8 +87,6 @@ export type UseSearchReturn = {
 
   performSearch: () => void;
   clearSearch: () => void;
-  loadMoreResults: () => void;
-
   autocompleteSuggestions: string[];
   isAutocompleteLoading: boolean;
 
@@ -171,7 +169,7 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
   }, [loadSearchStats]);
 
   const performSearchInternal = useCallback(
-    async (page: number, append: boolean) => {
+    async (page: number) => {
       const trimmedQuery = query.trim();
 
       if (!trimmedQuery && !selectedCategory) {
@@ -198,7 +196,7 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
         const results = Array.isArray(data.results) ? data.results : [];
         const hasMore = Boolean(data.pagination?.hasMore);
 
-        setSearchResults(prev => (append ? [...prev, ...results] : results));
+        setSearchResults(results);
         setHasMoreResults(hasMore);
         setCurrentPageState(page);
 
@@ -217,14 +215,8 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
   );
 
   const performSearch = useCallback(() => {
-    void performSearchInternal(1, false);
+    void performSearchInternal(1);
   }, [performSearchInternal]);
-
-  const loadMoreResults = useCallback(() => {
-    if (!isSearching && hasMoreResults) {
-      void performSearchInternal(currentPage + 1, true);
-    }
-  }, [currentPage, hasMoreResults, isSearching, performSearchInternal]);
 
   const loadAutocompleteSuggestions = useCallback(
     async (searchQuery: string) => {
@@ -273,7 +265,7 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
     }
 
     const debounceTimer = setTimeout(() => {
-      void performSearchInternal(1, false);
+      void performSearchInternal(1);
 
       if (trimmed.length >= 2) {
         void loadAutocompleteSuggestions(trimmed);
@@ -291,10 +283,9 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
         return;
       }
 
-      const append = page > currentPage;
-      void performSearchInternal(page, append);
+      void performSearchInternal(page);
     },
-    [currentPage, isSearching, performSearchInternal]
+    [isSearching, performSearchInternal]
   );
 
   return {
@@ -316,8 +307,6 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
 
     performSearch,
     clearSearch,
-    loadMoreResults,
-
     autocompleteSuggestions,
     isAutocompleteLoading,
 

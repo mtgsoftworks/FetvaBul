@@ -1,160 +1,140 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Search, Grid, List } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { getCategoryIconComponent, type CategoryIconComponent } from '@/lib/category-icons';
+import { Search } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { DataService } from '@/lib/data-service';
 
-type UIKategori = { name: string; slug: string; count: number; Icon: CategoryIconComponent; description?: string };
+const CARD_BACKGROUNDS = [
+  'linear-gradient(135deg, rgba(23,207,23,0.08), rgba(23,207,23,0.12))',
+  'linear-gradient(135deg, rgba(255,193,7,0.08), rgba(255,213,79,0.15))',
+  'linear-gradient(135deg, rgba(33,150,243,0.08), rgba(33,150,243,0.15))',
+  'linear-gradient(135deg, rgba(244,143,177,0.12), rgba(244,143,177,0.18))',
+  'linear-gradient(135deg, rgba(156,39,176,0.08), rgba(156,39,176,0.15))',
+];
 
-export default function KategorilerPage() {
-  const [categories, setCategories] = useState<UIKategori[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+async function getCategories() {
+  const dataService = DataService.getInstance();
+  await dataService.initialize();
+  return dataService.getAllCategories();
+}
 
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      try {
-        const res = await fetch('/api/categories', { cache: 'no-store' });
-        const data = await res.json();
-        const list = Array.isArray(data.categories) ? data.categories : [];
-        if (active) {
-          setCategories(
-            list.map((c: any) => ({
-              name: c.name,
-              slug: c.slug,
-              count: c.fatwaCount ?? 0,
-              Icon: getCategoryIconComponent(c.name),
-              description: c.description,
-            }))
-          );
-        }
-      } catch {
-        if (active) setCategories([]);
-      }
-    };
-    void load();
-    return () => {
-      active = false;
-    };
-  }, []);
+function CategoryCard({
+  name,
+  slug,
+  count,
+  description,
+  index,
+}: {
+  name: string;
+  slug: string;
+  count: number;
+  description?: string;
+  index: number;
+}) {
+  const art = CARD_BACKGROUNDS[index % CARD_BACKGROUNDS.length];
 
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  return (
+    <Link
+      href={`/kategori/${slug}`}
+      className="group flex flex-col justify-between rounded-3xl border border-border/30 bg-background/90 p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary"
+    >
+      <div className="space-y-4">
+        <span
+          className="flex h-14 w-14 items-center justify-center rounded-2xl text-primary"
+          style={{ background: art }}
+        >
+          <span className="text-lg font-semibold">#{index + 1}</span>
+        </span>
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+            {name}
+          </h3>
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {description ?? 'Bu kategoriye ait fetvaları inceleyin.'}
+          </p>
+        </div>
+      </div>
+      <div className="mt-6 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-primary/80">
+        <span>{count.toLocaleString('tr-TR')} fetva</span>
+        <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">Keşfet</span>
+      </div>
+    </Link>
   );
+}
+
+export default async function KategorilerPage({
+  searchParams,
+}: {
+  searchParams?: { q?: string };
+}) {
+  const initialSearch = searchParams?.q?.trim() ?? '';
+  const categories = await getCategories();
+
+  const filtered = initialSearch
+    ? categories.filter((category) => category.name.toLowerCase().includes(initialSearch.toLowerCase()))
+    : categories;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
-        {/* Page Header */}
-        <div className="text-center mb-10 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-4">Fetva Kategorileri</h1>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            İslami konulara göre düzenlenmiş fetva kategorilerimizi keşfedin
+      <main className="container mx-auto max-w-6xl px-4 py-16">
+        <section className="text-center">
+          <span className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+            Kategoriler
+          </span>
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            İslami konuları kolayca keşfedin
+          </h1>
+          <p className="mt-3 mx-auto max-w-3xl text-base leading-relaxed text-muted-foreground">
+            İbadet, muamelat, aile hayatı ve günlük yaşama dair binlerce fetvayı kategoriler halinde sunuyoruz. Hızlı arama ile ihtiyacınız olan konuyu bulun.
           </p>
-        </div>
+        </section>
 
-        {/* Search and View Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-          <div className="relative w-full md:w-[28rem]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Kategori ara..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-12 rounded-2xl bg-white border-2 border-islamic-green-200 focus:border-islamic-green-500 focus:ring-4 focus:ring-islamic-green-100 transition-all placeholder:text-islamic-green-400"
-            />
-          </div>
+        <form action="/kategoriler" className="relative mx-auto mt-10 w-full max-w-xl">
+          <label htmlFor="category-search" className="sr-only">
+            Kategori ara
+          </label>
+          <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+          <input
+            id="category-search"
+            name="q"
+            defaultValue={initialSearch}
+            placeholder="Örn: aile, ibadet, ekonomi..."
+            className="h-14 w-full rounded-full border border-primary/20 bg-background pl-14 pr-24 text-base shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+          <button
+            type="submit"
+            className="absolute right-2 top-1/2 flex h-11 -translate-y-1/2 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:scale-[1.02] hover:bg-primary/90"
+          >
+            Ara
+          </button>
+        </form>
 
-          <div className="flex items-center w-full md:w-auto justify-center md:justify-end gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              className="w-full md:w-auto"
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              className="w-full md:w-auto"
-              onClick={() => setViewMode('list')}
-            >
-              <List className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div
-          className={`grid gap-8 ${
-            viewMode === 'grid'
-              ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
-              : 'grid-cols-1'
-          }`}
-        >
-          {filteredCategories.map((category) => {
-            const Icon = category.Icon;
-            return (
-              <Link
-                key={category.slug}
-                href={`/kategori/${category.slug}`}
-                className="group"
-              >
-                <div
-                  className={`card-islamic p-5 sm:p-8 h-full transition-all duration-300 hover:shadow-lg hover:border-islamic-green-300 ${
-                    viewMode === 'list'
-                      ? 'flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8'
-                      : 'text-center'
-                  }`}
-                >
-                  <div
-                    className={`${viewMode === 'list' ? 'flex-shrink-0' : 'mx-auto'} w-12 h-12 bg-islamic-green-100 rounded-xl flex items-center justify-center ${
-                      viewMode === 'list' ? '' : 'mb-2'
-                    }`}
-                  >
-                    <Icon className="w-6 h-6 text-islamic-green-600" />
-                  </div>
-
-                  <div className={viewMode === 'list' ? 'flex-1 min-w-0' : ''}>
-                    <div className="mb-3">
-                      <h3 className="category-title text-lg sm:text-xl font-semibold text-foreground group-hover:text-islamic-green-700 transition-colors">
-                        {category.name}
-                      </h3>
-                      <Badge
-                        variant="secondary"
-                        className="bg-islamic-green-100 text-islamic-green-800 mt-2"
-                      >
-                        {category.count} fetva
-                      </Badge>
-                    </div>
-
-                    {category.description && (
-                      <p className="text-muted-foreground text-sm line-clamp-2">
-                        {category.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* No Results */}
-        {filteredCategories.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">Aradığınız kriterlere uygun kategori bulunamadı.</p>
-          </div>
-        )}
-      </div>
+        <section className="mt-12">
+          {filtered.length === 0 ? (
+            <div className="rounded-3xl border border-border/40 bg-background/90 p-12 text-center shadow-sm">
+              <h2 className="text-xl font-semibold text-foreground">Aramanızla eşleşen kategori bulunamadı</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Farklı bir anahtar kelimeyle aramayı deneyebilir veya tüm kategorileri gözden geçirebilirsiniz.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((category, index) => (
+                <CategoryCard
+                  key={category.id}
+                  name={category.name}
+                  slug={category.slug}
+                  count={category.fatwaCount}
+                  description={category.description}
+                  index={index}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+      <Footer />
     </div>
   );
 }

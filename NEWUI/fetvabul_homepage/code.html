@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter:wght@400;500;700;900&amp;family=Noto+Sans:wght@400;500;700;900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<title>Fetvabul - Islamic Q&amp;A</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+          darkMode: "class",
+          theme: {
+              extend: {
+                  colors: {
+                      "primary": "#17cf17",
+                      "background-light": "#f6f8f6",
+                      "background-dark": "#112111",
+                  },
+                  fontFamily: {
+                      "display": ["Inter", "Noto Sans", "sans-serif"]
+                  },
+                  borderRadius: {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+                  },
+              },
+          },
+      }
+  </script>
+<style>
+    .islamic-pattern {
+        background-image:
+            linear-gradient(rgba(246, 248, 246, 0.95), rgba(246, 248, 246, 0.95)),
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%2317cf17' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h16a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 6H42L36 24L42 42H6L12 24L6 6Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .dark .islamic-pattern {
+        background-image:
+            linear-gradient(rgba(17, 33, 17, 0.97), rgba(17, 33, 17, 0.97)),
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%2317cf17' fill-opacity='0.05'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h16a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9a1 1 0 0 1 1 1h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9h9v1h-9v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 6H42L36 24L42 42H6L12 24L6 6Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+  </style>
+</head>
+<body>
+<div class="relative flex h-auto min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark text-background-dark dark:text-background-light overflow-x-hidden islamic-pattern">
+<div class="flex h-full grow flex-col">
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-primary/20 dark:border-primary/30">
+<div class="container mx-auto flex items-center justify-between whitespace-nowrap px-4 sm:px-6 lg:px-8 py-3">
+<div class="flex items-center gap-3 text-primary">
+<svg class="size-8" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path></svg>
+<h1 class="text-xl font-bold">Fetvabul</h1>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Ask a Question</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Categories</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">About</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Contact</a>
+</nav>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-primary/20 dark:bg-primary/30 text-primary hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors">
+<svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
+<path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+</svg>
+</button>
+<button class="md:hidden flex items-center justify-center rounded-full h-10 w-10 bg-primary/20 dark:bg-primary/30 text-primary hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors">
+<svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><line x1="3" x2="21" y1="12" y2="12"></line><line x1="3" x2="21" y1="6" y2="6"></line><line x1="3" x2="21" y1="18" y2="18"></line></svg>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+<div class="max-w-3xl mx-auto text-center">
+<h2 class="text-3xl md:text-5xl font-bold tracking-tight text-background-dark dark:text-background-light">Find Answers to Your Islamic Questions</h2>
+<p class="mt-4 text-lg text-background-dark/70 dark:text-background-light/70">A trusted platform for authentic Islamic knowledge and guidance.</p>
+<div class="mt-8">
+<label class="relative flex items-center">
+<div class="absolute left-4 text-primary">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+</svg>
+</div>
+<input class="w-full h-14 pl-12 pr-4 rounded-xl bg-background-light/70 dark:bg-background-dark/70 border border-primary/20 dark:border-primary/30 focus:ring-2 focus:ring-primary focus:outline-none placeholder:text-background-dark/50 dark:placeholder:text-background-light/50 text-base" placeholder="Search for fatwas or questions..." value=""/>
+</label>
+</div>
+</div>
+<div class="mt-16">
+<h3 class="text-2xl font-bold tracking-tight text-background-dark dark:text-background-light px-4">Featured Categories</h3>
+<div class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+<div class="group flex flex-col items-center gap-3 text-center">
+<div class="w-full aspect-square rounded-xl bg-cover bg-center transition-transform duration-300 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCAjZXWbzIA2vaGOtiknEnuoUc1nqbYZH-c-NOqBDbjjz0pZU839mTfYu1FxmLb1Mcn2tDGoMnay9aN1I8Ptc1DNKqY1nGpdX0OozyZmrBAxP0M4-6y_012O5CT_MzO6oHoIHqoqLKjJvh28mc71nDjmcRe494wUjTHeCR-FBcrIKXDvsF6_LYbgfFcnbNKRfAfCOFx5fGWx8BMPvtDTbNcyw3hqY6xezsOsWzsla7fN3y-JmoJxknf03FyvCo9yEJFRJ9mal99t7Q");'></div>
+<p class="font-medium text-background-dark dark:text-background-light">Prayer</p>
+</div>
+<div class="group flex flex-col items-center gap-3 text-center">
+<div class="w-full aspect-square rounded-xl bg-cover bg-center transition-transform duration-300 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAsOqCAkztWfhyUYQ7ZbHOpEcG9XE7msHYqxdIVQvPgswiGwckHQfRbXRc9g6Xcta11vy2Kh1QMxpsNUCdotNDfTh0D3Tvw2PIZm2w9WFzsFAcbQsveVe8WDXg6wdq5F9TfkZOI4dg_1fB4Eabev72dUBopXz0FqoZgE8UA0zMDxIsbGFkxZwcprpX-yBxrbB_9I6r_5owiyY7SJfTB05OLCFSWqbAcEPE2DzasCqs3qy9No_YyLYwsmUgraY80AOaRCGqeL9GOTIA");'></div>
+<p class="font-medium text-background-dark dark:text-background-light">Fasting</p>
+</div>
+<div class="group flex flex-col items-center gap-3 text-center">
+<div class="w-full aspect-square rounded-xl bg-cover bg-center transition-transform duration-300 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC8lgpahBCO0zUfmzRbI9ISwmZkkBp7p-8SBq7RYiOhb4tezg9S4ptdoHdMVZO81UjdwilhRHb74t6eYC6WeRwxVC8CKtVBpgnHjqtck2Fwdu02kYLZlryzl3-lKN4VNMgM19cuxgo-G-LIaBkjfoZXZOOIpO08RKMmzGJq6aOPcQBE5lkXzVJMyQjwh8YGoBRwsEIiiwyYegvt_GJNBo3ECKDFygN5N13ygPbjPOA8nk23TC9OFKC7kE_o3O6o10J7SPUSS54M2oY");'></div>
+<p class="font-medium text-background-dark dark:text-background-light">Zakat</p>
+</div>
+<div class="group flex flex-col items-center gap-3 text-center">
+<div class="w-full aspect-square rounded-xl bg-cover bg-center transition-transform duration-300 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAIUBDX3GO9vrWEDfTf94n9lu_pTSY2aGdkT5MaefLGyHQca6dN4CzTVNDtOzhf0KZFEqk1TAtOJNWmsvTJ4fCMVQwOq2cPUEgwhRCdVm6hUvGA-jr5G8uTv0a8WQnFXTwivM9ws4kqP1Pi2BHjqeU0weICHVQfToTjK_A5Rhr9inLtVWGnNCduE-gsnZbPUEZsZFBcdBQdZ4BI7pKquGh5qaEsv-1ieqBMFM5pRZl8bBtQ55QNrsP4SOAy_wpHqgRmrk27Um38nrw");'></div>
+<p class="font-medium text-background-dark dark:text-background-light">Family</p>
+</div>
+<div class="group flex flex-col items-center gap-3 text-center">
+<div class="w-full aspect-square rounded-xl bg-cover bg-center transition-transform duration-300 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA7A9xL6WkodFH2iCvov5_gPiaieTpN7L275e2pugv5DrHpES8lE51Vp311qQ3vjA7hGsFsc80jgukYtFeYWkggdVB-BU_3e29n-nG1IBQs-HfjQi-VWe5lEpkVR1QEOg6LHiZNT8g6EGoDDfYF2QjxpDpcv7-YfwXAKSlWi6FRG6VTIFsbDFWg8qb77JuF2mLbyq46ogrou9RFfvhTO5ORSVq2M89umYr-kRCbzTlKVUImHbQb-dB79Aa07697oDJZXwZ8sWYATSY");'></div>
+<p class="font-medium text-background-dark dark:text-background-light">Daily Life</p>
+</div>
+</div>
+</div>
+<div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12">
+<div>
+<h3 class="text-2xl font-bold tracking-tight text-background-dark dark:text-background-light px-4 mb-6">Most Recent Fatwas</h3>
+<div class="space-y-6">
+<div class="flex items-start gap-4 rounded-lg p-4 bg-background-light/50 dark:bg-background-dark/50 hover:bg-background-light dark:hover:bg-background-dark transition-colors">
+<div class="flex-1">
+<p class="font-bold leading-tight">Ruling on Combining Prayers Due to Travel</p>
+<p class="text-sm text-background-dark/70 dark:text-background-light/70 mt-1 line-clamp-2">This fatwa clarifies the conditions under which prayers can be combined while traveling, providing guidance on the permissibility and method.</p>
+</div>
+<div class="w-32 h-20 bg-cover bg-center rounded-lg flex-shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAdhro18AoSEiGFb8JiriYIYVFNdMLf6s-gQ4MQbr2FavEz_2k0U7doRejUWUWBhAjrj3n9qw9QTfm3Ccj3VMEBRgnO2Dltw3ixW88Ngx9ZeZQI8JuyCgY-7ucbOGEGvoQipiSrQcw9eVEhS56Rzu9Gv7r-Eaia4sx3C50Er40xi2t3d6y_JK1QQZs1zdu0CdLWXJGOFhhYmR5t7mGNHqx8Le9CEblCM7jZLIwRwTY1PMhDlT8stZsGZSxvi9TSrraOtMg3m5A-C5A");'></div>
+</div>
+<div class="flex items-start gap-4 rounded-lg p-4 bg-background-light/50 dark:bg-background-dark/50 hover:bg-background-light dark:hover:bg-background-dark transition-colors">
+<div class="flex-1">
+<p class="font-bold leading-tight">Guidance on Fasting During Ramadan</p>
+<p class="text-sm text-background-dark/70 dark:text-background-light/70 mt-1 line-clamp-2">This fatwa offers comprehensive guidance on fasting during Ramadan, covering aspects such as exemptions, intentions, and common questions.</p>
+</div>
+<div class="w-32 h-20 bg-cover bg-center rounded-lg flex-shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuArT03Cftv89zCmEhpZWgq2W1gd4uAJGbwEfGcUNQQZL3BRc7ZxuO_q0kWAQuvUSanPcgE33SK6aFuTlBSscjBdWG6aEIGNF4l5-TxaD7XHa0ve6xt5ndazviyvU-6PRC1ZZLjuhwPGhqMw9X_vqQ-0rc4BpiWeFHddaNJ3WKM-nOGqExTFjnNcvil7Nh7DZzcHvTtm7FMuDQu_qA1dbRt82tdh4j2vYB69dYxZLP1gVgb3AYYeT20AImtVqJomn94G0gAsSKGg3zM");'></div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-2xl font-bold tracking-tight text-background-dark dark:text-background-light px-4 mb-6">Most Popular Questions</h3>
+<div class="space-y-2">
+<a class="flex items-center gap-4 p-4 min-h-[72px] justify-between rounded-lg hover:bg-background-light dark:hover:bg-background-dark transition-colors" href="#">
+<div class="flex-1">
+<p class="font-medium leading-normal line-clamp-1">What are the conditions for performing Qasr prayer?</p>
+<p class="text-sm text-background-dark/70 dark:text-background-light/70 line-clamp-1">Asked by Aisha on 2024-07-15</p>
+</div>
+<div class="shrink-0 text-background-dark/50 dark:text-background-light/50">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+</svg>
+</div>
+</a>
+<a class="flex items-center gap-4 p-4 min-h-[72px] justify-between rounded-lg hover:bg-background-light dark:hover:bg-background-dark transition-colors" href="#">
+<div class="flex-1">
+<p class="font-medium leading-normal line-clamp-1">How to calculate Zakat on savings?</p>
+<p class="text-sm text-background-dark/70 dark:text-background-light/70 line-clamp-1">Asked by Omar on 2024-07-10</p>
+</div>
+<div class="shrink-0 text-background-dark/50 dark:text-background-light/50">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+</svg>
+</div>
+</a>
+<a class="flex items-center gap-4 p-4 min-h-[72px] justify-between rounded-lg hover:bg-background-light dark:hover:bg-background-dark transition-colors" href="#">
+<div class="flex-1">
+<p class="font-medium leading-normal line-clamp-1">Is it permissible to use interest-based loans for essential needs?</p>
+<p class="text-sm text-background-dark/70 dark:text-background-light/70 line-clamp-1">Asked by Fatima on 2024-07-05</p>
+</div>
+<div class="shrink-0 text-background-dark/50 dark:text-background-light/50">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+</svg>
+</div>
+</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-background-light/80 dark:bg-background-dark/80 border-t border-primary/20 dark:border-primary/30">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+<div class="flex flex-col items-center md:items-start">
+<div class="flex items-center gap-3 text-primary">
+<svg class="size-7" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path></svg>
+<h2 class="text-lg font-bold">Fetvabul</h2>
+</div>
+<p class="text-sm text-background-dark/70 dark:text-background-light/70 mt-2">© 2024 Fetvabul. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Contact</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Terms of Service</a>
+</div>
+<div class="flex justify-center gap-4">
+<a class="text-background-dark/60 dark:text-background-light/60 hover:text-primary transition-colors" href="#">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M247.39,68.94A8,8,0,0,0,240,64H209.57A48.66,48.66,0,0,0,168.1,40a46.91,46.91,0,0,0-33.75,13.7A47.9,47.9,0,0,0,120,88v6.09C79.74,83.47,46.81,50.72,46.46,50.37a8,8,0,0,0-13.65,4.92c-4.31,47.79,9.57,79.77,22,98.18a110.93,110.93,0,0,0,21.88,24.2c-15.23,17.53-39.21,26.74-39.47,26.84a8,8,0,0,0-3.85,11.93c.75,1.12,3.75,5.05,11.08,8.72C53.51,229.7,65.48,232,80,232c70.67,0,129.72-54.42,135.75-124.44l29.91-29.9A8,8,0,0,0,247.39,68.94Zm-45,29.41a8,8,0,0,0-2.32,5.14C196,166.58,143.28,216,80,216c-10.56,0-18-1.4-23.22-3.08,11.51-6.25,27.56-17,37.88-32.48A8,8,0,0,0,92,169.08c-.47-.27-43.91-26.34-44-96,16,13,45.25,33.17,78.67,38.79A8,8,0,0,0,136,104V88a32,32,0,0,1,9.6-22.92A30.94,30.94,0,0,1,167.9,56c12.66.16,24.49,7.88,29.44,19.21A8,8,0,0,0,204.67,80h16Z"></path>
+</svg>
+</a>
+<a class="text-background-dark/60 dark:text-background-light/60 hover:text-primary transition-colors" href="#">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,191.63V152h24a8,8,0,0,0,0-16H136V112a16,16,0,0,1,16-16h16a8,8,0,0,0,0-16H152a32,32,0,0,0-32,32v24H96a8,8,0,0,0,0,16h24v63.63a88,88,0,1,1,16,0Z"></path>
+</svg>
+</a>
+<a class="text-background-dark/60 dark:text-background-light/60 hover:text-primary transition-colors" href="#">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</div>
+
+</body></html>

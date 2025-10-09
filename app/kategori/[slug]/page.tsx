@@ -1,13 +1,23 @@
 'use client';
 
-import { Tag, ArrowRight, Filter, Loader2 } from 'lucide-react';
+import { Tag, ArrowRight, Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { getCategoryIconInfo } from '@/lib/category-icons';
 
+type SortValue = 'popular' | 'views' | 'date' | 'alphabetical' | 'most-liked';
+
+const SORT_OPTIONS: { value: SortValue; label: string }[] = [
+  { value: 'popular', label: 'En Popüler' },
+  { value: 'views', label: 'En Çok Görüntülenen' },
+  { value: 'date', label: 'En Yeni' },
+  { value: 'alphabetical', label: 'Alfabetik' },
+  { value: 'most-liked', label: 'En Beğenilen' },
+];
+
 export default function KategoriPage({ params }: { params: { slug: string } }) {
-  const [sortBy, setSortBy] = useState<'relevance'|'date'|'popular'|'views'|'alphabetical'|'most-liked'>('popular');
+  const [sortBy, setSortBy] = useState<SortValue>('popular');
   const [category, setCategory] = useState<any | null>(null);
   const [fatwas, setFatwas] = useState<any[]>([]);
   const [page, setPage] = useState(1);
@@ -83,165 +93,196 @@ export default function KategoriPage({ params }: { params: { slug: string } }) {
 
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
           <Link href="/" className="hover:text-primary transition-colors">Ana Sayfa</Link>
           <span>/</span>
           <Link href="/kategoriler" className="hover:text-primary transition-colors">Kategoriler</Link>
           <span>/</span>
           <span>{category?.name || 'Kategori'}</span>
-        </div>
+        </nav>
 
-        {/* Category Header */}
-        <div className="card-islamic p-8 mb-8">
-          <div className="flex items-start space-x-6">
-            <div className="text-6xl" aria-hidden="true">{categoryIcon}</div>
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold text-primary mb-4">{category?.name || 'Kategori'}</h1>
-              {category?.description && (
-                <p className="text-lg text-muted-foreground mb-6 max-w-3xl">
-                  {category.description}
-                </p>
-              )}
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
-                  <Tag className="w-5 h-5 text-islamic-green-600" />
-                  <span className="font-semibold">{(category?.fatwaCount ?? 0).toLocaleString('tr-TR')} Fetva</span>
-                </div>
+        <section className="mt-6 rounded-3xl border border-border/30 bg-background/95 p-8 shadow-sm">
+          <div className="flex flex-col gap-6 text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-3xl lg:mx-0" aria-hidden="true">
+              {categoryIcon || '🕌'}
+            </div>
+            <div className="flex-1 space-y-4">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  {category?.name || 'Kategori'}
+                </h1>
+                {category?.description ? (
+                  <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+                    {category.description}
+                  </p>
+                ) : (
+                  <p className="mt-3 text-base text-muted-foreground">
+                    Bu kategoriye ait fetvaları keşfedin ve güncel cevaplara ulaşın.
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground lg:justify-start">
+                <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 font-semibold text-primary">
+                  <Tag className="h-4 w-4" />
+                  {(category?.fatwaCount ?? 0).toLocaleString('tr-TR')} fetva
+                </span>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="space-y-6">
-              {/* Sort Options */}
-              <div className="card-islamic p-6">
-                <div className="flex items-center space-x-2 mb-4">
-                  <Filter className="w-5 h-5 text-islamic-green-600" />
-                  <h3 className="font-semibold">Sıralama</h3>
-                </div>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="w-full p-3 border border-islamic-green-200 rounded-lg focus:border-islamic-green-500 focus:ring-2 focus:ring-islamic-green-100"
-                >
-                  <option value="popular">En Popüler</option>
-                  <option value="recent">En Yeni</option>
-                  <option value="alphabetical">Alfabetik</option>
-                  <option value="most-liked">En Beğenilen</option>
-                </select>
-              </div>
+        <section className="mt-12 space-y-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">Fetva listesi</h2>
+              <p className="text-sm text-muted-foreground">
+                Toplam {(category?.fatwaCount ?? 0).toLocaleString('tr-TR')} fetvadan {fatwas.length.toLocaleString('tr-TR')} gösteriliyor.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {SORT_OPTIONS.map((option) => {
+                const isActive = sortBy === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSortBy(option.value)}
+                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                      isActive
+                        ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                        : 'border-border text-muted-foreground hover:border-primary hover:text-primary'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* JSON-LD: BreadcrumbList + ItemList */}
-            {!loading && category && (
-              <>
+          {!loading && category && (
+            <>
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                      { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: '/' },
+                      { '@type': 'ListItem', position: 2, name: 'Kategoriler', item: '/kategoriler' },
+                      { '@type': 'ListItem', position: 3, name: category.name },
+                    ],
+                  }),
+                }}
+              />
+              {fatwas.length > 0 && (
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
                     __html: JSON.stringify({
                       '@context': 'https://schema.org',
-                      '@type': 'BreadcrumbList',
-                      itemListElement: [
-                        { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: '/' },
-                        { '@type': 'ListItem', position: 2, name: 'Kategoriler', item: '/kategoriler' },
-                        { '@type': 'ListItem', position: 3, name: category.name }
-                      ]
-                    })
+                      '@type': 'ItemList',
+                      itemListElement: fatwas.slice(0, 20).map((f, idx) => ({
+                        '@type': 'ListItem',
+                        position: idx + 1,
+                        name: f.question,
+                        url: `/fetva/${f.id}`,
+                      })),
+                    }),
                   }}
                 />
-                {fatwas.length > 0 && (
-                  <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                      __html: JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'ItemList',
-                        itemListElement: fatwas.slice(0, 20).map((f, idx) => ({
-                          '@type': 'ListItem',
-                          position: idx + 1,
-                          name: f.question,
-                          url: `/fetva/${f.id}`
-                        }))
-                      })
-                    }}
-                  />
-                )}
-              </>
-            )}
-            {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-semibold mb-2">{category?.name || 'Kategori'} Fetvaları</h2>
-                <p className="text-muted-foreground">
-                  Toplam {(category?.fatwaCount ?? 0).toLocaleString('tr-TR')} fetvadan {fatwas.length.toLocaleString('tr-TR')} gösteriliyor
-                </p>
-              </div>
+              )}
+            </>
+          )}
+
+          {error && (
+            <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
             </div>
+          )}
 
-            {/* Loading/Error States */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">{error}</div>
-            )}
-            {loading && fatwas.length === 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="fetva-card group h-full animate-pulse p-4">
-                    <div className="h-4 w-3/4 bg-islamic-green-50 rounded mb-3" />
-                    <div className="h-3 w-full bg-islamic-green-50 rounded mb-2" />
-                    <div className="h-3 w-11/12 bg-islamic-green-50 rounded mb-2" />
-                    <div className="h-3 w-10/12 bg-islamic-green-50 rounded" />
+          {loading && fatwas.length === 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex h-40 flex-col justify-between rounded-3xl border border-border/30 bg-background/80 p-5 shadow-sm"
+                >
+                  <div className="h-4 w-3/4 rounded-full bg-muted/40" />
+                  <div className="space-y-2">
+                    <div className="h-3 w-full rounded-full bg-muted/30" />
+                    <div className="h-3 w-5/6 rounded-full bg-muted/30" />
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="h-3 w-1/3 rounded-full bg-muted/20" />
+                </div>
+              ))}
+            </div>
+          ) : null}
 
-            {/* Fetvalar Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!loading && fatwas.length === 0 ? (
+            <div className="rounded-3xl border border-border/30 bg-background/90 p-12 text-center shadow-sm">
+              <h3 className="text-lg font-semibold text-foreground">Bu kategoriye ait fetva bulunamadı</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Yeni fetvalar eklendiğinde sizi bilgilendireceğiz.
+              </p>
+            </div>
+          ) : null}
+
+          {fatwas.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2">
               {fatwas.map((fetva) => (
-                <Link key={fetva.id} href={`/fetva/${fetva.id}`}>
-                  <div className="fetva-card group h-full">
-                    <h3 className="text-lg font-semibold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                <Link
+                  key={fetva.id}
+                  href={`/fetva/${fetva.id}`}
+                  className="group flex h-full flex-col rounded-3xl border border-border/30 bg-background/95 p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-primary"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        {fetva.createdAt
+                          ? new Date(fetva.createdAt).toLocaleDateString('tr-TR')
+                          : fetva.date
+                          ? new Date(fetva.date).toLocaleDateString('tr-TR')
+                          : 'Tarih belirtilmedi'}
+                      </span>
+                      <span>
+                        {(fetva.views || 0).toLocaleString('tr-TR')} görüntülenme
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary line-clamp-2">
                       {fetva.question}
                     </h3>
-
-                    <p className="text-muted-foreground mb-4 line-clamp-3 text-sm">
+                    <p className="text-sm leading-relaxed text-muted-foreground line-clamp-3">
                       {fetva.answer}
                     </p>
-
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">
-                          {(fetva.views || 0).toLocaleString('tr-TR')} görüntülenme
-                        </span>
-                        <span className="text-islamic-green-600 font-medium">
-                          {(fetva.likes || 0).toLocaleString('tr-TR')} beğeni
-                        </span>
-                      </div>
-                    </div>
+                  </div>
+                  <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{(fetva.likes || 0).toLocaleString('tr-TR')} beğeni</span>
+                    <span className="inline-flex items-center gap-2 text-primary">
+                      İncele
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    </span>
                   </div>
                 </Link>
               ))}
             </div>
+          ) : null}
 
-            {/* Load More */}
-            <div className="text-center mt-12">
+          {fatwas.length > 0 ? (
+            <div className="mt-12 flex justify-center">
               <button
-                onClick={() => setPage(p => p + 1)}
+                type="button"
+                onClick={() => setPage((p) => p + 1)}
                 disabled={loading || !hasMore}
-                className="px-8 py-3 bg-islamic-green-600 hover:bg-islamic-green-700 text-white rounded-xl font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-2"
+                className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-6 py-3 text-sm font-semibold text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                <span>{hasMore ? 'Daha Fazla Yükle' : 'Hepsi yüklendi'}</span>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                <span>{hasMore ? 'Daha fazla fetva yükle' : 'Tüm fetvalar listelendi'}</span>
               </button>
             </div>
-          </div>
-        </div>
+          ) : null}
+        </section>
       </div>
     </div>
   );

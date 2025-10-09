@@ -1,65 +1,102 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, Mail, Phone, MapPin } from 'lucide-react';
+import { BookOpen, Facebook, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
 import { useI18n } from '@/components/providers/I18nProvider';
 
 export function Footer() {
   const { t } = useI18n();
 
   return (
-    <footer className="bg-islamic-green-900 text-white mt-20">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo ve Açıklama */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-islamic-green-600" />
-              </div>
-              <h3 className="text-2xl font-bold">{t('header.title')}</h3>
-            </div>
-            <p className="text-islamic-green-100 mb-6 max-w-md">
+    <footer className="mt-24 border-t border-border/40 bg-background-light/85 backdrop-blur-xl dark:bg-background-dark/85">
+      <div className="container mx-auto px-4 py-12 sm:py-16">
+        <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div className="space-y-5">
+            <Link href="/" className="flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-islamic shadow-lg">
+                <BookOpen className="h-6 w-6 text-white" />
+              </span>
+              <span className="text-2xl font-bold tracking-tight text-foreground">{t('header.title')}</span>
+            </Link>
+            <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
               {t('footer.description')}
             </p>
           </div>
 
-          {/* Hızlı Linkler */}
-          <div>
-            <h4 className="font-semibold mb-4">{t('common.categories')}</h4>
-            <ul className="space-y-2 text-islamic-green-100">
-              <li><Link href="/kategori/ibadet" className="hover:text-white transition-colors">İbadet</Link></li>
-              <li><Link href="/kategori/muamelat" className="hover:text-white transition-colors">Muamelat</Link></li>
-              <li><Link href="/kategori/aile" className="hover:text-white transition-colors">Aile</Link></li>
-              <li><Link href="/kategori/ticaret" className="hover:text-white transition-colors">Ticaret</Link></li>
+          <div className="space-y-4">
+            <h4 className="text-base font-semibold text-foreground">{t('common.categories')}</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><Link href="/category/ibadet" className="transition-colors hover:text-primary">İbadet</Link></li>
+              <li><Link href="/category/muamelat" className="transition-colors hover:text-primary">Muamelat</Link></li>
+              <li><Link href="/category/aile" className="transition-colors hover:text-primary">Aile</Link></li>
+              <li><Link href="/category/ticaret" className="transition-colors hover:text-primary">Ticaret</Link></li>
             </ul>
           </div>
 
-          {/* İletişim */}
-          <div>
-            <h4 className="font-semibold mb-4">{t('about.contact')}</h4>
-            <ul className="space-y-2 text-islamic-green-100">
-              <li className="flex items-center space-x-2">
-                <Mail className="w-4 h-4" />
+          <div className="space-y-4">
+            <h4 className="text-base font-semibold text-foreground">{t('about.contact')}</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Mail className="h-4 w-4" />
+                </span>
                 <span>info@fetvabul.com</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <Phone className="w-4 h-4" />
+              <li className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Phone className="h-4 w-4" />
+                </span>
                 <span>+90 212 555 0123</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4" />
+              <li className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <MapPin className="h-4 w-4" />
+                </span>
                 <span>İstanbul, Türkiye</span>
               </li>
             </ul>
           </div>
+
+          <div className="space-y-4">
+            <h4 className="text-base font-semibold text-foreground">Bizi Takip Edin</h4>
+            <p className="text-sm text-muted-foreground">Güncel fetvalar ve duyurular için sosyal medya hesaplarımızı takip edin.</p>
+            <div className="flex items-center gap-3">
+              <Link
+                href="https://twitter.com"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary"
+                aria-label="Twitter"
+              >
+                <Twitter className="h-5 w-5" />
+              </Link>
+              <Link
+                href="https://facebook.com"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary"
+                aria-label="Facebook"
+              >
+                <Facebook className="h-5 w-5" />
+              </Link>
+              <Link
+                href="https://instagram.com"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary"
+                aria-label="Instagram"
+              >
+                <Instagram className="h-5 w-5" />
+              </Link>
+            </div>
+          </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-islamic-green-800 mt-8 pt-8 text-center">
-          <p className="text-islamic-green-100">
-            {t('footer.copyright')}
-          </p>
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border/30 pt-6 text-center text-sm text-muted-foreground md:flex-row">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:justify-start">
+            <Link href="/kullanim-sartlari" className="transition-colors hover:text-primary">
+              {t('footer.terms') ?? 'Kullanım Şartları'}
+            </Link>
+            <span className="hidden text-border/60 md:inline">|</span>
+            <Link href="/gizlilik" className="transition-colors hover:text-primary">
+              {t('footer.privacy') ?? 'Gizlilik Sözleşmesi'}
+            </Link>
+          </div>
+          <p className="text-muted-foreground/80">{t('footer.copyright')}</p>
         </div>
       </div>
     </footer>
