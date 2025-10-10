@@ -48,9 +48,24 @@ export default function ContactPage() {
       <Header />
       <main className="container mx-auto max-w-6xl px-4 py-16 sm:py-24">
         <section className="text-center">
-          <span className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            Bize Ulaşın
-          </span>
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+            <svg
+              className="h-7 w-7"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M8 12a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V12Z"
+                fill="currentColor"
+                opacity="0.15"
+              />
+              <path
+                d="M12 8h24a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4Zm0 2a2 2 0 0 0-2 2v1.382l14 8.167 14-8.167V12a2 2 0 0 0-2-2H12Zm26 6.618-12.63 7.372a2 2 0 0 1-1.74 0L11 16.618V36a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2V16.618Z"
+                fill="currentColor"
+              />
+            </svg>
+          </div>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Sorularınızı bekliyoruz
           </h1>

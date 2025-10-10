@@ -56,8 +56,27 @@ export default function AboutPage() {
       <Header />
       <main className="container mx-auto px-4 py-16 sm:py-24">
         <section className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <span className="text-lg font-semibold">Fb</span>
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+            <svg
+              className="h-8 w-8"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 10h24a2 2 0 0 1 2 2v28l-14-8-14 8V12a2 2 0 0 1 2-2Z"
+                fill="currentColor"
+                opacity="0.2"
+              />
+              <path
+                d="M12 10h24a2 2 0 0 1 2 2v26.667L24 32l-14 6.667V12a2 2 0 0 1 2-2Zm0-2a4 4 0 0 0-4 4v28a2 2 0 0 0 2.92 1.79L24 35.382l13.08 6.408A2 2 0 0 0 40 40V12a4 4 0 0 0-4-4H12Z"
+                fill="currentColor"
+              />
+              <path
+                d="M17 17h14v2H17v-2Zm0 6h14v2H17v-2Zm0 6h10v2H17v-2Z"
+                fill="currentColor"
+              />
+            </svg>
           </div>
           <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">FetvaBul Hakkında</h1>
           <p className="mt-4 mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground">
@@ -90,11 +109,27 @@ export default function AboutPage() {
               Bilgiye erişimi demokratikleştirirken, güvenilirliği ve ilmî titizliği koruyoruz.
             </p>
           </div>
-          <div className="rounded-3xl border border-primary/20 bg-primary/10 p-10 text-center text-primary">
-            <span className="text-6xl" role="img" aria-label="mosque">
-              🕌
-            </span>
-            <p className="mt-4 text-base font-medium text-primary/80">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-primary/20 bg-primary/10 p-10 text-center text-primary">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-background text-primary">
+              <svg
+                className="h-10 w-10"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <circle cx="24" cy="24" r="16" fill="currentColor" opacity="0.1" />
+                <path
+                  d="M24 14c.552 0 1 .448 1 1v4.382l3.535-3.536a1 1 0 1 1 1.414 1.415L26.414 20H30a1 1 0 1 1 0 2h-4a2 2 0 0 1-2-2v-6a1 1 0 0 1 1-1Zm-5.657 6.757a1 1 0 0 1 1.414 0L24 24.001l4.243-4.244a1 1 0 0 1 1.414 1.415L25.414 25.414l2.829 2.829a1 1 0 0 1-1.414 1.414L24 26.828l-2.829 2.829a1 1 0 1 1-1.414-1.414l2.829-2.829-4.243-4.243a1 1 0 0 1 0-1.414Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M15 32a1 1 0 0 1 1-1h16a1 1 0 1 1 0 2H16a1 1 0 0 1-1-1Z"
+                  fill="currentColor"
+                  opacity="0.4"
+                />
+              </svg>
+            </div>
+            <p className="text-base font-medium text-primary/80">
               İman, ilim ve teknolojiyi aynı çizgide buluşturarak bilgiye erişimi kolaylaştırıyoruz.
             </p>
           </div>

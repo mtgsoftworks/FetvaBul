@@ -16,6 +16,9 @@
 /build
 
 # misc
+
+# design exports
+NEWUI/
 .DS_Store
 *.pem
 

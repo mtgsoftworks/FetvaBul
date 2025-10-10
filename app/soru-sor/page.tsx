@@ -86,7 +86,25 @@ export default function AskQuestionPage() {
       <Header />
       <main className="container mx-auto max-w-3xl px-4 py-16">
         <section className="text-center">
-          <span className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+            <svg
+              className="h-8 w-8"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M10 10a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v28l-8-5-8 5-8-5-8 5V10Z"
+                fill="currentColor"
+                opacity="0.15"
+              />
+              <path
+                d="M14 6h20a4 4 0 0 1 4 4v28a1 1 0 0 1-1.52.85L28 34.118l-8.48 4.732A1 1 0 0 1 18 38V28h-4a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4Zm-2 6v8a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v7.764l7.48-4.17a1 1 0 0 1 1.04 0L38 31.764V10a2 2 0 0 0-2-2H14a2 2 0 0 0-2 2Zm10 2h8v2h-8v-2Zm0 4h8v2h-8v-2Z"
+                fill="currentColor"
+              />
+            </svg>
+          </div>
+          <span className="mt-4 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             Soru Sor
           </span>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
