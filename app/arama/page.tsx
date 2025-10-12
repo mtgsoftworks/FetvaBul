@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Filter, Clock, Tag, Loader2, BookOpen, Calendar } from 'lucide-react';
+import { Search, Filter, Clock, Tag, Loader2, BookOpen, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -49,6 +49,17 @@ export default function AramaPage() {
   const [inputFocused, setInputFocused] = useState(false);
   const [activeIdx, setActiveIdx] = useState<number>(-1);
   const listboxId = 'autocomplete-listbox';
+
+  const [expandedAnswers, setExpandedAnswers] = useState<string[]>([]);
+
+  const toggleAnswer = (id: string) => {
+    setExpandedAnswers((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((existingId) => existingId !== id);
+      }
+      return [...prev, id];
+    });
+  };
 
   const FiltersPanel = () => (
     <div className="space-y-8">
@@ -361,9 +372,13 @@ export default function AramaPage() {
             {searchResults.length > 0 && (
               <>
                 <div className="flex flex-col gap-6">
-                  {searchResults.map((result, index) => (
-                    <Link key={`${result.fetva.id}-${index}`} href={`/fetva/${result.fetva.id}`}>
-                      <div className="group flex flex-col gap-4 rounded-3xl border border-border/40 bg-background/95 p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary">
+                  {searchResults.map((result, index) => {
+                    const isExpanded = expandedAnswers.includes(result.fetva.id);
+                    return (
+                      <article
+                        key={`${result.fetva.id}-${index}`}
+                        className="group flex flex-col gap-4 rounded-3xl border border-border/40 bg-background/95 p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary"
+                      >
                         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
                           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-primary">
                             <Tag className="h-3.5 w-3.5" />
@@ -375,19 +390,58 @@ export default function AramaPage() {
                           <span className="font-medium text-muted-foreground/80">%{Math.round(result.score)} eşleşme</span>
                         </div>
 
-                        <h3
+                        <Link
+                          href={`/fetva/${result.fetva.id}`}
                           className="text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary"
                           dangerouslySetInnerHTML={{
                             __html: result.highlightedQuestion || result.fetva.question
                           }}
                         />
 
-                        <p
-                          className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line"
-                          dangerouslySetInnerHTML={{
-                            __html: result.highlightedAnswer || result.fetva.answer
-                          }}
-                        />
+                        <div className="space-y-3">
+                          <div className="relative">
+                            <div
+                              id={`answer-${result.fetva.id}`}
+                              className={`text-sm leading-relaxed text-muted-foreground whitespace-pre-line transition-[max-height] duration-300 ease-in-out ${
+                                isExpanded ? 'max-h-[999px]' : 'max-h-48 overflow-hidden'
+                              }`}
+                              dangerouslySetInnerHTML={{
+                                __html: result.highlightedAnswer || result.fetva.answer
+                              }}
+                            />
+                            {!isExpanded && (
+                              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background via-background/90 to-transparent" />
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <button
+                              type="button"
+                              onClick={() => toggleAnswer(result.fetva.id)}
+                              className="inline-flex items-center gap-2 rounded-full border border-border/60 px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:border-primary hover:text-primary"
+                              aria-expanded={isExpanded}
+                              aria-controls={`answer-${result.fetva.id}`}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                  Yanıtı Gizle
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                  Devamını Göster
+                                </>
+                              )}
+                            </button>
+                            <Link
+                              href={`/fetva/${result.fetva.id}`}
+                              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                            >
+                              Detaylı Gör
+                            </Link>
+                          </div>
+                        </div>
 
                         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
                           <div className="flex flex-wrap items-center gap-3">
@@ -410,9 +464,9 @@ export default function AramaPage() {
                             <span>{result.matchedTerms.length} eşleşme</span>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </article>
+                    );
+                  })}
                 </div>
                 {displayTotalPages > 1 && (
                   <nav className="mt-12 flex flex-wrap items-center justify-center gap-2">

@@ -1,12 +1,16 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, BookOpen, Clock, Facebook, Share2, Tag, ThumbsUp, Twitter } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, Tag } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { DataService } from '@/lib/data-service';
 import { FetvaCard } from '@/components/cards/FetvaCard';
 import { Badge } from '@/components/ui/badge';
 import type { Fetva } from '@/types';
+import { FetvaEngagement } from '@/components/fetva/FetvaEngagement';
 
 function formatDate(value?: string | Date | null) {
   if (!value) return null;
@@ -28,10 +32,13 @@ async function getFetvaDetail(id: string) {
   const dataService = DataService.getInstance();
   await dataService.initialize();
 
-  const fetva = await dataService.getFetvaById(id);
-  if (!fetva) {
+  const existing = await dataService.getFetvaById(id);
+  if (!existing) {
     return null;
   }
+
+  await dataService.incrementViews(id);
+  const fetva = (await dataService.getFetvaById(id)) ?? existing;
 
   const relatedFatwas = await dataService.findSimilarQuestions(fetva.question, 3);
 
@@ -108,67 +115,14 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
             )}
           </section>
 
-          <section className="flex flex-wrap items-center gap-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 text-sm font-semibold text-primary">
-              <ThumbsUp className="h-4 w-4" />
-              {(fetva.likes ?? 0).toLocaleString('tr-TR')} beğeni
-            </span>
-
-            <a
-              href={shareUrl}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/10"
-            >
-              <Share2 className="h-4 w-4" />
-              Fetvaya git
-            </a>
-
-            <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-blue-200 px-5 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
-            >
-              <Facebook className="h-4 w-4" />
-              Facebook'ta paylaş
-            </a>
-
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(fetva.question)}&url=${encodeURIComponent(shareUrl)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-sky-200 px-5 py-2 text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
-            >
-              <Twitter className="h-4 w-4" />
-              Twitter'da paylaş
-            </a>
-          </section>
-
-          <section className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-2xl border border-border/60 bg-background/70 p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Kategoriler</h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {fetva.categories.map((category) => (
-                  <span key={category} className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-sm text-primary">
-                    {category}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-border/60 bg-background/70 p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">İstatistikler</h2>
-              <dl className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <div className="flex justify-between">
-                  <dt>Görüntülenme</dt>
-                  <dd>{(fetva.views ?? 0).toLocaleString('tr-TR')}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt>Beğeni</dt>
-                  <dd>{(fetva.likes ?? 0).toLocaleString('tr-TR')}</dd>
-                </div>
-              </dl>
-            </div>
-          </section>
+          <FetvaEngagement
+            id={fetva.id}
+            initialLikes={fetva.likes ?? 0}
+            views={fetva.views ?? 0}
+            categories={fetva.categories ?? []}
+            shareUrl={shareUrl}
+            question={fetva.question}
+          />
         </article>
 
         {relatedFatwas.length > 0 && (

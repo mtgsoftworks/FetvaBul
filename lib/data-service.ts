@@ -45,7 +45,7 @@ export class DataService {
   private viewsOverrides: Map<string, number> = new Map();
   private viewCountCache: Map<string, { value: number; expiresAt: number }> = new Map();
   private readonly VIEW_CACHE_TTL_MS = 60 * 1000; // 1 dakika
-  private readonly enableRealtimeViews = process.env.ENABLE_REALTIME_VIEWS === 'true';
+  private readonly enableRealtimeViews = process.env.ENABLE_REALTIME_VIEWS !== 'false';
   
   // Arama önbelleği
   private searchCache: Map<string, { results: InternalSearchResult[]; timestamp: number }> = new Map();
@@ -403,24 +403,45 @@ export class DataService {
     );
   }
 
+  private updateLocalViewCount(id: string, views: number) {
+    const record = this.fetvaById.get(id);
+    if (record) {
+      record.views = views;
+    }
+
+    const index = this.fetvas.findIndex(f => f.id === id);
+    if (index >= 0) {
+      this.fetvas[index].views = views;
+    }
+  }
+
   public async incrementViews(id: string): Promise<void> {
     this.ensureInitialized();
 
     try {
       if (this.enableRealtimeViews) {
         // Firebase Firestore'da görüntüleme sayısını artır
-        await incrementViewCount(id);
+        const latest = await incrementViewCount(id);
         this.viewCountCache.delete(id);
+        if (typeof latest === 'number' && Number.isFinite(latest)) {
+          this.updateLocalViewCount(id, latest);
+        }
         return;
       }
 
       const current = this.viewsOverrides.get(id) ?? 0;
       this.viewsOverrides.set(id, current + 1);
+      const baseViews = this.fetvaById.get(id)?.views ?? 0;
+      this.updateLocalViewCount(id, baseViews + current + 1);
+      this.viewCountCache.delete(id);
     } catch (error) {
       console.error('Failed to increment view count in Firestore:', error);
       // Hata durumunda eski yönteme geri dön (geçici çözüm)
       const current = this.viewsOverrides.get(id) ?? 0;
       this.viewsOverrides.set(id, current + 1);
+      const baseViews = this.fetvaById.get(id)?.views ?? 0;
+      this.updateLocalViewCount(id, baseViews + current + 1);
+      this.viewCountCache.delete(id);
     }
   }
 
