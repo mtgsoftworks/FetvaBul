@@ -15,6 +15,9 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
+const siteStatsDoc = doc(db, 'site_stats', 'global');
+const searchStatsDoc = doc(db, 'site_stats', 'search');
+
 let analyticsPromise: Promise<ReturnType<typeof getAnalytics> | null> | null = null;
 if (typeof window !== 'undefined') {
   analyticsPromise = isSupported().then(supported => (supported ? getAnalytics(app) : null));
@@ -61,6 +64,84 @@ export async function getViewCount(fetvaId: string): Promise<number> {
     return 0;
   } catch (error) {
     console.error('Error getting view count:', error);
+    return 0;
+  }
+}
+
+export async function incrementSiteViewCount(): Promise<number> {
+  try {
+    const siteStatsSnapshot = await getDoc(siteStatsDoc);
+
+    if (siteStatsSnapshot.exists()) {
+      await updateDoc(siteStatsDoc, {
+        homepageViews: increment(1),
+        updatedAt: serverTimestamp()
+      });
+      const current = siteStatsSnapshot.data()?.homepageViews ?? 0;
+      return Number.isFinite(current) ? current + 1 : 1;
+    }
+
+    await setDoc(siteStatsDoc, {
+      homepageViews: 1,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return 1;
+  } catch (error) {
+    console.error('Error incrementing site view count:', error);
+    throw error;
+  }
+}
+
+export async function getSiteViewCount(): Promise<number> {
+  try {
+    const siteStatsSnapshot = await getDoc(siteStatsDoc);
+    if (siteStatsSnapshot.exists()) {
+      const value = siteStatsSnapshot.data()?.homepageViews;
+      return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+    }
+    return 0;
+  } catch (error) {
+    console.error('Error getting site view count:', error);
+    return 0;
+  }
+}
+
+export async function incrementSearchCount(): Promise<number> {
+  try {
+    const snapshot = await getDoc(searchStatsDoc);
+
+    if (snapshot.exists()) {
+      await updateDoc(searchStatsDoc, {
+        totalSearches: increment(1),
+        updatedAt: serverTimestamp(),
+      });
+      const current = snapshot.data()?.totalSearches ?? 0;
+      return Number.isFinite(current) ? current + 1 : 1;
+    }
+
+    await setDoc(searchStatsDoc, {
+      totalSearches: 1,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return 1;
+  } catch (error) {
+    console.error('Error incrementing search count:', error);
+    throw error;
+  }
+}
+
+export async function getSearchCount(): Promise<number> {
+  try {
+    const snapshot = await getDoc(searchStatsDoc);
+    if (snapshot.exists()) {
+      const value = snapshot.data()?.totalSearches;
+      return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+    }
+    return 0;
+  } catch (error) {
+    console.error('Error getting search count:', error);
     return 0;
   }
 }

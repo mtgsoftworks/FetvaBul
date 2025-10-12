@@ -3,7 +3,14 @@ import path from 'path';
 import * as readline from 'readline';
 import { createHash } from 'crypto';
 import { SearchIndex, TurkishNormalizer } from './search-index';
-import { incrementViewCount, getViewCount } from './firebase';
+import {
+  incrementViewCount,
+  getViewCount,
+  incrementSiteViewCount,
+  getSiteViewCount,
+  incrementSearchCount,
+  getSearchCount,
+} from './firebase';
 import {
   RawFetvaData,
   DataServiceError,
@@ -46,6 +53,10 @@ export class DataService {
   private viewCountCache: Map<string, { value: number; expiresAt: number }> = new Map();
   private readonly VIEW_CACHE_TTL_MS = 60 * 1000; // 1 dakika
   private readonly enableRealtimeViews = process.env.ENABLE_REALTIME_VIEWS !== 'false';
+  private siteViewCache?: { value: number; expiresAt: number };
+  private readonly SITE_VIEW_CACHE_TTL_MS = 30 * 1000;
+  private searchCountCache?: { value: number; expiresAt: number };
+  private readonly SEARCH_COUNT_CACHE_TTL_MS = 30 * 1000;
   
   // Arama önbelleği
   private searchCache: Map<string, { results: InternalSearchResult[]; timestamp: number }> = new Map();
@@ -445,6 +456,86 @@ export class DataService {
     }
   }
 
+  public async incrementHomepageViews(): Promise<number> {
+    this.ensureInitialized();
+
+    try {
+      const latest = await incrementSiteViewCount();
+      this.siteViewCache = undefined;
+      return latest;
+    } catch (error) {
+      console.error('Failed to increment site view count in Firestore:', error);
+      throw error instanceof DataServiceError
+        ? error
+        : new DataServiceError(
+            'SITE_VIEW_INCREMENT_FAILED',
+            error instanceof Error ? error.message : 'Unknown error',
+            500
+          );
+    }
+  }
+
+  public async getHomepageViewCount(): Promise<number> {
+    this.ensureInitialized();
+
+    const now = Date.now();
+    if (this.siteViewCache && this.siteViewCache.expiresAt > now) {
+      return this.siteViewCache.value;
+    }
+
+    try {
+      const value = await getSiteViewCount();
+      this.siteViewCache = {
+        value,
+        expiresAt: now + this.SITE_VIEW_CACHE_TTL_MS
+      };
+      return value;
+    } catch (error) {
+      console.error('Failed to fetch site view count:', error);
+      return 0;
+    }
+  }
+
+  public async incrementSearches(): Promise<number> {
+    this.ensureInitialized();
+
+    try {
+      const latest = await incrementSearchCount();
+      this.searchCountCache = undefined;
+      return latest;
+    } catch (error) {
+      console.error('Failed to increment search count in Firestore:', error);
+      throw error instanceof DataServiceError
+        ? error
+        : new DataServiceError(
+            'SEARCH_COUNT_INCREMENT_FAILED',
+            error instanceof Error ? error.message : 'Unknown error',
+            500
+          );
+    }
+  }
+
+  public async getTotalSearches(): Promise<number> {
+    this.ensureInitialized();
+
+    const now = Date.now();
+    if (this.searchCountCache && this.searchCountCache.expiresAt > now) {
+      return this.searchCountCache.value;
+    }
+
+    try {
+      const value = await getSearchCount();
+      this.searchCountCache = {
+        value,
+        expiresAt: now + this.SEARCH_COUNT_CACHE_TTL_MS,
+      };
+      return value;
+    } catch (error) {
+      console.error('Failed to fetch search count:', error);
+      return 0;
+    }
+  }
+
   public async getStats(): Promise<SiteStats> {
     this.ensureInitialized();
 
@@ -457,6 +548,8 @@ export class DataService {
         this.fetvas.map(async (fetva) => await this.getViewCountCached(fetva.id, fetva.views))
       );
       const totalViews = viewCounts.reduce((sum, count) => sum + count, 0);
+      const homepageViews = await this.getHomepageViewCount();
+      const totalSearches = await this.getTotalSearches();
       
       const popularCategories = this.categories
         .slice()
@@ -468,6 +561,8 @@ export class DataService {
         totalFatwas,
         totalCategories,
         totalViews,
+        homepageViews,
+        totalSearches,
         popularCategories
       };
     } catch (error) {
@@ -476,6 +571,8 @@ export class DataService {
         totalFatwas: 0,
         totalCategories: 0,
         totalViews: 0,
+        homepageViews: 0,
+        totalSearches: 0,
         popularCategories: []
       };
     }

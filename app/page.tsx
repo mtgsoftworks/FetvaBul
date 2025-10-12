@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Search } from 'lucide-react';
@@ -31,6 +33,10 @@ const FALLBACK_ART = [
 async function getHomepageData() {
   const dataService = DataService.getInstance();
   await dataService.initialize();
+
+  await dataService.incrementHomepageViews().catch((error) => {
+    console.error('Failed to increment homepage view count:', error);
+  });
 
   const [stats, categories, allFatwas, popularFatwas] = await Promise.all([
     dataService.getStats(),
@@ -76,7 +82,8 @@ function Hero({
   const formatted = {
     fatwas: (stats?.totalFatwas ?? 0).toLocaleString('tr-TR'),
     categories: (stats?.totalCategories ?? 0).toLocaleString('tr-TR'),
-    views: (stats?.totalViews ?? 0).toLocaleString('tr-TR'),
+    totalViews: (stats?.homepageViews ?? 0).toLocaleString('tr-TR'),
+    totalSearches: (stats?.totalSearches ?? 0).toLocaleString('tr-TR'),
   };
 
   return (
@@ -108,7 +115,7 @@ function Hero({
           </div>
         </form>
 
-        <dl className="mt-10 grid w-full max-w-3xl gap-4 rounded-3xl bg-background/80 p-6 shadow-sm backdrop-blur sm:grid-cols-3">
+        <dl className="mt-10 grid w-full max-w-4xl gap-4 rounded-3xl bg-background/80 p-6 shadow-sm backdrop-blur sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1">
             <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Toplam Fetva</dt>
             <dd className="text-2xl font-semibold text-foreground">{formatted.fatwas}</dd>
@@ -119,7 +126,11 @@ function Hero({
           </div>
           <div className="space-y-1">
             <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Toplam Görüntülenme</dt>
-            <dd className="text-2xl font-semibold text-foreground">{formatted.views}</dd>
+            <dd className="text-2xl font-semibold text-foreground">{formatted.totalViews}</dd>
+          </div>
+          <div className="space-y-1">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Toplam Arama</dt>
+            <dd className="text-2xl font-semibold text-foreground">{formatted.totalSearches}</dd>
           </div>
         </dl>
       </div>

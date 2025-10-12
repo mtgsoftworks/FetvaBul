@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 import { DataService } from '@/lib/data-service';
+import { incrementSearchCount } from '@/lib/firebase';
 import { SearchQuery, DataServiceError, isValidSearchQuery } from '@/types';
 
 // Simple in-memory rate limiter (per-process). Window: 60s, Max: 60 requests/IP
@@ -102,6 +103,17 @@ export async function GET(request: NextRequest) {
       limit,
       offset
     });
+
+    if (query.trim().length > 0) {
+      const incrementPromise =
+        typeof (dataService as DataService & { incrementSearches?: () => Promise<number> }).incrementSearches === 'function'
+          ? (dataService as DataService & { incrementSearches: () => Promise<number> }).incrementSearches()
+          : incrementSearchCount();
+
+      incrementPromise.catch((error) => {
+        console.error('Failed to track search count:', error);
+      });
+    }
 
     // Telemetry end
     const durationMs = Date.now() - t0;

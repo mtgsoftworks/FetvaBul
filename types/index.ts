@@ -53,6 +53,8 @@ export interface SiteStats {
   totalFatwas: number;
   totalCategories: number;
   totalViews: number;
+  homepageViews: number;
+  totalSearches: number;
   popularCategories: string[];
 }
 
