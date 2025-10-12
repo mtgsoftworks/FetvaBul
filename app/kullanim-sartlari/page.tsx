@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { I18nProvider } from "@/components/providers/I18nProvider";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
@@ -12,8 +11,7 @@ export const metadata = {
 
 export default function KullanimSartlariPage() {
   return (
-    <I18nProvider>
-      <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
         <Header />
 
         <main className="space-y-16 pb-16">
@@ -108,6 +106,5 @@ export default function KullanimSartlariPage() {
 
         <Footer />
       </div>
-    </I18nProvider>
   );
 }
