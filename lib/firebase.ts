@@ -2,14 +2,23 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getFirestore, doc, getDoc, updateDoc, increment, setDoc, serverTimestamp } from 'firebase/firestore';
 
+function getEnv(name: string): string {
+  const value = process.env[name];
+  if (value && value.trim()) {
+    return value;
+  }
+  throw new Error(`Missing environment variable "${name}" required for Firebase configuration.`);
+}
+
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY || 'AIzaSyDkStkaUFNloLc3Ji7vL_A_30Vcrp7dia0',
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'fetvabul-fdb31.firebaseapp.com',
-  projectId: process.env.FIREBASE_PROJECT_ID || 'fetvabul-fdb31',
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'fetvabul-fdb31.firebasestorage.app',
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '964601180247',
-  appId: process.env.FIREBASE_APP_ID || '1:964601180247:web:3b22acfb440882ea607312',
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID || 'G-M9S8756XS8',
+  apiKey: getEnv('FIREBASE_API_KEY'),
+  authDomain: getEnv('FIREBASE_AUTH_DOMAIN'),
+  projectId: getEnv('FIREBASE_PROJECT_ID'),
+  storageBucket: getEnv('FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: getEnv('FIREBASE_MESSAGING_SENDER_ID'),
+  appId: getEnv('FIREBASE_APP_ID'),
+  // measurementId is optional in Firebase JS SDK
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
