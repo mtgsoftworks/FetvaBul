@@ -59,6 +59,10 @@ export function SearchInput({
           "placeholder:text-gray-500",
           "transition-all duration-200"
         )}
+<<<<<<< HEAD
+=======
+        aria-expanded={showSuggestions}
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         aria-autocomplete={showSuggestions ? "list" : "none"}
       />
 
@@ -84,4 +88,8 @@ export function SearchInput({
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f

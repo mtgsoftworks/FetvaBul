@@ -80,8 +80,11 @@ export interface SearchOptions {
   stemming?: boolean;
   maxResults?: number;
   minScore?: number;
+<<<<<<< HEAD
   maxTermsToProcess?: number;
   maxMatchesPerTerm?: number;
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 }
 
 export interface SearchIndexDocumentEntry {

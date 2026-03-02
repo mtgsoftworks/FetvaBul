@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DataService } from '@/lib/data-service';
 import { DataServiceError } from '@/types';
+<<<<<<< HEAD
 export const revalidate = 300;
+=======
+
+export const dynamic = 'force-dynamic';
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
 export async function GET(
   request: NextRequest,
@@ -87,4 +92,8 @@ export async function GET(
       { status: 500 }
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f

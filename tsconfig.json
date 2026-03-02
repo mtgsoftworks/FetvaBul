@@ -37,7 +37,11 @@
     "out/types/**/*.ts"
   ],
   "exclude": [
+<<<<<<< HEAD
     "node_modules",
     "webview"
+=======
+    "node_modules"
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   ]
 }

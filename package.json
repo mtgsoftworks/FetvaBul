@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+<<<<<<< HEAD
     "build": "npm run lint && npm run typecheck && node scripts/build.mjs",
     "start": "next start",
     "lint": "next lint",
@@ -12,16 +13,29 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "perf:smoke": "node scripts/perf-smoke.mjs",
+=======
+    "build": "node scripts/build.mjs",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     "migrate": "tsx scripts/migrate-data.ts",
     "migrate:dev": "tsx scripts/migrate-data.ts"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@capacitor/android": "^7.4.4",
     "@capacitor/cli": "^7.4.4",
     "@capacitor/core": "^7.4.4",
     "@capacitor/ios": "^7.4.4",
     "@hookform/resolvers": "^3.9.0",
     "@next/swc-wasm-nodejs": "^13.5.11",
+=======
+    "@hookform/resolvers": "^3.9.0",
+    "@next/swc-wasm-nodejs": "13.5.1",
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -59,6 +73,7 @@
     "dotenv": "^17.2.2",
     "embla-carousel-react": "^8.3.0",
     "eslint": "8.49.0",
+<<<<<<< HEAD
     "eslint-config-next": "^13.5.11",
     "firebase": "^12.3.0",
     "input-otp": "^1.2.4",
@@ -66,6 +81,15 @@
     "next": "^13.5.11",
     "next-themes": "^0.3.0",
     "postcss": "^8.4.31",
+=======
+    "eslint-config-next": "13.5.1",
+    "firebase": "^12.3.0",
+    "input-otp": "^1.2.4",
+    "lucide-react": "^0.446.0",
+    "next": "13.5.1",
+    "next-themes": "^0.3.0",
+    "postcss": "8.4.30",
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     "react": "18.2.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "18.2.0",

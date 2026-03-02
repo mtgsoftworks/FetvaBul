@@ -311,9 +311,13 @@ export class SearchIndex {
       fuzzy = false,
       stemming = true,
       maxResults = 100,
+<<<<<<< HEAD
       minScore = 0.1,
       maxTermsToProcess = 5,
       maxMatchesPerTerm = 100
+=======
+      minScore = 0.1
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     } = options;
 
     // Normalize and tokenize query
@@ -333,16 +337,28 @@ export class SearchIndex {
     }>();
 
     // Performans için terim sayısını sınırla
+<<<<<<< HEAD
     const termsToProcess = Math.min(processedTerms.length, Math.max(1, maxTermsToProcess));
     
     for (let i = 0; i < termsToProcess; i++) {
+=======
+    const maxTermsToProcess = Math.min(processedTerms.length, 5);
+    
+    for (let i = 0; i < maxTermsToProcess; i++) {
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       const term = processedTerms[i];
       const matches = this.findTermMatches(term, fuzzy);
       
       // Performans için eşleşme sayısını sınırla
+<<<<<<< HEAD
       const matchesPerTerm = Math.min(matches.length, Math.max(1, maxMatchesPerTerm));
       
       for (let j = 0; j < matchesPerTerm; j++) {
+=======
+      const maxMatchesPerTerm = Math.min(matches.length, 100);
+      
+      for (let j = 0; j < maxMatchesPerTerm; j++) {
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         const matchedTerm = matches[j];
         const entry = this.index.get(matchedTerm);
         if (!entry) continue;
@@ -599,4 +615,8 @@ export class SearchIndex {
   public isIndexBuilt(): boolean {
     return this.isBuilt;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f

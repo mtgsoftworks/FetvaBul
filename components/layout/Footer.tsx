@@ -9,10 +9,14 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12 sm:py-16">
         <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]">
           <div className="space-y-5">
+<<<<<<< HEAD
             <Link
               href="/"
               className="flex items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
+=======
+            <Link href="/" className="flex items-center gap-3">
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-islamic shadow-lg">
                 <BookOpen className="h-6 w-6 text-white" />
               </span>
@@ -26,6 +30,7 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="text-base font-semibold text-foreground">Kategoriler</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
+<<<<<<< HEAD
               <li>
                 <Link
                   href="/kategori/ibadet"
@@ -58,6 +63,12 @@ export function Footer() {
                   Helal Gıda
                 </Link>
               </li>
+=======
+              <li><Link href="/category/ibadet" className="transition-colors hover:text-primary">İbadet</Link></li>
+              <li><Link href="/category/muamelat" className="transition-colors hover:text-primary">Muamelat</Link></li>
+              <li><Link href="/category/aile" className="transition-colors hover:text-primary">Aile</Link></li>
+              <li><Link href="/category/ticaret" className="transition-colors hover:text-primary">Ticaret</Link></li>
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
             </ul>
           </div>
 
@@ -74,19 +85,28 @@ export function Footer() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Phone className="h-4 w-4" />
                 </span>
+<<<<<<< HEAD
                 <span>0544 175 71 51</span>
+=======
+                <span>+90 212 555 0123</span>
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
               </li>
               <li className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <MapPin className="h-4 w-4" />
                 </span>
+<<<<<<< HEAD
                 <span>Niğde Merkez (NİKEM)</span>
+=======
+                <span>İstanbul, Türkiye</span>
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
               </li>
             </ul>
           </div>
 
           <div className="space-y-4">
             <h4 className="text-base font-semibold text-foreground">Bizi Takip Edin</h4>
+<<<<<<< HEAD
             <p className="text-sm text-muted-foreground">
               Güncel fetvalar ve duyurular için sosyal medya hesaplarımızı takip edin.
             </p>
@@ -97,24 +117,42 @@ export function Footer() {
                 aria-label="Twitter"
                 target="_blank"
                 rel="noopener noreferrer"
+=======
+            <p className="text-sm text-muted-foreground">Güncel fetvalar ve duyurular için sosyal medya hesaplarımızı takip edin.</p>
+            <div className="flex items-center gap-3">
+              <Link
+                href="https://twitter.com"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary"
+                aria-label="Twitter"
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
               >
                 <Twitter className="h-5 w-5" />
               </Link>
               <Link
                 href="https://facebook.com"
+<<<<<<< HEAD
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="Facebook"
                 target="_blank"
                 rel="noopener noreferrer"
+=======
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary"
+                aria-label="Facebook"
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
               >
                 <Facebook className="h-5 w-5" />
               </Link>
               <Link
                 href="https://instagram.com"
+<<<<<<< HEAD
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="Instagram"
                 target="_blank"
                 rel="noopener noreferrer"
+=======
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary"
+                aria-label="Instagram"
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
               >
                 <Instagram className="h-5 w-5" />
               </Link>
@@ -124,6 +162,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border/30 pt-6 text-center text-sm text-muted-foreground md:flex-row">
           <div className="flex flex-wrap items-center justify-center gap-4 md:justify-start">
+<<<<<<< HEAD
             <Link
               href="/kullanim-sartlari"
               className="rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
@@ -139,8 +178,23 @@ export function Footer() {
             </Link>
           </div>
           <p className="text-muted-foreground/80">© 2026 FetvaBul. Tüm hakları saklıdır.</p>
+=======
+            <Link href="/kullanim-sartlari" className="transition-colors hover:text-primary">
+              Kullanım Şartları
+            </Link>
+            <span className="hidden text-border/60 md:inline">|</span>
+            <Link href="/gizlilik" className="transition-colors hover:text-primary">
+              Gizlilik Sözleşmesi
+            </Link>
+          </div>
+          <p className="text-muted-foreground/80">© 2025 FetvaBul. Tüm hakları saklıdır.</p>
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         </div>
       </div>
     </footer>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f

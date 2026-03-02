@@ -1,6 +1,10 @@
 "use client";
 
+<<<<<<< HEAD
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+=======
+import { useState, useEffect, useCallback, useMemo } from "react";
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
 const RESULTS_PER_PAGE = 20;
 
@@ -41,8 +45,11 @@ type SearchStats = {
 type SearchPagination = {
   page: number;
   limit: number;
+<<<<<<< HEAD
   total?: number;
   totalPages?: number;
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   hasMore?: boolean;
 };
 
@@ -147,10 +154,13 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
   const [isAutocompleteLoading, setIsAutocompleteLoading] = useState(false);
 
   const [searchStats, setSearchStats] = useState<SearchStats | null>(null);
+<<<<<<< HEAD
   const searchAbortControllerRef = useRef<AbortController | null>(null);
   const autocompleteAbortControllerRef = useRef<AbortController | null>(null);
   const searchRequestIdRef = useRef(0);
   const autocompleteRequestIdRef = useRef(0);
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
   const totalPages = useMemo(() => {
     if (totalResults === 0) {
@@ -161,7 +171,11 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
 
   const loadSearchStats = useCallback(async () => {
     try {
+<<<<<<< HEAD
       const data = await fetchJson<SearchStatsResponse>("/api/search/stats");
+=======
+      const data = await fetchJson<SearchStatsResponse>("/api/search/stats", { cache: "no-store" });
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       if (data.stats) {
         setSearchStats(data.stats);
       }
@@ -179,8 +193,11 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
       const trimmedQuery = query.trim();
 
       if (!trimmedQuery && !selectedCategory) {
+<<<<<<< HEAD
         searchAbortControllerRef.current?.abort();
         searchAbortControllerRef.current = null;
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         setSearchResults([]);
         setHasMoreResults(false);
         setTotalResults(0);
@@ -188,11 +205,14 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
         return;
       }
 
+<<<<<<< HEAD
       const requestId = ++searchRequestIdRef.current;
       searchAbortControllerRef.current?.abort();
       const controller = new AbortController();
       searchAbortControllerRef.current = controller;
 
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       setIsSearching(true);
       setSearchError(null);
 
@@ -205,6 +225,7 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
           page,
         });
 
+<<<<<<< HEAD
         const data = await fetchJson<SearchResponse>(`/api/search?${params}`, {
           signal: controller.signal,
         });
@@ -217,11 +238,17 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
         const total = typeof totalFromApi === "number" && Number.isFinite(totalFromApi) && totalFromApi >= 0
           ? totalFromApi
           : (hasMore ? page * RESULTS_PER_PAGE + 1 : (page - 1) * RESULTS_PER_PAGE + results.length);
+=======
+        const data = await fetchJson<SearchResponse>(`/api/search?${params}`, { cache: "no-store" });
+        const results = Array.isArray(data.results) ? data.results : [];
+        const hasMore = Boolean(data.pagination?.hasMore);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
         setSearchResults(results);
         setHasMoreResults(hasMore);
         setCurrentPageState(page);
 
+<<<<<<< HEAD
         setTotalResults(total);
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
@@ -236,6 +263,17 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
         if (requestId === searchRequestIdRef.current) {
           setIsSearching(false);
         }
+=======
+        const estimatedTotal = hasMore
+          ? page * RESULTS_PER_PAGE + 1
+          : (page - 1) * RESULTS_PER_PAGE + results.length;
+        setTotalResults(estimatedTotal);
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchError("Arama sırasında bir hata oluştu");
+      } finally {
+        setIsSearching(false);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       }
     },
     [query, selectedCategory, sortBy]
@@ -249,21 +287,28 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
     async (searchQuery: string) => {
       const trimmed = searchQuery.trim();
       if (trimmed.length < 2) {
+<<<<<<< HEAD
         autocompleteAbortControllerRef.current?.abort();
         autocompleteAbortControllerRef.current = null;
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         setAutocompleteSuggestions([]);
         return;
       }
 
+<<<<<<< HEAD
       const requestId = ++autocompleteRequestIdRef.current;
       autocompleteAbortControllerRef.current?.abort();
       const controller = new AbortController();
       autocompleteAbortControllerRef.current = controller;
 
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       setIsAutocompleteLoading(true);
 
       try {
         const params = new URLSearchParams({ q: trimmed, limit: "8" });
+<<<<<<< HEAD
         const data = await fetchJson<AutocompleteResponse>(`/api/autocomplete?${params}`, {
           signal: controller.signal,
         });
@@ -285,12 +330,22 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
         if (requestId === autocompleteRequestIdRef.current) {
           setIsAutocompleteLoading(false);
         }
+=======
+        const data = await fetchJson<AutocompleteResponse>(`/api/autocomplete?${params}`, { cache: "no-store" });
+        setAutocompleteSuggestions(Array.isArray(data.suggestions) ? data.suggestions : []);
+      } catch (error) {
+        console.error("Autocomplete error:", error);
+        setAutocompleteSuggestions([]);
+      } finally {
+        setIsAutocompleteLoading(false);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       }
     },
     []
   );
 
   const clearSearch = useCallback(() => {
+<<<<<<< HEAD
     searchAbortControllerRef.current?.abort();
     searchAbortControllerRef.current = null;
     autocompleteAbortControllerRef.current?.abort();
@@ -298,6 +353,8 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
     searchRequestIdRef.current += 1;
     autocompleteRequestIdRef.current += 1;
 
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     setQuery("");
     setSelectedCategory("");
     setSortBy("relevance");
@@ -312,10 +369,13 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed && !selectedCategory) {
+<<<<<<< HEAD
       searchAbortControllerRef.current?.abort();
       searchAbortControllerRef.current = null;
       autocompleteAbortControllerRef.current?.abort();
       autocompleteAbortControllerRef.current = null;
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       setSearchResults([]);
       setTotalResults(0);
       setHasMoreResults(false);
@@ -336,6 +396,7 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
     return () => clearTimeout(debounceTimer);
   }, [query, selectedCategory, sortBy, performSearchInternal, loadAutocompleteSuggestions]);
 
+<<<<<<< HEAD
   useEffect(() => {
     return () => {
       searchAbortControllerRef.current?.abort();
@@ -343,6 +404,8 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
     };
   }, []);
 
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   const goToPage = useCallback(
     (page: number) => {
       if (page < 1 || isSearching) {
@@ -391,7 +454,13 @@ export function useCategories() {
 
     const fetchCategories = async () => {
       try {
+<<<<<<< HEAD
         const data = await fetchJson<{ categories?: Array<{ name: string; fatwaCount?: number }> }>("/api/categories");
+=======
+        const data = await fetchJson<{ categories?: Array<{ name: string; fatwaCount?: number }> }>("/api/categories", {
+          cache: "no-store",
+        });
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
         if (isMounted) {
           const list = Array.isArray(data.categories) ? data.categories : [];
@@ -435,7 +504,11 @@ export function useFetvas(type: "popular" | "recent" = "popular", limit = 10) {
           page: 1,
         });
 
+<<<<<<< HEAD
         const data = await fetchJson<SearchResponse>(`/api/search?${params}`);
+=======
+        const data = await fetchJson<SearchResponse>(`/api/search?${params}`, { cache: "no-store" });
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         const results = Array.isArray(data.results) ? data.results : [];
 
         if (isMounted) {
@@ -488,7 +561,11 @@ export function useSimilarQuestions(question: string, limit = 5) {
           page: 1,
         });
 
+<<<<<<< HEAD
         const data = await fetchJson<SearchResponse>(`/api/search?${params}`);
+=======
+        const data = await fetchJson<SearchResponse>(`/api/search?${params}`, { cache: "no-store" });
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         const results = Array.isArray(data.results) ? data.results : [];
 
         if (isMounted) {

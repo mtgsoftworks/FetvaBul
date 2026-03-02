@@ -6,7 +6,10 @@ import { SearchIndex, TurkishNormalizer } from './search-index';
 import {
   incrementViewCount,
   getViewCount,
+<<<<<<< HEAD
   getAllViewCounts,
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   incrementSiteViewCount,
   getSiteViewCount,
   incrementSearchCount,
@@ -26,6 +29,7 @@ import {
 
 const DATA_FILE_NAME = 'consolidated_fetvas.jsonl';
 
+<<<<<<< HEAD
 type RawFetvaRecord = RawFetvaData & Record<string, unknown>;
 
 interface AggregatesSnapshot {
@@ -36,6 +40,9 @@ interface AggregatesSnapshot {
   totalSearches: number;
   expiresAt: number;
 }
+=======
+type RawFetvaRecord = RawFetvaData & Record<string, any>;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
 export class DataService {
   private static instance: DataService;
@@ -63,11 +70,21 @@ export class DataService {
   private viewCountCache: Map<string, { value: number; expiresAt: number }> = new Map();
   private readonly VIEW_CACHE_TTL_MS = 60 * 1000; // 1 dakika
   private readonly enableRealtimeViews = process.env.ENABLE_REALTIME_VIEWS !== 'false';
+<<<<<<< HEAD
   private aggregatesSnapshot?: AggregatesSnapshot;
   private readonly AGGREGATES_TTL_MS = 60 * 1000; // 1 dakika
   
   // Arama önbelleği
   private searchCache: Map<string, { results: InternalSearchResult[]; total: number; timestamp: number }> = new Map();
+=======
+  private siteViewCache?: { value: number; expiresAt: number };
+  private readonly SITE_VIEW_CACHE_TTL_MS = 30 * 1000;
+  private searchCountCache?: { value: number; expiresAt: number };
+  private readonly SEARCH_COUNT_CACHE_TTL_MS = 30 * 1000;
+  
+  // Arama önbelleği
+  private searchCache: Map<string, { results: InternalSearchResult[]; timestamp: number }> = new Map();
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika
   private fatwaCache: Map<string, { data: Fetva[]; expiresAt: number }> = new Map();
   private readonly DATA_CACHE_TTL_MS = 2 * 60 * 1000; // 2 dakika
@@ -132,11 +149,14 @@ export class DataService {
   }
 
   public async search(options: InternalSearchOptions): Promise<InternalSearchResult[]> {
+<<<<<<< HEAD
     const { results } = await this.searchWithTotal(options);
     return results;
   }
 
   public async searchWithTotal(options: InternalSearchOptions): Promise<{ results: InternalSearchResult[]; total: number }> {
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     this.ensureInitialized();
 
     const {
@@ -148,6 +168,7 @@ export class DataService {
       minScore = 0.1
     } = options;
 
+<<<<<<< HEAD
     const cacheKey = `${query.trim().toLowerCase()}-${category || ''}-${sortBy}-${limit}-${offset}-${minScore}`;
     const cached = this.searchCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
@@ -185,10 +206,43 @@ export class DataService {
 
       for (const match of rawMatches) {
         const fetva = this.fetvaById.get(match.documentId);
+=======
+    if (!query || query.trim().length < 2) {
+      return await this.getAllFatvasForSearch({ ...options, limit, offset, sortBy });
+    }
+
+    // Önbellek anahtarı oluştur
+    const cacheKey = `${query.trim().toLowerCase()}-${category || ''}-${sortBy}-${limit}-${offset}-${minScore}`;
+    
+    // Önbelleği kontrol et
+    const cached = this.searchCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
+      return cached.results;
+    }
+
+    try {
+      // Performans için maxResults sınırlaması
+      const maxResults = Math.min(500, limit * 3 + offset); // Daha küçük bir limit
+      
+      const searchResults = this.searchIndex.search(query, {
+        fuzzy: true,
+        stemming: true,
+        maxResults,
+        minScore
+      });
+
+      const filtered: InternalSearchResult[] = [];
+      const processedCount = Math.min(searchResults.length, 200); // İşlenecek maksimum sonuç sayısı
+
+      for (let i = 0; i < processedCount; i++) {
+        const result = searchResults[i];
+        const fetva = this.fetvaById.get(result.documentId);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         if (!fetva) {
           continue;
         }
 
+<<<<<<< HEAD
         if (normalizedCategory && !fetva.categories.includes(normalizedCategory)) {
           continue;
         }
@@ -217,6 +271,36 @@ export class DataService {
       });
 
       return { results, total };
+=======
+        if (category && category.trim() && !fetva.categories.includes(category)) {
+          continue;
+        }
+
+        filtered.push({
+          fetva: await this.withRuntimeViews(fetva),
+          score: result.score,
+          matchedTerms: result.matchedTerms,
+          highlightedQuestion: this.highlightText(fetva.question, result.matchedTerms),
+          highlightedAnswer: this.highlightText(fetva.answer, result.matchedTerms)
+        });
+
+        // Performans için erken durma
+        if (filtered.length >= limit + offset) {
+          break;
+        }
+      }
+
+      const sorted = await this.sortResults(filtered, sortBy);
+      const finalResults = sorted.slice(offset, offset + limit);
+      
+      // Önbelleği güncelle
+      this.searchCache.set(cacheKey, {
+        results: finalResults,
+        timestamp: Date.now()
+      });
+
+      return finalResults;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     } catch (error) {
       console.error('Search error:', error);
       throw new DataServiceError(
@@ -236,7 +320,10 @@ export class DataService {
     const { limit = 20, offset = 0, sortBy = 'views', category } = options;
 
     try {
+<<<<<<< HEAD
       const aggregates = await this.getAggregates();
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       const normalizedKeywords = Array.from(
         new Set(
           keywords
@@ -268,7 +355,11 @@ export class DataService {
         }
 
         results.push({
+<<<<<<< HEAD
           fetva: await this.withRuntimeViews(fetva, aggregates.viewById),
+=======
+          fetva: await this.withRuntimeViews(fetva),
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
           score: normalizedKeywords.length,
           matchedTerms: normalizedKeywords,
           highlightedQuestion: this.highlightText(fetva.question, normalizedKeywords),
@@ -276,7 +367,11 @@ export class DataService {
         });
       }
 
+<<<<<<< HEAD
       const sorted = await this.sortResults(results, sortBy, aggregates.viewById);
+=======
+      const sorted = await this.sortResults(results, sortBy);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       return sorted.slice(offset, offset + limit);
     } catch (error) {
       console.error('Keyword search error:', error);
@@ -382,11 +477,17 @@ export class DataService {
       return cached.data;
     }
 
+<<<<<<< HEAD
     const aggregates = await this.getAggregates();
     const fetvasWithViews = this.fetvas.map((fetva) => ({
       ...fetva,
       views: aggregates.viewById.get(fetva.id) ?? fetva.views,
     }));
+=======
+    const fetvasWithViews = await Promise.all(
+      this.fetvas.map(fetva => this.withRuntimeViews(fetva))
+    );
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
     this.fatwaCache.set(cacheKey, {
       data: fetvasWithViews,
@@ -398,6 +499,7 @@ export class DataService {
 
   public async getFatwasByCategory(categoryName: string): Promise<Fetva[]> {
     this.ensureInitialized();
+<<<<<<< HEAD
     const aggregates = await this.getAggregates();
     return this.fetvas
       .filter((fetva) => fetva.categories.includes(categoryName))
@@ -405,6 +507,14 @@ export class DataService {
         ...fetva,
         views: aggregates.viewById.get(fetva.id) ?? fetva.views,
       }));
+=======
+    const filtered = this.fetvas
+      .filter(fetva => fetva.categories.includes(categoryName));
+    const fetvasWithViews = await Promise.all(
+      filtered.map(fetva => this.withRuntimeViews(fetva))
+    );
+    return fetvasWithViews;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   }
 
   public async getAllCategories(): Promise<Category[]> {
@@ -419,6 +529,7 @@ export class DataService {
 
   public async getPopularFatwas(limit: number = 10): Promise<Fetva[]> {
     this.ensureInitialized();
+<<<<<<< HEAD
     const aggregates = await this.getAggregates();
     const ids = aggregates.popularIds.slice(0, limit);
 
@@ -429,6 +540,25 @@ export class DataService {
         ...fetva,
         views: aggregates.viewById.get(fetva.id) ?? fetva.views,
       }));
+=======
+
+    // Tüm fetvalar için görüntüleme sayılarını al
+    const fetvasWithViews = await Promise.all(
+      this.fetvas.map(async (fetva) => ({
+        fetva,
+        viewCount: await this.getViewCountCached(fetva.id, fetva.views)
+      }))
+    );
+
+    const sortedFetvas = fetvasWithViews
+      .sort((a, b) => b.viewCount - a.viewCount || b.fetva.likes - a.fetva.likes)
+      .slice(0, limit)
+      .map(item => item.fetva);
+    
+    return await Promise.all(
+      sortedFetvas.map(fetva => this.withRuntimeViews(fetva))
+    );
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   }
 
   private updateLocalViewCount(id: string, views: number) {
@@ -454,7 +584,10 @@ export class DataService {
         if (typeof latest === 'number' && Number.isFinite(latest)) {
           this.updateLocalViewCount(id, latest);
         }
+<<<<<<< HEAD
         this.invalidateAggregates();
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         return;
       }
 
@@ -463,7 +596,10 @@ export class DataService {
       const baseViews = this.fetvaById.get(id)?.views ?? 0;
       this.updateLocalViewCount(id, baseViews + current + 1);
       this.viewCountCache.delete(id);
+<<<<<<< HEAD
       this.invalidateAggregates();
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     } catch (error) {
       console.error('Failed to increment view count in Firestore:', error);
       // Hata durumunda eski yönteme geri dön (geçici çözüm)
@@ -472,7 +608,10 @@ export class DataService {
       const baseViews = this.fetvaById.get(id)?.views ?? 0;
       this.updateLocalViewCount(id, baseViews + current + 1);
       this.viewCountCache.delete(id);
+<<<<<<< HEAD
       this.invalidateAggregates();
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     }
   }
 
@@ -481,7 +620,11 @@ export class DataService {
 
     try {
       const latest = await incrementSiteViewCount();
+<<<<<<< HEAD
       this.invalidateAggregates();
+=======
+      this.siteViewCache = undefined;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       return latest;
     } catch (error) {
       console.error('Failed to increment site view count in Firestore:', error);
@@ -497,8 +640,28 @@ export class DataService {
 
   public async getHomepageViewCount(): Promise<number> {
     this.ensureInitialized();
+<<<<<<< HEAD
     const aggregates = await this.getAggregates();
     return aggregates.homepageViews;
+=======
+
+    const now = Date.now();
+    if (this.siteViewCache && this.siteViewCache.expiresAt > now) {
+      return this.siteViewCache.value;
+    }
+
+    try {
+      const value = await getSiteViewCount();
+      this.siteViewCache = {
+        value,
+        expiresAt: now + this.SITE_VIEW_CACHE_TTL_MS
+      };
+      return value;
+    } catch (error) {
+      console.error('Failed to fetch site view count:', error);
+      return 0;
+    }
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   }
 
   public async incrementSearches(): Promise<number> {
@@ -506,7 +669,11 @@ export class DataService {
 
     try {
       const latest = await incrementSearchCount();
+<<<<<<< HEAD
       this.invalidateAggregates();
+=======
+      this.searchCountCache = undefined;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       return latest;
     } catch (error) {
       console.error('Failed to increment search count in Firestore:', error);
@@ -522,18 +689,52 @@ export class DataService {
 
   public async getTotalSearches(): Promise<number> {
     this.ensureInitialized();
+<<<<<<< HEAD
     const aggregates = await this.getAggregates();
     return aggregates.totalSearches;
+=======
+
+    const now = Date.now();
+    if (this.searchCountCache && this.searchCountCache.expiresAt > now) {
+      return this.searchCountCache.value;
+    }
+
+    try {
+      const value = await getSearchCount();
+      this.searchCountCache = {
+        value,
+        expiresAt: now + this.SEARCH_COUNT_CACHE_TTL_MS,
+      };
+      return value;
+    } catch (error) {
+      console.error('Failed to fetch search count:', error);
+      return 0;
+    }
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   }
 
   public async getStats(): Promise<SiteStats> {
     this.ensureInitialized();
 
     try {
+<<<<<<< HEAD
       const aggregates = await this.getAggregates();
       const totalFatwas = this.fetvas.length;
       const totalCategories = this.categories.length;
       
+=======
+      const totalFatwas = this.fetvas.length;
+      const totalCategories = this.categories.length;
+      
+      // Tüm fetvalar için görüntüleme sayılarını al
+      const viewCounts = await Promise.all(
+        this.fetvas.map(async (fetva) => await this.getViewCountCached(fetva.id, fetva.views))
+      );
+      const totalViews = viewCounts.reduce((sum, count) => sum + count, 0);
+      const homepageViews = await this.getHomepageViewCount();
+      const totalSearches = await this.getTotalSearches();
+      
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       const popularCategories = this.categories
         .slice()
         .sort((a, b) => b.fatwaCount - a.fatwaCount)
@@ -543,9 +744,15 @@ export class DataService {
       return {
         totalFatwas,
         totalCategories,
+<<<<<<< HEAD
         totalViews: aggregates.totalViews,
         homepageViews: aggregates.homepageViews,
         totalSearches: aggregates.totalSearches,
+=======
+        totalViews,
+        homepageViews,
+        totalSearches,
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         popularCategories
       };
     } catch (error) {
@@ -580,6 +787,7 @@ export class DataService {
     };
   }
 
+<<<<<<< HEAD
   private invalidateAggregates(): void {
     this.aggregatesSnapshot = undefined;
     this.fatwaCache.clear();
@@ -677,6 +885,8 @@ export class DataService {
     }
   }
 
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   private async loadDataFromFile(): Promise<void> {
     let stats;
     try {
@@ -767,9 +977,12 @@ export class DataService {
 
     this.viewsOverrides = new Map<string, number>();
     this.searchIndex.buildIndex(this.fetvas);
+<<<<<<< HEAD
     this.searchCache.clear();
     this.viewCountCache.clear();
     this.invalidateAggregates();
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
     console.log(` Loaded ${this.fetvas.length} fatwas across ${this.categories.length} categories.`);
   }
@@ -873,11 +1086,15 @@ export class DataService {
       });
   }
 
+<<<<<<< HEAD
   private async sortResults(
     results: InternalSearchResult[],
     sortBy: InternalSearchOptions['sortBy'],
     viewById?: Map<string, number>
   ): Promise<InternalSearchResult[]> {
+=======
+  private async sortResults(results: InternalSearchResult[], sortBy: InternalSearchOptions['sortBy']): Promise<InternalSearchResult[]> {
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     switch (sortBy) {
       case 'date':
         return results.slice().sort((a, b) => {
@@ -887,6 +1104,7 @@ export class DataService {
         });
       case 'popular':
       case 'views':
+<<<<<<< HEAD
         if (viewById) {
           return results
             .slice()
@@ -903,16 +1121,34 @@ export class DataService {
         return fallbackViews
           .sort((a, b) => b.viewCount - a.viewCount)
           .map((item) => item.result);
+=======
+        // Görüntüleme sayılarına göre sıralama
+        const resultsWithViews = await Promise.all(
+          results.map(async (result) => ({
+            result,
+            viewCount: await this.getViewCountCached(result.fetva.id, result.fetva.views)
+          }))
+        );
+        
+        return resultsWithViews
+          .sort((a, b) => b.viewCount - a.viewCount)
+          .map(item => item.result);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       case 'relevance':
       default:
         return results.slice().sort((a, b) => b.score - a.score);
     }
   }
 
+<<<<<<< HEAD
   private async withRuntimeViews(fetva: Fetva, viewById?: Map<string, number>): Promise<Fetva> {
     const views = typeof viewById?.get(fetva.id) === 'number'
       ? (viewById.get(fetva.id) as number)
       : await this.getViewCountCached(fetva.id, fetva.views);
+=======
+  private async withRuntimeViews(fetva: Fetva): Promise<Fetva> {
+    const views = await this.getViewCountCached(fetva.id, fetva.views);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     return { ...fetva, views };
   }
 
@@ -923,6 +1159,7 @@ export class DataService {
       return cached.value;
     }
 
+<<<<<<< HEAD
     if (this.aggregatesSnapshot && this.aggregatesSnapshot.expiresAt > now) {
       const aggregateValue = this.aggregatesSnapshot.viewById.get(id);
       if (typeof aggregateValue === 'number') {
@@ -931,6 +1168,8 @@ export class DataService {
       }
     }
 
+=======
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     const value = await this.getViewCount(id, fallback);
     this.viewCountCache.set(id, { value, expiresAt: now + this.VIEW_CACHE_TTL_MS });
     return value;
@@ -964,26 +1203,44 @@ export class DataService {
   }
 
   private highlightText(text: string, terms: string[]): string {
+<<<<<<< HEAD
     const safeText = this.escapeHtml(text);
     if (!terms.length) {
       return safeText;
+=======
+    if (!terms.length) {
+      return text;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     }
 
     // Escape and de-duplicate terms; sort by length desc to prevent partial overrides
     const uniqueTerms = Array.from(
+<<<<<<< HEAD
       new Set(terms.map(term => this.escapeRegExp(this.escapeHtml(term.trim()))).filter(Boolean))
     ).sort((a, b) => b.length - a.length);
     if (!uniqueTerms.length) {
       return safeText;
+=======
+      new Set(terms.map(term => this.escapeRegExp(term.trim())).filter(Boolean))
+    ).sort((a, b) => b.length - a.length);
+    if (!uniqueTerms.length) {
+      return text;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     }
 
     try {
       // Highlight prefixes to better align with stemmed matches: term + word-characters
       const prefixPatterns = uniqueTerms.map(t => `${t}\\w*`);
       const pattern = new RegExp(`(${prefixPatterns.join('|')})`, 'gi');
+<<<<<<< HEAD
       return safeText.replace(pattern, '<mark>$1</mark>');
     } catch {
       return safeText;
+=======
+      return text.replace(pattern, '<mark>$1</mark>');
+    } catch {
+      return text;
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     }
   }
 
@@ -991,6 +1248,7 @@ export class DataService {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
+<<<<<<< HEAD
   private escapeHtml(value: string): string {
     return value
       .replace(/&/g, '&amp;')
@@ -1007,14 +1265,25 @@ export class DataService {
 
     const fetvas = await this.getAllFatwas();
     const aggregates = await this.getAggregates();
+=======
+  private async getAllFatvasForSearch(options: InternalSearchOptions): Promise<InternalSearchResult[]> {
+    const { category, sortBy = 'views', limit = 20, offset = 0 } = options;
+
+    const fetvas = await this.getAllFatwas();
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     const filtered = fetvas
       .filter(fetva => (category ? fetva.categories.includes(category) : true))
       .map(fetva => ({ fetva, score: 0, matchedTerms: [] }));
 
+<<<<<<< HEAD
     const sorted = await this.sortResults(filtered, sortBy, aggregates.viewById);
     const total = sorted.length;
     const paged = sorted.slice(offset, offset + limit);
     return { results: paged, total };
+=======
+    const sorted = await this.sortResults(filtered, sortBy);
+    return sorted.slice(offset, offset + limit);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   }
 
   private ensureInitialized(): void {

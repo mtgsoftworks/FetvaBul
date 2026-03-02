@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
+<<<<<<< HEAD
+=======
+
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 export const dynamic = 'force-dynamic';
 
 import { DataService } from '@/lib/data-service';
 import { incrementSearchCount } from '@/lib/firebase';
+<<<<<<< HEAD
 import { DataServiceError, SearchSort } from '@/types';
 import { applyRateLimit } from '@/lib/rate-limit';
+=======
+import { SearchQuery, DataServiceError, isValidSearchQuery } from '@/types';
+
+// Simple in-memory rate limiter (per-process). Window: 60s, Max: 60 requests/IP
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 60;
+const rateStore: Map<string, { count: number; resetAt: number }> = new Map();
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
 function getClientIp(req: NextRequest): string {
   const xf = req.headers.get('x-forwarded-for');
@@ -12,19 +25,43 @@ function getClientIp(req: NextRequest): string {
     const ip = xf.split(',')[0]?.trim();
     if (ip) return ip;
   }
+<<<<<<< HEAD
   return (req as unknown as { ip?: string }).ip || 'unknown';
+=======
+  // NextRequest may provide ip via geo or ip, fallback
+  // @ts-ignore
+  return (req as any).ip || 'unknown';
+}
+
+function rateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const entry = rateStore.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true };
+  }
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+  entry.count += 1;
+  return { allowed: true };
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 }
 
 export async function GET(request: NextRequest) {
   try {
     // Rate limiting
     const ip = getClientIp(request);
+<<<<<<< HEAD
     const r = await applyRateLimit({
       namespace: 'search',
       identifier: ip,
       windowMs: 60_000,
       max: 60,
     });
+=======
+    const r = rateLimit(ip);
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     if (!r.allowed) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
@@ -80,6 +117,7 @@ export async function GET(request: NextRequest) {
     const t0 = Date.now();
 
     // Perform search using new DataService
+<<<<<<< HEAD
     const searchData = await dataService.searchWithTotal({
       query,
       category: category || undefined,
@@ -89,6 +127,15 @@ export async function GET(request: NextRequest) {
     });
     const searchResults = searchData.results;
     const total = searchData.total;
+=======
+    const searchResults = await dataService.search({
+      query,
+      category: category || undefined,
+      sortBy: sortBy as any,
+      limit,
+      offset
+    });
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
     if (query.trim().length > 0) {
       const incrementPromise =
@@ -110,9 +157,13 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
+<<<<<<< HEAD
         total,
         totalPages: Math.max(1, Math.ceil(total / limit)),
         hasMore: offset + searchResults.length < total,
+=======
+        hasMore: searchResults.length === limit // Simple check for more results
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
       },
       meta: {
         durationMs,
@@ -136,4 +187,8 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f

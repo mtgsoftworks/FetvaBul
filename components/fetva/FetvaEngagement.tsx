@@ -161,7 +161,11 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
           className="inline-flex items-center gap-2 rounded-full border border-blue-200 px-5 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
         >
           <Facebook className="h-4 w-4" />
+<<<<<<< HEAD
           Facebook&apos;ta paylaş
+=======
+          Facebook'ta paylaş
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         </a>
 
         <a
@@ -171,7 +175,11 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
           className="inline-flex items-center gap-2 rounded-full border border-sky-200 px-5 py-2 text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
         >
           <Twitter className="h-4 w-4" />
+<<<<<<< HEAD
           Twitter&apos;da paylaş
+=======
+          Twitter'da paylaş
+>>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         </a>
       </div>
 
