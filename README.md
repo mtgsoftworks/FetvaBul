@@ -1,51 +1,35 @@
-# FetvaBul
+﻿# FetvaBul
 
-FetvaBul, İslami sorulara hızlı ve güvenilir cevaplar sunan modern bir arama platformudur. Güncellenen arayüz sayesinde kullanıcılar, binlerce fetvayı kategori bazlı filtreleyebilir, gelişmiş sıralama seçenekleri kullanabilir ve alakalı içeriklere minimal bir deneyimle erişebilir.
+FetvaBul is a Next.js 13 application for searching and reading Islamic fatwas.
+It provides category-based discovery, autocomplete, sorting, and API endpoints for
+search and engagement flows.
 
 <p align="center">
   <img src="./public/fetvabul_logo.png" alt="FetvaBul Logo" width="200" />
 </p>
 
-## İçindekiler
+## Features
 
-- [Özellikler](#özellikler)
-- [Teknolojiler](#teknolojiler)
-- [Başlangıç](#başlangıç)
-- [Çalışma Zamanı Komutları](#çalışma-zamanı-komutları)
-- [Dizin Yapısı](#dizin-yapısı)
-- [Arayüz ve Tasarım Notları](#arayüz-ve-tasarım-notları)
-- [Veri ve API](#veri-ve-api)
-- [Dağıtım](#dağıtım)
-- [Katkıda Bulunma](#katkıda-bulunma)
-- [Lisans ve İletişim](#lisans-ve-iletişim)
+- Fast fatwa search (`/arama`) with filters and sorting
+- Category pages (`/kategori/[slug]`) and fatwa detail pages (`/fetva/[id]`)
+- Autocomplete and search stats endpoints
+- Contact form endpoint for user submissions
+- View/search telemetry backed by Firestore
 
-## Özellikler
+## Tech Stack
 
-- **[Arama Deneyimi]** `app/arama/page.tsx` yeni filtre paneli, kategori butonları, sıralama seçenekleri ve istatistik kartları sunar.
-- **[Kategori Odaklı İçerik]** `app/kategori/[slug]/page.tsx` modern hero, kartlar ve hızlı sıralama bileşenleriyle yenilendi.
-- **[Hukuki Sayfalar]** `app/gizlilik/page.tsx` ve `app/kullanim-sartlari/page.tsx` gradient hero + kart düzeniyle tema uyumlu hale getirildi.
-- **[Performans]** `lib/data-service.ts` içinde global önbellek, Firestore isteklerini azaltır ve arama sonuçlarını hızlandırır.
-- **[Mobil Uyumluluk]** Tailwind breakpoints (sm/md/lg) ile tüm sayfalar mobil, tablet ve masaüstü için optimize.
-- **[UI Bileşenleri]** `components/` dizinindeki `Header`, `Footer`, `Button`, `Sheet` gibi bileşenler aynı görsel dili taşır.
+- Next.js 13 (App Router)
+- TypeScript
+- Tailwind CSS + Radix UI
+- Firebase Firestore
+- Vitest
 
-## Teknolojiler
+## Requirements
 
-- **Framework**: Next.js 13 (App Router)
-- **Dil**: TypeScript
-- **Stil**: Tailwind CSS, Radix tabanlı bileşenler
-- **Veri**: JSONL veri setleri (`data/`) + Firebase Firestore
-- **Arama**: Özel `SearchIndex` implementasyonu (`lib/search-index.ts`)
-- **Test**: Vitest (`vitest.config.ts`)
+- Node.js 18+
+- npm
 
-## Başlangıç
-
-### Gereksinimler
-
-- Node.js >= 18.x
-- npm veya yarn
-- Firebase projesi (Firestore erişimi)
-
-### Kurulum
+## Setup
 
 ```bash
 git clone https://github.com/mtgsoftworks/FetvaBul.git
@@ -54,11 +38,11 @@ npm install
 npm run dev
 ```
 
-Uygulama varsayılan olarak `http://localhost:3000` adresinde çalışır.
+Local app: `http://localhost:3000`
 
-### Ortam Değişkenleri
+## Environment Variables
 
-`.env.local` dosyasında aşağıdaki anahtarları tanımlayın:
+Create `.env.local`:
 
 ```env
 FIREBASE_API_KEY=...
@@ -71,74 +55,74 @@ FIREBASE_MEASUREMENT_ID=...
 DATA_FILE=data/consolidated_fetvas.jsonl
 ```
 
-## Çalışma Zamanı Komutları
+## Scripts
 
 ```bash
-npm run dev        # Geliştirme sunucusu
-npm run build      # Üretim derlemesi
-npm run start      # Üretim sunucusunu çalıştır
-npm run lint       # ESLint denetimi
-npm run test       # Vitest testleri (tanımlandıysa)
+npm run dev
+npm run lint
+npm run typecheck
+npm run test:run
+npm run build
+npm run start
 ```
 
-## Dizin Yapısı
+Windows PowerShell policy issue for `npm`:
 
-```
-app/                # Sayfalar, API rotaları, layout bileşenleri
-├── arama/          # Arama sayfası ve filtre paneli
-├── kategori/       # Dinamik kategori sayfaları
-├── gizlilik/       # Gizlilik politikası
-├── kullanim-sartlari/ # Kullanım şartları sayfası
-├── soru-sor/       # Soru gönderme formu
-├── api/            # Arama, autocomplete, contact vb. API uçları
-components/         # Layout, kart, form ve UI bileşenleri
-hooks/              # `use-search`, `use-toast` gibi custom hook'lar
-lib/                # DataService, search index, firebase, i18n
-data/               # JSONL veri dosyaları
-public/             # Statik varlıklar
-scripts/            # Veri migrasyon ve konsolidasyon betikleri
+```bash
+npm.cmd run build
 ```
 
-## Arayüz ve Tasarım Notları
+## API Overview
 
-- **[Filtre Paneli]** `FiltersPanel` kategorileri kart formatında sunar; aktif seçim, primary (#27C26B) renk ile vurgulanır.
-- **[Hero Bölümleri]** Hukuki sayfalar gradient hero ve kart gövdeleriyle yeni görsel dile uyum sağlar.
-- **[Kart Tasarımı]** Arama sonuçları ve istatistik kutuları `rounded-3xl`, `border-border/40`, `shadow-sm` gibi ortak sınıflar kullanır.
-- **[Mobil Deneyim]** Gridler mobilde tek sütuna düşer; filtreler mobilde `Sheet` bileşeniyle açılır.
+- `GET /api/search` - query, category, sortBy, page, limit
+- `GET /api/search/stats` - index/search stats
+- `GET /api/autocomplete` - suggestions
+- `GET /api/categories` - category list/count
+- `GET /api/categories/[slug]` - category detail
+- `GET /api/fatwas/[id]` - fatwa detail
+- `POST /api/contact` - contact/question submit
+- `GET /api/health` - health status
 
-## Veri ve API
+## Project Structure
 
-- **`GET /api/search`**: query, category, sortBy, page, limit parametreleri ile arama.
-- **`GET /api/autocomplete`**: otomatik tamamlama önerileri.
-- **`GET /api/categories`**: kategoriler ve sayıları.
-- **`POST /api/contact`**: iletişim & soru formlarını Firestore’a kaydeder.
+```text
+app/         pages + API routes
+components/  UI and page components
+hooks/       custom React hooks
+lib/         data service, search index, firebase, utilities
+data/        JSONL datasets
+public/      static assets
+scripts/     build/data scripts
+test/        vitest tests
+```
 
-`lib/data-service.ts`, JSONL verisini yükler, arama indeksini hazırlar, Firestore görüntülenme sayılarını önbelleğe alır ve tüm arama fonksiyonlarını yönetir.
-## Dağıtım
+## Deployment
 
 ### Vercel
 
-1. Depoyu Vercel’e bağlayın.
-2. Environment variable’ları Vercel panelinde tanımlayın (`FIREBASE_*`, `DATA_FILE`).
-3. Deploy sırasında `npm run build` otomatik çalışır.
+1. Import repository
+2. Set `FIREBASE_*` and `DATA_FILE` environment variables
+3. Build command: `npm run build`
 
-### Self-Hosted
+### Self-hosted
 
 ```bash
 npm run build
-npm run start  # Varsayılan port 3000
+npm run start
 ```
 
-## Katkıda Bulunma
+If port `3000` is already in use:
 
-- Fork oluşturun ve yeni bir branch açın (`feat/...`, `fix/...`).
-- Kod stiline uyun ve `npm run lint` komutunu çalıştırın.
-- PR açmadan önce `npm run build` ile derlemeyi doğrulayın.
-- Açıklayıcı commit mesajları kullanın.
+```bash
+npx next start -p 3010
+```
 
-## Lisans ve İletişim
+## License
 
-- **Lisans**: MIT
-- **E-posta**: info@fetvabul.com
-- **Web**: https://fetvabul.com
-- **GitHub**: https://github.com/mtgsoftworks/FetvaBul
+MIT
+
+## Contact
+
+- Email: info@fetvabul.com
+- Web: https://fetvabul.com
+- GitHub: https://github.com/mtgsoftworks/FetvaBul

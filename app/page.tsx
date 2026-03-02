@@ -1,24 +1,13 @@
-<<<<<<< HEAD
 export const revalidate = 300;
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Search, ShieldCheck } from 'lucide-react';
-=======
-export const dynamic = 'force-dynamic';
-
-import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowRight, Search } from 'lucide-react';
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { DataService } from '@/lib/data-service';
 import { getCategoryIconComponent } from '@/lib/category-icons';
-<<<<<<< HEAD
 import { HomepageViewTracker } from '@/components/layout/HomepageViewTracker';
-=======
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 
 const CATEGORY_ARTWORK: Record<string, string> = {
   Prayer: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)',
@@ -42,7 +31,6 @@ const FALLBACK_ART = [
   'linear-gradient(135deg, #ede7f6, #d1c4e9)',
 ];
 
-<<<<<<< HEAD
 function toTimestamp(value?: string | Date): number {
   if (!value) return 0;
   const d = value instanceof Date ? value : new Date(value);
@@ -56,19 +44,10 @@ function formatDate(value?: string | Date): string {
   return new Date(ts).toLocaleDateString('tr-TR', { dateStyle: 'long' });
 }
 
-=======
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 async function getHomepageData() {
   const dataService = DataService.getInstance();
   await dataService.initialize();
 
-<<<<<<< HEAD
-=======
-  await dataService.incrementHomepageViews().catch((error) => {
-    console.error('Failed to increment homepage view count:', error);
-  });
-
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   const [stats, categories, allFatwas, popularFatwas] = await Promise.all([
     dataService.getStats(),
     dataService.getAllCategories(),
@@ -83,21 +62,12 @@ async function getHomepageData() {
 
   const recentFatwas = allFatwas
     .slice()
-<<<<<<< HEAD
     .sort((a, b) => toTimestamp(b.createdAt ?? b.updatedAt) - toTimestamp(a.createdAt ?? a.updatedAt))
-=======
-    .sort((a, b) => {
-      const dateA = new Date(a.createdAt ?? a.updatedAt ?? 0).getTime();
-      const dateB = new Date(b.createdAt ?? b.updatedAt ?? 0).getTime();
-      return dateB - dateA;
-    })
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     .slice(0, 4);
 
   const popularQuestions = popularFatwas.map((fetva) => ({
     id: fetva.id,
     question: fetva.question,
-<<<<<<< HEAD
     source: fetva.source?.trim() || 'Kaynak belirtilmedi',
     date: fetva.date ?? fetva.createdAt,
   }));
@@ -109,35 +79,21 @@ async function getHomepageData() {
     return toTimestamp(candidate) > toTimestamp(latest) ? candidate : latest;
   }, undefined);
 
-=======
-    asker: fetva.source,
-    date: fetva.date ?? fetva.createdAt,
-  }));
-
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   return {
     stats,
     popularCategories,
     recentFatwas,
     popularQuestions,
-<<<<<<< HEAD
     latestUpdatedAt,
-=======
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   } as const;
 }
 
 function Hero({
   stats,
-<<<<<<< HEAD
   latestUpdatedAt,
 }: {
   stats: Awaited<ReturnType<typeof getHomepageData>>['stats'];
   latestUpdatedAt: Awaited<ReturnType<typeof getHomepageData>>['latestUpdatedAt'];
-=======
-}: {
-  stats: Awaited<ReturnType<typeof getHomepageData>>['stats'];
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 }) {
   const formatted = {
     fatwas: (stats?.totalFatwas ?? 0).toLocaleString('tr-TR'),
@@ -156,7 +112,6 @@ function Hero({
           Sorularınıza güvenilir fetvalarla cevap bulun
         </h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-<<<<<<< HEAD
           Uzman hocalar tarafından hazırlanan binlerce fetva içinde arama yapın, sık sorulan soruları keşfedin ve
           İslami konularda hızlıca rehberlik alın.
         </p>
@@ -169,11 +124,6 @@ function Hero({
           </span>
         </div>
 
-=======
-          Uzman hocalar tarafından hazırlanan binlerce fetva içinde arama yapın, sık sorulan soruları keşfedin ve İslami konularda hızlıca rehberlik alın.
-        </p>
-
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         <form action="/arama" className="mt-8 w-full max-w-2xl">
           <label htmlFor="hero-search" className="sr-only">
             Fetva ara
@@ -230,12 +180,8 @@ function FeaturedCategories({
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">Kategoriler</span>
         <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Öne çıkan konular</h2>
         <p className="max-w-3xl text-base leading-relaxed text-muted-foreground sm:mx-auto">
-<<<<<<< HEAD
           İbadet, muamelat, aile hayatı ve daha fazlası. İhtiyacınız olan fetvayı hızlıca bulmak için popüler
           kategorileri keşfedin.
-=======
-          İbadet, muamelat, aile hayatı ve daha fazlası. İhtiyacınız olan fetvayı hızlıca bulmak için popüler kategorileri keşfedin.
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         </p>
       </div>
 
@@ -268,17 +214,10 @@ function FeaturedCategories({
                 )}
               </div>
               <div className="space-y-2">
-<<<<<<< HEAD
                 <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
                   {category.name}
                 </h3>
                 <p className="line-clamp-2 text-sm text-muted-foreground">
-=======
-                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-sm text-muted-foreground line-clamp-2">
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
                   {category.description ?? 'Konuyu keşfetmeye başlayın.'}
                 </p>
               </div>
@@ -321,11 +260,7 @@ function RecentFatwas({
                 <div className="hidden h-20 w-28 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary/10 to-primary/30 md:block" />
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-<<<<<<< HEAD
                     <span>{formatDate(item.createdAt ?? item.updatedAt)}</span>
-=======
-                    <span>{item.createdAt ? new Date(item.createdAt).toLocaleDateString('tr-TR') : 'Tarih belirtilmedi'}</span>
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
                     <span className="hidden md:inline">•</span>
                     <span>{(item.views ?? 0).toLocaleString('tr-TR')} görüntülenme</span>
                   </div>
@@ -385,17 +320,9 @@ function PopularQuestions({
                 #{index + 1}
               </span>
               <div className="space-y-1">
-<<<<<<< HEAD
                 <h3 className="text-base font-semibold text-foreground group-hover:text-primary">{question.question}</h3>
                 <p className="text-sm text-muted-foreground">
                   Kaynak: {question.source} • {formatDate(question.date)}
-=======
-                <h3 className="text-base font-semibold text-foreground group-hover:text-primary">
-                  {question.question}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {question.asker ?? 'Anonim'} • {question.date ? new Date(question.date).toLocaleDateString('tr-TR') : 'Tarih belirtilmedi'}
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
                 </p>
               </div>
             </div>
@@ -412,16 +339,10 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-<<<<<<< HEAD
       <HomepageViewTracker />
       <Header />
       <main className="flex flex-col gap-0">
         <Hero stats={data.stats} latestUpdatedAt={data.latestUpdatedAt} />
-=======
-      <Header />
-      <main className="flex flex-col gap-0">
-        <Hero stats={data.stats} />
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
         <FeaturedCategories categories={data.popularCategories} />
         <RecentFatwas fatwas={data.recentFatwas} />
         <PopularQuestions questions={data.popularQuestions} />
@@ -429,8 +350,4 @@ export default async function Home() {
       <Footer />
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f

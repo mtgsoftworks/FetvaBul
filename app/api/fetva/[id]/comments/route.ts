@@ -18,7 +18,6 @@ const COLLECTION = 'fetvaInteractions';
 const MAX_NAME_LENGTH = 80;
 const MAX_MESSAGE_LENGTH = 2000;
 
-<<<<<<< HEAD
 interface FirestoreTimestampLike {
   toDate?: () => Date;
   seconds?: number;
@@ -30,28 +29,17 @@ interface CommentDocData {
   createdAt?: FirestoreTimestampLike;
 }
 
-=======
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 function getInteractionDocRef(fetvaId: string) {
   return doc(db, COLLECTION, fetvaId);
 }
 
 function serializeComment(docSnap: Awaited<ReturnType<typeof getDoc>>) {
-<<<<<<< HEAD
   const data = docSnap.data() as CommentDocData | undefined;
   if (!data) return null;
 
   let createdAt: string | null = null;
   const rawCreatedAt = data.createdAt;
   if (typeof rawCreatedAt?.toDate === 'function') {
-=======
-  const data = docSnap.data() as Record<string, any> | undefined;
-  if (!data) return null;
-
-  let createdAt: string | null = null;
-  const rawCreatedAt = data.createdAt as any;
-  if (rawCreatedAt?.toDate) {
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     createdAt = rawCreatedAt.toDate().toISOString();
   } else if (typeof rawCreatedAt?.seconds === 'number') {
     createdAt = new Date(rawCreatedAt.seconds * 1000).toISOString();

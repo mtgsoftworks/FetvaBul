@@ -11,12 +11,7 @@ async function run() {
       return;
     }
 
-<<<<<<< HEAD
     const nextBuildResult = await runCommand('npx', ['next', 'build']);
-=======
-    const env = { ...process.env, NEXT_TYPESCRIPT_CHECK: 'false' };
-    const nextBuildResult = await runCommand('npx', ['next', 'build'], env);
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     if (!nextBuildResult) {
       process.exitCode = 1;
     }

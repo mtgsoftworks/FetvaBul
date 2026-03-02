@@ -1,6 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
-<<<<<<< HEAD
 import {
   getFirestore,
   doc,
@@ -22,27 +21,6 @@ const firebaseConfig = {
   appId: '1:964601180247:web:3b22acfb440882ea607312',
   // measurementId is optional in Firebase JS SDK v7.20.0+
   measurementId: 'G-M9S8756XS8',
-=======
-import { getFirestore, doc, getDoc, updateDoc, increment, setDoc, serverTimestamp } from 'firebase/firestore';
-
-function getEnv(name: string): string {
-  const value = process.env[name];
-  if (value && value.trim()) {
-    return value;
-  }
-  throw new Error(`Missing environment variable "${name}" required for Firebase configuration.`);
-}
-
-const firebaseConfig = {
-  apiKey: getEnv('FIREBASE_API_KEY'),
-  authDomain: getEnv('FIREBASE_AUTH_DOMAIN'),
-  projectId: getEnv('FIREBASE_PROJECT_ID'),
-  storageBucket: getEnv('FIREBASE_STORAGE_BUCKET'),
-  messagingSenderId: getEnv('FIREBASE_MESSAGING_SENDER_ID'),
-  appId: getEnv('FIREBASE_APP_ID'),
-  // measurementId is optional in Firebase JS SDK
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
@@ -101,7 +79,6 @@ export async function getViewCount(fetvaId: string): Promise<number> {
   }
 }
 
-<<<<<<< HEAD
 export async function getAllViewCounts(): Promise<Map<string, number>> {
   try {
     const snapshot = await getDocs(collection(db, 'fetvas'));
@@ -120,8 +97,6 @@ export async function getAllViewCounts(): Promise<Map<string, number>> {
   }
 }
 
-=======
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
 export async function incrementSiteViewCount(): Promise<number> {
   try {
     const siteStatsSnapshot = await getDoc(siteStatsDoc);

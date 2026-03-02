@@ -19,18 +19,12 @@ const CONTACT_POINTS = [
   {
     icon: Phone,
     title: 'Telefon',
-<<<<<<< HEAD
     description: 'İletişim hattı',
     details: ['0544 175 71 51'],
-=======
-    description: 'Hafta içi 09:00-18:00 arası ulaşabilirsiniz',
-    details: ['+90 212 555 0123'],
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   },
   {
     icon: MapPin,
     title: 'Adres',
-<<<<<<< HEAD
     description: 'Niğde Merkez (NİKEM)',
     details: [
       'NİĞDE İLİM KÜLTÜR EĞİTİM MERKEZİ',
@@ -51,16 +45,6 @@ const CONTACT_POINTS = [
       'Cumartesi: 09:00–17:00, 22:00–00:00',
       'Pazar: 00:00–17:00',
     ],
-=======
-    description: 'Merkez ofisimiz',
-    details: ['Fatih, İstanbul', 'Detaylı adres için randevu iletniz'],
-  },
-  {
-    icon: Clock,
-    title: 'Yanıt Süresi',
-    description: 'E-posta taleplerini 24 saat içinde yanıtlamaya çalışıyoruz.',
-    details: [],
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
   },
   {
     icon: MessageCircle,

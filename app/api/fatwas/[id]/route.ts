@@ -30,12 +30,6 @@ export async function GET(
       );
     }
 
-<<<<<<< HEAD
-=======
-    // Increment view count
-    await dataService.incrementViews(id);
-
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
     // Get related fatwas (using similar questions functionality)
     const relatedFatwas = await dataService.findSimilarQuestions(fatwa.question, 5);
 
@@ -60,8 +54,4 @@ export async function GET(
       { status: 500 }
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 34d7bb9060bc9befb4eabc47f323d49be6d3478f
