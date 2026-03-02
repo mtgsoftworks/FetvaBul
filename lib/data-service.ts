@@ -1,0 +1,1029 @@
+import { createReadStream, promises as fs } from 'fs';
+import path from 'path';
+import * as readline from 'readline';
+import { createHash } from 'crypto';
+import { SearchIndex, TurkishNormalizer } from './search-index';
+import {
+  incrementViewCount,
+  getViewCount,
+  getAllViewCounts,
+  incrementSiteViewCount,
+  getSiteViewCount,
+  incrementSearchCount,
+  getSearchCount,
+} from './firebase';
+import {
+  RawFetvaData,
+  DataServiceError,
+  isValidRawFetvaData,
+  createCategorySlug,
+  SiteStats,
+  InternalSearchOptions,
+  InternalSearchResult,
+  Fetva,
+  Category
+} from '@/types';
+
+const DATA_FILE_NAME = 'consolidated_fetvas.jsonl';
+
+type RawFetvaRecord = RawFetvaData & Record<string, unknown>;
+
+interface AggregatesSnapshot {
+  viewById: Map<string, number>;
+  totalViews: number;
+  popularIds: string[];
+  homepageViews: number;
+  totalSearches: number;
+  expiresAt: number;
+}
+
+export class DataService {
+  private static instance: DataService;
+
+  private isInitialized = false;
+  private initializePromise?: Promise<void>;
+
+  private readonly dataFilePath = (() => {
+    const envPath = process.env.DATA_FILE;
+    if (envPath && typeof envPath === 'string' && envPath.trim()) {
+      const p = envPath.trim();
+      return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+    }
+    return path.join(process.cwd(), 'data', DATA_FILE_NAME);
+  })();
+
+  private fetvas: Fetva[] = [];
+  private fetvaById: Map<string, Fetva> = new Map();
+  private categories: Category[] = [];
+  private categoryBySlug: Map<string, Category> = new Map();
+  private keywordIndex: Map<string, Set<string>> = new Map();
+  private keywordFrequency: Map<string, number> = new Map();
+  private searchIndex = new SearchIndex();
+  private viewsOverrides: Map<string, number> = new Map();
+  private viewCountCache: Map<string, { value: number; expiresAt: number }> = new Map();
+  private readonly VIEW_CACHE_TTL_MS = 60 * 1000; // 1 dakika
+  private readonly enableRealtimeViews = process.env.ENABLE_REALTIME_VIEWS !== 'false';
+  private aggregatesSnapshot?: AggregatesSnapshot;
+  private readonly AGGREGATES_TTL_MS = 60 * 1000; // 1 dakika
+  
+  // Arama önbelleği
+  private searchCache: Map<string, { results: InternalSearchResult[]; total: number; timestamp: number }> = new Map();
+  private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika
+  private fatwaCache: Map<string, { data: Fetva[]; expiresAt: number }> = new Map();
+  private readonly DATA_CACHE_TTL_MS = 2 * 60 * 1000; // 2 dakika
+
+  private constructor() {}
+
+  public static getInstance(): DataService {
+    const globalStore = globalThis as typeof globalThis & {
+      __dataServiceInstance?: DataService;
+    };
+
+    if (!globalStore.__dataServiceInstance) {
+      globalStore.__dataServiceInstance = new DataService();
+    }
+
+    DataService.instance = globalStore.__dataServiceInstance;
+    return DataService.instance;
+  }
+
+  public async initialize(): Promise<void> {
+    const globalStore = globalThis as typeof globalThis & {
+      __dataServiceInitPromise?: Promise<void>;
+      __dataServiceInitialized?: boolean;
+    };
+
+    if (this.isInitialized || globalStore.__dataServiceInitialized) {
+      this.isInitialized = true;
+      return;
+    }
+
+    const existingPromise = this.initializePromise ?? globalStore.__dataServiceInitPromise;
+    if (existingPromise) {
+      await existingPromise;
+      this.isInitialized = true;
+      globalStore.__dataServiceInitialized = true;
+      return;
+    }
+
+    this.initializePromise = this.loadDataFromFile()
+      .then(() => {
+        this.isInitialized = true;
+        globalStore.__dataServiceInitialized = true;
+      })
+      .catch(error => {
+        this.isInitialized = false;
+        this.initializePromise = undefined;
+        globalStore.__dataServiceInitPromise = undefined;
+        globalStore.__dataServiceInitialized = false;
+
+        throw error instanceof DataServiceError
+          ? error
+          : new DataServiceError(
+              'INITIALIZATION_FAILED',
+              `Failed to initialize data service: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              500
+            );
+      });
+
+    globalStore.__dataServiceInitPromise = this.initializePromise;
+
+    await this.initializePromise;
+  }
+
+  public async search(options: InternalSearchOptions): Promise<InternalSearchResult[]> {
+    const { results } = await this.searchWithTotal(options);
+    return results;
+  }
+
+  public async searchWithTotal(options: InternalSearchOptions): Promise<{ results: InternalSearchResult[]; total: number }> {
+    this.ensureInitialized();
+
+    const {
+      query,
+      category,
+      sortBy = 'relevance',
+      limit = 20,
+      offset = 0,
+      minScore = 0.1
+    } = options;
+
+    const cacheKey = `${query.trim().toLowerCase()}-${category || ''}-${sortBy}-${limit}-${offset}-${minScore}`;
+    const cached = this.searchCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
+      return {
+        results: cached.results,
+        total: cached.total,
+      };
+    }
+
+    if (!query || query.trim().length < 2) {
+      const plain = await this.getAllFatwasForSearchWithTotal({ ...options, limit, offset, sortBy });
+      this.searchCache.set(cacheKey, {
+        results: plain.results,
+        total: plain.total,
+        timestamp: Date.now(),
+      });
+      return plain;
+    }
+
+    try {
+      const aggregates = await this.getAggregates();
+      const maxResults = Math.max(this.fetvas.length, limit + offset, 500);
+      const normalizedCategory = category?.trim() || '';
+
+      const rawMatches = this.searchIndex.search(query, {
+        fuzzy: true,
+        stemming: true,
+        maxResults,
+        minScore,
+        maxTermsToProcess: 10,
+        maxMatchesPerTerm: this.fetvas.length,
+      });
+
+      const baseResults: InternalSearchResult[] = [];
+
+      for (const match of rawMatches) {
+        const fetva = this.fetvaById.get(match.documentId);
+        if (!fetva) {
+          continue;
+        }
+
+        if (normalizedCategory && !fetva.categories.includes(normalizedCategory)) {
+          continue;
+        }
+
+        baseResults.push({
+          fetva: await this.withRuntimeViews(fetva, aggregates.viewById),
+          score: match.score,
+          matchedTerms: match.matchedTerms,
+        });
+      }
+
+      const sorted = await this.sortResults(baseResults, sortBy, aggregates.viewById);
+      const total = sorted.length;
+      const paged = sorted.slice(offset, offset + limit);
+
+      const results = paged.map((item) => ({
+        ...item,
+        highlightedQuestion: this.highlightText(item.fetva.question, item.matchedTerms),
+        highlightedAnswer: this.highlightText(item.fetva.answer, item.matchedTerms),
+      }));
+
+      this.searchCache.set(cacheKey, {
+        results,
+        total,
+        timestamp: Date.now(),
+      });
+
+      return { results, total };
+    } catch (error) {
+      console.error('Search error:', error);
+      throw new DataServiceError(
+        'SEARCH_ERROR',
+        `Search failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        500
+      );
+    }
+  }
+
+  public async searchByKeywords(
+    keywords: string[],
+    options: Omit<InternalSearchOptions, 'query'> = {}
+  ): Promise<InternalSearchResult[]> {
+    this.ensureInitialized();
+
+    const { limit = 20, offset = 0, sortBy = 'views', category } = options;
+
+    try {
+      const aggregates = await this.getAggregates();
+      const normalizedKeywords = Array.from(
+        new Set(
+          keywords
+            .map(keyword => this.normalizeKeyword(keyword))
+            .filter((keyword): keyword is string => Boolean(keyword))
+        )
+      );
+
+      if (normalizedKeywords.length === 0) {
+        return [];
+      }
+
+      const matchedIds = new Set<string>();
+
+      for (const keyword of normalizedKeywords) {
+        const ids = this.keywordIndex.get(keyword);
+        ids?.forEach(id => matchedIds.add(id));
+      }
+
+      const results: InternalSearchResult[] = [];
+
+      for (const [id, fetva] of Array.from(this.fetvaById.entries())) {
+        if (!matchedIds.has(id)) {
+          continue;
+        }
+
+        if (category && category.trim() && !fetva.categories.includes(category)) {
+          continue;
+        }
+
+        results.push({
+          fetva: await this.withRuntimeViews(fetva, aggregates.viewById),
+          score: normalizedKeywords.length,
+          matchedTerms: normalizedKeywords,
+          highlightedQuestion: this.highlightText(fetva.question, normalizedKeywords),
+          highlightedAnswer: this.highlightText(fetva.answer, normalizedKeywords)
+        });
+      }
+
+      const sorted = await this.sortResults(results, sortBy, aggregates.viewById);
+      return sorted.slice(offset, offset + limit);
+    } catch (error) {
+      console.error('Keyword search error:', error);
+      throw new DataServiceError(
+        'KEYWORD_SEARCH_ERROR',
+        `Keyword search failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        500
+      );
+    }
+  }
+
+  public async findSimilarQuestions(question: string, limit: number = 5): Promise<Fetva[]> {
+    this.ensureInitialized();
+
+    const trimmedQuestion = question.trim();
+    if (!trimmedQuestion) {
+      return this.getPopularFatwas(limit);
+    }
+
+    try {
+      const results = await this.search({ query: trimmedQuestion, limit: limit * 2, sortBy: 'relevance' });
+      const unique: Fetva[] = [];
+      const seen = new Set<string>();
+
+      for (const result of results) {
+        if (seen.has(result.fetva.id)) {
+          continue;
+        }
+        seen.add(result.fetva.id);
+        unique.push(result.fetva);
+        if (unique.length >= limit) {
+          break;
+        }
+      }
+
+      return unique.length > 0 ? unique : this.getPopularFatwas(limit);
+    } catch (error) {
+      console.error('Similar questions error:', error);
+      return this.getPopularFatwas(limit);
+    }
+  }
+
+  public async getAutocompleteSuggestions(query: string, limit: number = 10): Promise<string[]> {
+    this.ensureInitialized();
+
+    const normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.length < 2) {
+      return [];
+    }
+
+    try {
+      const suggestions = new Set<string>();
+
+      for (const fetva of this.fetvas) {
+        if (fetva.question.toLowerCase().startsWith(normalizedQuery)) {
+          suggestions.add(fetva.question);
+          if (suggestions.size >= limit) {
+            break;
+          }
+        }
+      }
+
+      if (suggestions.size < limit) {
+        const keywordSuggestions = this.searchIndex.getSuggestions(normalizedQuery, limit * 2);
+        keywordSuggestions.forEach(suggestion => {
+          if (suggestions.size < limit) {
+            suggestions.add(suggestion);
+          }
+        });
+      }
+
+      if (suggestions.size < limit) {
+        for (const [keyword] of Array.from(this.keywordFrequency.entries()).sort((a, b) => b[1] - a[1])) {
+          if (keyword.startsWith(normalizedQuery)) {
+            suggestions.add(keyword);
+          }
+          if (suggestions.size >= limit) {
+            break;
+          }
+        }
+      }
+
+      return Array.from(suggestions).slice(0, limit);
+    } catch (error) {
+      console.error('Autocomplete error:', error);
+      return [];
+    }
+  }
+
+  public async getFetvaById(id: string): Promise<Fetva | null> {
+    this.ensureInitialized();
+
+    const fetva = this.fetvaById.get(id);
+    return fetva ? await this.withRuntimeViews(fetva) : null;
+  }
+
+  public async getAllFatwas(): Promise<Fetva[]> {
+    this.ensureInitialized();
+    const cacheKey = 'all';
+    const cached = this.fatwaCache.get(cacheKey);
+    const now = Date.now();
+    if (cached && cached.expiresAt > now) {
+      return cached.data;
+    }
+
+    const aggregates = await this.getAggregates();
+    const fetvasWithViews = this.fetvas.map((fetva) => ({
+      ...fetva,
+      views: aggregates.viewById.get(fetva.id) ?? fetva.views,
+    }));
+
+    this.fatwaCache.set(cacheKey, {
+      data: fetvasWithViews,
+      expiresAt: now + this.DATA_CACHE_TTL_MS,
+    });
+
+    return fetvasWithViews;
+  }
+
+  public async getFatwasByCategory(categoryName: string): Promise<Fetva[]> {
+    this.ensureInitialized();
+    const aggregates = await this.getAggregates();
+    return this.fetvas
+      .filter((fetva) => fetva.categories.includes(categoryName))
+      .map((fetva) => ({
+        ...fetva,
+        views: aggregates.viewById.get(fetva.id) ?? fetva.views,
+      }));
+  }
+
+  public async getAllCategories(): Promise<Category[]> {
+    this.ensureInitialized();
+    return this.categories;
+  }
+
+  public async getCategoryBySlug(slug: string): Promise<Category | null> {
+    this.ensureInitialized();
+    return this.categoryBySlug.get(slug) ?? null;
+  }
+
+  public async getPopularFatwas(limit: number = 10): Promise<Fetva[]> {
+    this.ensureInitialized();
+    const aggregates = await this.getAggregates();
+    const ids = aggregates.popularIds.slice(0, limit);
+
+    return ids
+      .map((id) => this.fetvaById.get(id))
+      .filter((fetva): fetva is Fetva => Boolean(fetva))
+      .map((fetva) => ({
+        ...fetva,
+        views: aggregates.viewById.get(fetva.id) ?? fetva.views,
+      }));
+  }
+
+  private updateLocalViewCount(id: string, views: number) {
+    const record = this.fetvaById.get(id);
+    if (record) {
+      record.views = views;
+    }
+
+    const index = this.fetvas.findIndex(f => f.id === id);
+    if (index >= 0) {
+      this.fetvas[index].views = views;
+    }
+  }
+
+  public async incrementViews(id: string): Promise<void> {
+    this.ensureInitialized();
+
+    try {
+      if (this.enableRealtimeViews) {
+        // Firebase Firestore'da görüntüleme sayısını artır
+        const latest = await incrementViewCount(id);
+        this.viewCountCache.delete(id);
+        if (typeof latest === 'number' && Number.isFinite(latest)) {
+          this.updateLocalViewCount(id, latest);
+        }
+        this.invalidateAggregates();
+        return;
+      }
+
+      const current = this.viewsOverrides.get(id) ?? 0;
+      this.viewsOverrides.set(id, current + 1);
+      const baseViews = this.fetvaById.get(id)?.views ?? 0;
+      this.updateLocalViewCount(id, baseViews + current + 1);
+      this.viewCountCache.delete(id);
+      this.invalidateAggregates();
+    } catch (error) {
+      console.error('Failed to increment view count in Firestore:', error);
+      // Hata durumunda eski yönteme geri dön (geçici çözüm)
+      const current = this.viewsOverrides.get(id) ?? 0;
+      this.viewsOverrides.set(id, current + 1);
+      const baseViews = this.fetvaById.get(id)?.views ?? 0;
+      this.updateLocalViewCount(id, baseViews + current + 1);
+      this.viewCountCache.delete(id);
+      this.invalidateAggregates();
+    }
+  }
+
+  public async incrementHomepageViews(): Promise<number> {
+    this.ensureInitialized();
+
+    try {
+      const latest = await incrementSiteViewCount();
+      this.invalidateAggregates();
+      return latest;
+    } catch (error) {
+      console.error('Failed to increment site view count in Firestore:', error);
+      throw error instanceof DataServiceError
+        ? error
+        : new DataServiceError(
+            'SITE_VIEW_INCREMENT_FAILED',
+            error instanceof Error ? error.message : 'Unknown error',
+            500
+          );
+    }
+  }
+
+  public async getHomepageViewCount(): Promise<number> {
+    this.ensureInitialized();
+    const aggregates = await this.getAggregates();
+    return aggregates.homepageViews;
+  }
+
+  public async incrementSearches(): Promise<number> {
+    this.ensureInitialized();
+
+    try {
+      const latest = await incrementSearchCount();
+      this.invalidateAggregates();
+      return latest;
+    } catch (error) {
+      console.error('Failed to increment search count in Firestore:', error);
+      throw error instanceof DataServiceError
+        ? error
+        : new DataServiceError(
+            'SEARCH_COUNT_INCREMENT_FAILED',
+            error instanceof Error ? error.message : 'Unknown error',
+            500
+          );
+    }
+  }
+
+  public async getTotalSearches(): Promise<number> {
+    this.ensureInitialized();
+    const aggregates = await this.getAggregates();
+    return aggregates.totalSearches;
+  }
+
+  public async getStats(): Promise<SiteStats> {
+    this.ensureInitialized();
+
+    try {
+      const aggregates = await this.getAggregates();
+      const totalFatwas = this.fetvas.length;
+      const totalCategories = this.categories.length;
+      
+      const popularCategories = this.categories
+        .slice()
+        .sort((a, b) => b.fatwaCount - a.fatwaCount)
+        .slice(0, 5)
+        .map(category => category.name);
+
+      return {
+        totalFatwas,
+        totalCategories,
+        totalViews: aggregates.totalViews,
+        homepageViews: aggregates.homepageViews,
+        totalSearches: aggregates.totalSearches,
+        popularCategories
+      };
+    } catch (error) {
+      console.error('Get stats error:', error);
+      return {
+        totalFatwas: 0,
+        totalCategories: 0,
+        totalViews: 0,
+        homepageViews: 0,
+        totalSearches: 0,
+        popularCategories: []
+      };
+    }
+  }
+
+  public async getSearchStats() {
+    this.ensureInitialized();
+
+    const totalFatwas = this.fetvas.length;
+    const totalKeywords = Array.from(this.keywordFrequency.values()).reduce((sum, count) => sum + count, 0);
+    const averageKeywordsPerFatva = totalFatwas > 0 ? totalKeywords / totalFatwas : 0;
+    const mostCommonKeywords = Array.from(this.keywordFrequency.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([keyword, count]) => ({ keyword, count }));
+
+    return {
+      totalFatwas,
+      totalKeywords,
+      averageKeywordsPerFatva,
+      mostCommonKeywords
+    };
+  }
+
+  private invalidateAggregates(): void {
+    this.aggregatesSnapshot = undefined;
+    this.fatwaCache.clear();
+  }
+
+  private async getAggregates(forceRefresh = false): Promise<AggregatesSnapshot> {
+    const now = Date.now();
+    const cached = this.aggregatesSnapshot;
+    if (!forceRefresh && cached && cached.expiresAt > now) {
+      return cached;
+    }
+
+    const [realtimeViewCounts, homepageViews, totalSearches] = await Promise.all([
+      this.fetchRealtimeViewCounts(),
+      this.fetchHomepageViews(),
+      this.fetchTotalSearches(),
+    ]);
+
+    const viewById = new Map<string, number>();
+    let totalViews = 0;
+
+    for (const fetva of this.fetvas) {
+      const firestoreViews = realtimeViewCounts.get(fetva.id);
+      const overrides = this.viewsOverrides.get(fetva.id) ?? 0;
+      const baseViews = typeof firestoreViews === 'number' ? firestoreViews : fetva.views;
+      const mergedViews = baseViews + overrides;
+
+      viewById.set(fetva.id, mergedViews);
+      totalViews += mergedViews;
+    }
+
+    const popularIds = this.fetvas
+      .slice()
+      .sort((a, b) => {
+        const viewA = viewById.get(a.id) ?? a.views;
+        const viewB = viewById.get(b.id) ?? b.views;
+        return viewB - viewA || b.likes - a.likes;
+      })
+      .map((fetva) => fetva.id);
+
+    const snapshot: AggregatesSnapshot = {
+      viewById,
+      totalViews,
+      popularIds,
+      homepageViews,
+      totalSearches,
+      expiresAt: now + this.AGGREGATES_TTL_MS,
+    };
+
+    this.aggregatesSnapshot = snapshot;
+    this.primeViewCountCache(snapshot);
+
+    return snapshot;
+  }
+
+  private primeViewCountCache(snapshot: AggregatesSnapshot): void {
+    this.viewCountCache.clear();
+
+    const cacheExpiry = Math.min(snapshot.expiresAt, Date.now() + this.VIEW_CACHE_TTL_MS);
+    for (const [id, value] of Array.from(snapshot.viewById.entries())) {
+      this.viewCountCache.set(id, { value, expiresAt: cacheExpiry });
+    }
+  }
+
+  private async fetchRealtimeViewCounts(): Promise<Map<string, number>> {
+    if (!this.enableRealtimeViews) {
+      return new Map<string, number>();
+    }
+
+    try {
+      return await getAllViewCounts();
+    } catch (error) {
+      console.error('Failed to fetch realtime view counts:', error);
+      return new Map<string, number>();
+    }
+  }
+
+  private async fetchHomepageViews(): Promise<number> {
+    try {
+      const value = await getSiteViewCount();
+      return Number.isFinite(value) ? value : 0;
+    } catch (error) {
+      console.error('Failed to fetch site view count:', error);
+      return 0;
+    }
+  }
+
+  private async fetchTotalSearches(): Promise<number> {
+    try {
+      const value = await getSearchCount();
+      return Number.isFinite(value) ? value : 0;
+    } catch (error) {
+      console.error('Failed to fetch total searches:', error);
+      return 0;
+    }
+  }
+
+  private async loadDataFromFile(): Promise<void> {
+    let stats;
+    try {
+      stats = await fs.stat(this.dataFilePath);
+      if (!stats.isFile()) {
+        throw new Error('Path is not a file');
+      }
+    } catch (error) {
+      throw new DataServiceError(
+        'DATA_FILE_NOT_FOUND',
+        `Unable to access data file at ${this.dataFilePath}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        500
+      );
+    }
+
+    console.log(` Loading data from ${this.dataFilePath} (${stats.size} bytes)...`);
+
+    const fileStream = createReadStream(this.dataFilePath, { encoding: 'utf-8' });
+    const reader = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+
+    const fetvas: Fetva[] = [];
+    const fetvaById = new Map<string, Fetva>();
+    const keywordIndex = new Map<string, Set<string>>();
+    const keywordFrequency = new Map<string, number>();
+    const categoryCounts = new Map<string, number>();
+
+    let lineNumber = 0;
+
+    for await (const line of reader) {
+      lineNumber += 1;
+      const trimmed = line.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      let record: RawFetvaRecord;
+      try {
+        record = JSON.parse(trimmed);
+      } catch (error) {
+        throw new DataServiceError(
+          'DATA_PARSE_ERROR',
+          `Invalid JSON at line ${lineNumber}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          500
+        );
+      }
+
+      if (!isValidRawFetvaData(record)) {
+        console.warn(`[DataService] Skipping invalid record at line ${lineNumber}`);
+        continue;
+      }
+
+      const fetva = this.createFetvaFromRaw(record, lineNumber);
+      fetvas.push(fetva);
+      fetvaById.set(fetva.id, fetva);
+
+      fetva.categories.forEach(category => {
+        categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
+      });
+
+      fetva.searchKeywords?.forEach(keyword => {
+        const normalized = this.normalizeKeyword(keyword);
+        if (!normalized) {
+          return;
+        }
+
+        if (!keywordIndex.has(normalized)) {
+          keywordIndex.set(normalized, new Set());
+        }
+        keywordIndex.get(normalized)!.add(fetva.id);
+
+        keywordFrequency.set(normalized, (keywordFrequency.get(normalized) || 0) + 1);
+      });
+    }
+
+    if (fetvas.length === 0) {
+      throw new DataServiceError('DATA_EMPTY', 'No records found in data file', 500);
+    }
+
+    this.fetvas = fetvas;
+    this.fetvaById = fetvaById;
+    this.keywordIndex = keywordIndex;
+    this.keywordFrequency = keywordFrequency;
+    this.categories = this.buildCategories(categoryCounts);
+
+    const categoryBySlug = new Map<string, Category>();
+    this.categories.forEach(category => categoryBySlug.set(category.slug, category));
+    this.categoryBySlug = categoryBySlug;
+
+    this.viewsOverrides = new Map<string, number>();
+    this.searchIndex.buildIndex(this.fetvas);
+    this.searchCache.clear();
+    this.viewCountCache.clear();
+    this.invalidateAggregates();
+
+    console.log(` Loaded ${this.fetvas.length} fatwas across ${this.categories.length} categories.`);
+  }
+
+  private createFetvaFromRaw(raw: RawFetvaRecord, lineNumber: number): Fetva {
+    const id = typeof raw.id === 'string' && raw.id
+      ? raw.id
+      : typeof raw._id === 'string' && raw._id
+        ? raw._id
+        : this.generateStableId(raw, lineNumber);
+
+    const categories = Array.isArray(raw.categories)
+      ? raw.categories.map((category: unknown) => String(category).trim()).filter(Boolean)
+      : [];
+
+    const baseKeywords = Array.isArray(raw.searchKeywords)
+      ? raw.searchKeywords.map((keyword: unknown) => String(keyword).trim()).filter(Boolean)
+      : [];
+
+    const searchKeywords = baseKeywords.length > 0
+      ? Array.from(new Set(baseKeywords))
+      : TurkishNormalizer.extractKeywords(`${raw.question} ${raw.answer}`);
+
+    const views = typeof raw.views === 'number' && raw.views >= 0 ? raw.views : 0;
+    const likes = typeof raw.likes === 'number' && raw.likes >= 0 ? raw.likes : 0;
+
+    const createdAt = raw.createdAt ? new Date(raw.createdAt) : undefined;
+    const updatedAt = raw.updatedAt ? new Date(raw.updatedAt) : undefined;
+
+    return {
+      id,
+      q_in_file: raw.q_in_file,
+      question: raw.question,
+      answer: raw.answer,
+      categories,
+      source: typeof raw.source === 'string' ? raw.source : undefined,
+      date: typeof raw.date === 'string' ? raw.date : undefined,
+      views,
+      likes,
+      searchKeywords,
+      arabicText: typeof raw.arabicText === 'string' ? raw.arabicText : undefined,
+      references: Array.isArray(raw.references) ? raw.references.map((ref: unknown) => String(ref)) : undefined,
+      relatedFatwas: Array.isArray(raw.relatedFatwas) ? raw.relatedFatwas.map((ref: unknown) => String(ref)) : undefined,
+      createdAt: createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt : undefined,
+      updatedAt: updatedAt && !Number.isNaN(updatedAt.getTime()) ? updatedAt : undefined,
+      normalizedText: typeof raw.normalizedText === 'string' ? raw.normalizedText : undefined
+    };
+  }
+
+  private generateStableId(raw: RawFetvaRecord, lineNumber: number): string {
+    const base = `${raw.q_in_file ?? lineNumber}-${raw.question}`;
+    return createHash('sha1').update(base).digest('hex');
+  }
+
+  private buildCategories(counts: Map<string, number>): Category[] {
+    // Önceden tanımlanmış 11 ana kategori
+    const mainCategories = [
+      'Genel Sorular', 'Helal Gıda & Beslenme', 'İbadet', 'İnanç', 
+      'Aile Hukuku & Sosyal İlişkiler', 'Ahlak & Tasavvuf', 'Muamelat & Ekonomi', 
+      'Sağlık', 'Ölüm & Ahiret', 'İslam İlimleri', 'Mahremiyet & Tesettür'
+    ];
+    
+    // Ana kategorileri oluştur ve sayıları topla
+    const categoryMap = new Map<string, number>();
+    
+    // Önce ana kategorileri sıfır değerle ekle
+    mainCategories.forEach(cat => categoryMap.set(cat, 0));
+    
+    // Veri dosyasındaki kategorileri ana kategorilere eşleştir
+    for (const [name, count] of counts.entries()) {
+      const normalizedName = name.toLowerCase().trim();
+      
+      // Her ana kategori için eşleşme kontrolü yap
+      for (const mainCat of mainCategories) {
+        const mainCatLower = mainCat.toLowerCase();
+        
+        // Eğer kategori adı ana kategori adını içeriyorsa veya ana kategori adı kategori adını içeriyorsa
+        if (normalizedName.includes(mainCatLower) || mainCatLower.includes(normalizedName)) {
+          // Mevcut değere yeni sayıyı ekle
+          const currentCount = categoryMap.get(mainCat) || 0;
+          categoryMap.set(mainCat, currentCount + count);
+          break; // Eşleşme bulundu, diğer ana kategorileri kontrol etme
+        }
+      }
+    }
+    
+    // Sadece fetva içeren kategorileri al ve sırala
+    return Array.from(categoryMap.entries())
+      .filter(([_, count]) => count > 0) // Sadece fetva içeren kategorileri tut
+      .sort((a, b) => b[1] - a[1]) // Fetva sayısına göre azalan sırada sırala
+      .map(([name, count], index) => {
+        const slug = createCategorySlug(name);
+        return {
+          id: slug,
+          name,
+          slug,
+          order: index,
+          isActive: true,
+          fatwaCount: count
+        } as Category;
+      });
+  }
+
+  private async sortResults(
+    results: InternalSearchResult[],
+    sortBy: InternalSearchOptions['sortBy'],
+    viewById?: Map<string, number>
+  ): Promise<InternalSearchResult[]> {
+    switch (sortBy) {
+      case 'date':
+        return results.slice().sort((a, b) => {
+          const dateA = a.fetva.date ? new Date(a.fetva.date).getTime() : 0;
+          const dateB = b.fetva.date ? new Date(b.fetva.date).getTime() : 0;
+          return dateB - dateA;
+        });
+      case 'popular':
+      case 'views':
+        if (viewById) {
+          return results
+            .slice()
+            .sort((a, b) => (viewById.get(b.fetva.id) ?? b.fetva.views) - (viewById.get(a.fetva.id) ?? a.fetva.views));
+        }
+
+        const fallbackViews = await Promise.all(
+          results.map(async (result) => ({
+            result,
+            viewCount: await this.getViewCountCached(result.fetva.id, result.fetva.views),
+          }))
+        );
+
+        return fallbackViews
+          .sort((a, b) => b.viewCount - a.viewCount)
+          .map((item) => item.result);
+      case 'relevance':
+      default:
+        return results.slice().sort((a, b) => b.score - a.score);
+    }
+  }
+
+  private async withRuntimeViews(fetva: Fetva, viewById?: Map<string, number>): Promise<Fetva> {
+    const views = typeof viewById?.get(fetva.id) === 'number'
+      ? (viewById.get(fetva.id) as number)
+      : await this.getViewCountCached(fetva.id, fetva.views);
+    return { ...fetva, views };
+  }
+
+  private async getViewCountCached(id: string, fallback: number): Promise<number> {
+    const now = Date.now();
+    const cached = this.viewCountCache.get(id);
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
+    }
+
+    if (this.aggregatesSnapshot && this.aggregatesSnapshot.expiresAt > now) {
+      const aggregateValue = this.aggregatesSnapshot.viewById.get(id);
+      if (typeof aggregateValue === 'number') {
+        this.viewCountCache.set(id, { value: aggregateValue, expiresAt: now + this.VIEW_CACHE_TTL_MS });
+        return aggregateValue;
+      }
+    }
+
+    const value = await this.getViewCount(id, fallback);
+    this.viewCountCache.set(id, { value, expiresAt: now + this.VIEW_CACHE_TTL_MS });
+    return value;
+  }
+
+  private async getViewCount(id: string, fallback: number): Promise<number> {
+    if (!this.enableRealtimeViews) {
+      const overrides = this.viewsOverrides.get(id) ?? 0;
+      const baseViews = this.fetvaById.get(id)?.views ?? fallback;
+      return baseViews + overrides;
+    }
+
+    try {
+      // Önce Firebase Firestore'dan görüntüleme sayısını al
+      const firestoreViews = await getViewCount(id);
+      const overrides = this.viewsOverrides.get(id) ?? 0;
+      const baseViews = this.fetvaById.get(id)?.views ?? fallback;
+
+      const value = firestoreViews > 0 ? firestoreViews : baseViews + overrides;
+      return value;
+    } catch (error) {
+      console.error('Failed to get view count from Firestore:', error);
+      const overrides = this.viewsOverrides.get(id) ?? 0;
+      const baseViews = this.fetvaById.get(id)?.views ?? fallback;
+      return baseViews + overrides;
+    }
+  }
+
+  private normalizeKeyword(keyword: string): string {
+    return keyword.trim().toLowerCase();
+  }
+
+  private highlightText(text: string, terms: string[]): string {
+    const safeText = this.escapeHtml(text);
+    if (!terms.length) {
+      return safeText;
+    }
+
+    // Escape and de-duplicate terms; sort by length desc to prevent partial overrides
+    const uniqueTerms = Array.from(
+      new Set(terms.map(term => this.escapeRegExp(this.escapeHtml(term.trim()))).filter(Boolean))
+    ).sort((a, b) => b.length - a.length);
+    if (!uniqueTerms.length) {
+      return safeText;
+    }
+
+    try {
+      // Highlight prefixes to better align with stemmed matches: term + word-characters
+      const prefixPatterns = uniqueTerms.map(t => `${t}\\w*`);
+      const pattern = new RegExp(`(${prefixPatterns.join('|')})`, 'gi');
+      return safeText.replace(pattern, '<mark>$1</mark>');
+    } catch {
+      return safeText;
+    }
+  }
+
+  private escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private async getAllFatwasForSearchWithTotal(
+    options: InternalSearchOptions
+  ): Promise<{ results: InternalSearchResult[]; total: number }> {
+    const { category, sortBy = 'views', limit = 20, offset = 0 } = options;
+
+    const fetvas = await this.getAllFatwas();
+    const aggregates = await this.getAggregates();
+    const filtered = fetvas
+      .filter(fetva => (category ? fetva.categories.includes(category) : true))
+      .map(fetva => ({ fetva, score: 0, matchedTerms: [] }));
+
+    const sorted = await this.sortResults(filtered, sortBy, aggregates.viewById);
+    const total = sorted.length;
+    const paged = sorted.slice(offset, offset + limit);
+    return { results: paged, total };
+  }
+
+  private ensureInitialized(): void {
+    if (!this.isInitialized) {
+      throw new DataServiceError(
+        'SERVICE_NOT_INITIALIZED',
+        'DataService must be initialized before use',
+        500
+      );
+    }
+  }
+}

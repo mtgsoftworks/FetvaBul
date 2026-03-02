@@ -1,0 +1,12 @@
+<svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradZakat" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E3F2FD" />
+      <stop offset="100%" stop-color="#BBDEFB" />
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="32" fill="url(#gradZakat)" />
+  <path d="M100 125L160 70L220 125" stroke="#0D47A1" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M120 130H200V150H120z" fill="#1976D2" />
+  <path d="M148 120C148 108 160 100 160 88C160 100 172 108 172 120C172 132 160 140 160 152C160 140 148 132 148 120Z" fill="#0D47A1" />
+</svg>

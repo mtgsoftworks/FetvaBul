@@ -1,0 +1,12 @@
+<svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradFast" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE0B2" />
+      <stop offset="100%" stop-color="#FFCC80" />
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="32" fill="url(#gradFast)" />
+  <rect x="120" y="70" width="80" height="60" rx="12" stroke="#FF8F00" stroke-width="8" fill="none" />
+  <path d="M140 110H180" stroke="#FF8F00" stroke-width="8" stroke-linecap="round" />
+  <circle cx="160" cy="58" r="16" fill="#FFB300" />
+</svg>
