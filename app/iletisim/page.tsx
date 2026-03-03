@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react';
+﻿import { Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ContactForm } from '@/components/about/ContactForm';
@@ -14,7 +14,7 @@ const CONTACT_POINTS = [
     icon: Mail,
     title: 'E-posta',
     description: 'Genel sorular ve iş birlikleri',
-    details: ['destek@fetvabul.com', 'info@fetvabul.com'],
+    details: ['mtgsoftworks@gmail.com'],
   },
   {
     icon: Phone,
@@ -28,7 +28,7 @@ const CONTACT_POINTS = [
     description: 'Niğde Merkez (NİKEM)',
     details: [
       'NİĞDE İLİM KÜLTÜR EĞİTİM MERKEZİ',
-      'Adres: Selçuk, Deniz Sk. Emânet Apt No: 7/1, 51100 Niğde Merkez/Niğde',
+      'Adres: Selçuk, Deniz Sk. Emanet Apt No: 7/1, 51100 Niğde Merkez/Niğde',
       'Telefon: 0544 175 71 51',
     ],
   },
@@ -50,7 +50,7 @@ const CONTACT_POINTS = [
     icon: MessageCircle,
     title: 'Topluluk',
     description: 'Güncellemeleri takip etmek için sosyal medya hesaplarımıza katılın.',
-    details: ['twitter.com/fetvabul', 'instagram.com/fetvabul'],
+    details: ['https://www.youtube.com/@davetul_islam'],
   },
 ];
 
@@ -132,3 +132,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
+

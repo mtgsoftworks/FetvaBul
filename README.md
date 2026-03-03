@@ -123,6 +123,7 @@ MIT
 
 ## Contact
 
-- Email: info@fetvabul.com
+- Email: mtgsoftworks@gmail.com
 - Web: https://fetvabul.com
 - GitHub: https://github.com/mtgsoftworks/FetvaBul
+

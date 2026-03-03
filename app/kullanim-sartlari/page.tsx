@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -41,7 +41,7 @@ export default function KullanimSartlariPage() {
                 Bu platform, Niğde Merkez (NİKEM) NİĞDE İLİM KÜLTÜR EĞİTİM MERKEZİ tarafından yönetilmektedir.
               </p>
               <p className="text-muted-foreground">
-                Adres: Selçuk, Deniz Sk. Emânet Apt No: 7/1, 51100 Niğde Merkez/Niğde
+                Adres: Selçuk, Deniz Sk. Emanet Apt No: 7/1, 51100 Niğde Merkez/Niğde
                 <br />
                 Telefon: 0544 175 71 51
               </p>
@@ -94,15 +94,15 @@ export default function KullanimSartlariPage() {
               <h2 className="text-xl font-semibold text-foreground">İletişim</h2>
               <p className="text-muted-foreground">
                 Kullanım şartlarıyla ilgili sorularınız için bize{' '}
-                <a href="mailto:info@fetvabul.com" className="text-primary transition hover:underline">
-                  info@fetvabul.com
+                <a href="mailto:mtgsoftworks@gmail.com" className="text-primary transition hover:underline">
+                  mtgsoftworks@gmail.com
                 </a>{' '}
                 adresinden ulaşabilirsiniz.
               </p>
               <p className="text-muted-foreground">
                 Telefon: 0544 175 71 51
                 <br />
-                Adres: Selçuk, Deniz Sk. Emânet Apt No: 7/1, 51100 Niğde Merkez/Niğde
+                Adres: Selçuk, Deniz Sk. Emanet Apt No: 7/1, 51100 Niğde Merkez/Niğde
               </p>
             </div>
 
@@ -131,3 +131,5 @@ export default function KullanimSartlariPage() {
     </div>
   );
 }
+
+

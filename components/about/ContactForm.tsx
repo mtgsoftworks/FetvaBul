@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, FormEvent } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -122,7 +122,7 @@ export function ContactForm({
               name="email"
               type="email"
               required
-              placeholder="ornek@fetvabul.com"
+              placeholder="mtgsoftworks@gmail.com"
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -167,3 +167,4 @@ export function ContactForm({
     </div>
   );
 }
+

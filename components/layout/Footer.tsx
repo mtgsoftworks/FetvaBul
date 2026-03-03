@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
-import { BookOpen, Facebook, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
+import { BookOpen, Facebook, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -68,7 +68,7 @@ export function Footer() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Mail className="h-4 w-4" />
                 </span>
-                <span>info@fetvabul.com</span>
+                <span>mtgsoftworks@gmail.com</span>
               </li>
               <li className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -92,13 +92,13 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-3">
               <Link
-                href="https://twitter.com"
+                href="https://www.youtube.com/@davetul_islam"
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="Twitter"
+                aria-label="YouTube"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Twitter className="h-5 w-5" />
+                <Youtube className="h-5 w-5" />
               </Link>
               <Link
                 href="https://facebook.com"
@@ -108,15 +108,6 @@ export function Footer() {
                 rel="noopener noreferrer"
               >
                 <Facebook className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://instagram.com"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="Instagram"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Instagram className="h-5 w-5" />
               </Link>
             </div>
           </div>
@@ -144,3 +135,4 @@ export function Footer() {
     </footer>
   );
 }
+
