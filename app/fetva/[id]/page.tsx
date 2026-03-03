@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 
 export const revalidate = 300;
 
@@ -23,8 +23,20 @@ function formatDate(value?: string | Date | null) {
 }
 
 function extractParagraphs(answer: string) {
-  return answer
+  const normalized = answer.replace(/\r\n/g, '\n').trim();
+  if (!normalized) return [] as string[];
+
+  const blocks = normalized
     .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  if (blocks.length > 1) {
+    return blocks;
+  }
+
+  return normalized
+    .split(/\n/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 }
@@ -91,10 +103,7 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
       <Header />
       <main className="container mx-auto max-w-5xl px-4 py-12">
         <FetvaViewTracker id={fetva.id} />
-        <Link
-          href="/arama"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3"
-        >
+        <Link href="/arama" className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3">
           <ArrowLeft className="h-4 w-4" />
           Fetvalara geri dön
         </Link>
@@ -136,15 +145,15 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
             </div>
           </header>
 
-          <section className="space-y-6 text-lg leading-relaxed text-muted-foreground">
+          <section className="space-y-5 text-lg leading-relaxed text-muted-foreground">
             {paragraphs.length > 0 ? (
               paragraphs.map((paragraph, index) => (
-                <p key={index} className="text-foreground">
+                <p key={index} className="text-foreground leading-8">
                   {paragraph}
                 </p>
               ))
             ) : (
-              <p className="whitespace-pre-wrap text-foreground">{fetva.answer}</p>
+              <p className="whitespace-pre-wrap text-foreground leading-8">{fetva.answer}</p>
             )}
           </section>
 
