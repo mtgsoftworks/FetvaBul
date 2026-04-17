@@ -12,6 +12,8 @@ import { FetvaCard } from '@/components/cards/FetvaCard';
 import { Badge } from '@/components/ui/badge';
 import { FetvaEngagement } from '@/components/fetva/FetvaEngagement';
 import { FetvaViewTracker } from '@/components/fetva/FetvaViewTracker';
+import { FetvaComments } from '@/components/fetva/FetvaComments';
+import { FetvaStructuredData } from '@/components/seo/StructuredData';
 
 function formatDate(value?: string | Date | null) {
   if (!value) return null;
@@ -55,7 +57,7 @@ async function getFetvaDetail(id: string) {
     return null;
   }
 
-  const relatedFatwas = await dataService.findSimilarQuestions(fetva.question, 3);
+  const relatedFatwas = await dataService.findSimilarQuestions(fetva.question, 3, fetva.id);
 
   return { fetva, relatedFatwas } as const;
 }
@@ -97,12 +99,26 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
   const primaryCategory = fetva.categories?.[0] ?? 'Genel';
   const shareBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fetvabul.com';
   const shareUrl = `${shareBase}/fetva/${fetva.id}`;
+  const structuredDateRaw = fetva.updatedAt ?? fetva.createdAt ?? fetva.date;
+  const structuredDate = structuredDateRaw
+    ? (structuredDateRaw instanceof Date ? structuredDateRaw.toISOString() : structuredDateRaw)
+    : undefined;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto max-w-5xl px-4 py-12">
         <FetvaViewTracker id={fetva.id} />
+        <FetvaStructuredData
+          fetva={{
+            id: fetva.id,
+            question: fetva.question,
+            answer: fetva.answer,
+            categories: fetva.categories ?? [],
+            source: sourceLabel,
+            date: structuredDate,
+          }}
+        />
         <Link href="/arama" className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3">
           <ArrowLeft className="h-4 w-4" />
           Fetvalara geri dön
@@ -165,6 +181,8 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
             shareUrl={shareUrl}
             question={fetva.question}
           />
+
+          <FetvaComments fetvaId={fetva.id} />
         </article>
 
         {relatedFatwas.length > 0 && (

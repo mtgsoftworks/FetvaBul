@@ -1,5 +1,8 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { DataService } from '@/lib/data-service';
+
+export const revalidate = 300;
 
 export const metadata = {
   title: 'Hakkımızda | FetvaBul',
@@ -7,12 +10,32 @@ export const metadata = {
     'FetvaBul platformunun misyonu, vizyonu, değerleri ve ekibi hakkında bilgi edinin. İslami sorularınıza güvenilir cevaplar sunuyoruz.',
 };
 
-const STATS: { value: string; label: string }[] = [
-  { value: '12.000+', label: 'Fetva Kaydı' },
-  { value: '11', label: 'Ana Kategori' },
-  { value: '237K+', label: 'Anahtar Kelime Dizini' },
-  { value: '%100', label: 'Mobil Uyumluluk' },
-];
+const compactFormatter = new Intl.NumberFormat('tr-TR', {
+  notation: 'compact',
+  compactDisplay: 'short',
+  maximumFractionDigits: 1,
+});
+
+function formatNumber(value: number): string {
+  return compactFormatter.format(Math.max(0, value));
+}
+
+async function getAboutStats() {
+  const dataService = DataService.getInstance();
+  await dataService.initialize();
+
+  const [stats, searchStats] = await Promise.all([
+    dataService.getStats(),
+    dataService.getSearchStats(),
+  ]);
+
+  return [
+    { value: formatNumber(stats.totalFatwas), label: 'Fetva Kaydı' },
+    { value: stats.totalCategories.toLocaleString('tr-TR'), label: 'Ana Kategori' },
+    { value: formatNumber(searchStats.totalKeywords), label: 'Anahtar Kelime Dizini' },
+    { value: '%100', label: 'Mobil Uyumluluk' },
+  ] as const;
+}
 
 const TEAM: { name: string; role: string; bio: string }[] = [
   {
@@ -50,7 +73,9 @@ const JOURNEY: { year: string; title: string; description: string }[] = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const stats = await getAboutStats();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -86,7 +111,7 @@ export default function AboutPage() {
         </section>
 
         <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {STATS.map((stat) => (
+          {stats.map((stat) => (
             <div
               key={stat.label}
               className="rounded-3xl border border-border/30 bg-background/80 p-6 text-center shadow-sm backdrop-blur"

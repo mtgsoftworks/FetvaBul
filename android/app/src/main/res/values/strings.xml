@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FetvaBul</string>
+    <string name="title_activity_main">FetvaBul</string>
+    <string name="package_name">com.mtgsoftworks.fetvabulapp</string>
+    <string name="custom_url_scheme">com.mtgsoftworks.fetvabulapp</string>
+</resources>

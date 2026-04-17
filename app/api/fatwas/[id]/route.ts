@@ -31,7 +31,7 @@ export async function GET(
     }
 
     // Get related fatwas (using similar questions functionality)
-    const relatedFatwas = await dataService.findSimilarQuestions(fatwa.question, 5);
+    const relatedFatwas = await dataService.findSimilarQuestions(fatwa.question, 5, fatwa.id);
 
     return NextResponse.json({
       fatwa,

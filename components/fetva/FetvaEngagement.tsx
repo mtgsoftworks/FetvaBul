@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Facebook, Heart, Share2, ThumbsUp, Twitter, Eye } from 'lucide-react';
+import { Facebook, MessageCircle, Share2, ThumbsUp, Twitter, Eye } from 'lucide-react';
 
 const STORAGE_KEY = 'fetvabul_liked_fatwas';
 
@@ -37,6 +37,7 @@ interface FetvaEngagementProps {
 
 export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl, question }: FetvaEngagementProps) {
   const [likeCount, setLikeCount] = useState<number>(initialLikes);
+  const [commentsCount, setCommentsCount] = useState<number>(0);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
 
@@ -51,6 +52,9 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
         if (cancelled) return;
         if (typeof data?.likes === 'number') {
           setLikeCount(data.likes);
+        }
+        if (typeof data?.commentsCount === 'number') {
+          setCommentsCount(data.commentsCount);
         }
       } catch (error) {
         console.error('Failed to load engagement data', error);
@@ -152,6 +156,14 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
         >
           <Share2 className="h-4 w-4" />
           Fetvaya git
+        </a>
+
+        <a
+          href="#yorumlar"
+          className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/10"
+        >
+          <MessageCircle className="h-4 w-4" />
+          {commentsCount.toLocaleString('tr-TR')} yorum
         </a>
 
         <a

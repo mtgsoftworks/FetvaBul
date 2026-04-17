@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 :root {
   /* Primary brand system */
   --primary-hex: #17cf17;
@@ -502,5 +500,7 @@
 }
 
 @layer utilities {
-  /* Custom utilities can be added here if needed */
+  .mobile-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }

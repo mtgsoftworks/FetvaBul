@@ -288,7 +288,7 @@ export class DataService {
     }
   }
 
-  public async findSimilarQuestions(question: string, limit: number = 5): Promise<Fetva[]> {
+  public async findSimilarQuestions(question: string, limit: number = 5, excludeId?: string): Promise<Fetva[]> {
     this.ensureInitialized();
 
     const trimmedQuestion = question.trim();
@@ -302,6 +302,9 @@ export class DataService {
       const seen = new Set<string>();
 
       for (const result of results) {
+        if (excludeId && result.fetva.id === excludeId) {
+          continue;
+        }
         if (seen.has(result.fetva.id)) {
           continue;
         }
@@ -454,14 +457,13 @@ export class DataService {
         if (typeof latest === 'number' && Number.isFinite(latest)) {
           this.updateLocalViewCount(id, latest);
         }
+        this.viewsOverrides.delete(id);
         this.invalidateAggregates();
         return;
       }
 
       const current = this.viewsOverrides.get(id) ?? 0;
       this.viewsOverrides.set(id, current + 1);
-      const baseViews = this.fetvaById.get(id)?.views ?? 0;
-      this.updateLocalViewCount(id, baseViews + current + 1);
       this.viewCountCache.delete(id);
       this.invalidateAggregates();
     } catch (error) {
@@ -469,8 +471,6 @@ export class DataService {
       // Hata durumunda eski yönteme geri dön (geçici çözüm)
       const current = this.viewsOverrides.get(id) ?? 0;
       this.viewsOverrides.set(id, current + 1);
-      const baseViews = this.fetvaById.get(id)?.views ?? 0;
-      this.updateLocalViewCount(id, baseViews + current + 1);
       this.viewCountCache.delete(id);
       this.invalidateAggregates();
     }
@@ -583,6 +583,8 @@ export class DataService {
   private invalidateAggregates(): void {
     this.aggregatesSnapshot = undefined;
     this.fatwaCache.clear();
+    this.searchCache.clear();
+    this.viewCountCache.clear();
   }
 
   private async getAggregates(forceRefresh = false): Promise<AggregatesSnapshot> {
@@ -604,7 +606,7 @@ export class DataService {
     for (const fetva of this.fetvas) {
       const firestoreViews = realtimeViewCounts.get(fetva.id);
       const overrides = this.viewsOverrides.get(fetva.id) ?? 0;
-      const baseViews = typeof firestoreViews === 'number' ? firestoreViews : fetva.views;
+      const baseViews = Number.isFinite(firestoreViews) ? (firestoreViews as number) : fetva.views;
       const mergedViews = baseViews + overrides;
 
       viewById.set(fetva.id, mergedViews);
@@ -949,8 +951,8 @@ export class DataService {
       const overrides = this.viewsOverrides.get(id) ?? 0;
       const baseViews = this.fetvaById.get(id)?.views ?? fallback;
 
-      const value = firestoreViews > 0 ? firestoreViews : baseViews + overrides;
-      return value;
+      const value = Number.isFinite(firestoreViews) ? firestoreViews : baseViews;
+      return value + overrides;
     } catch (error) {
       console.error('Failed to get view count from Firestore:', error);
       const overrides = this.viewsOverrides.get(id) ?? 0;

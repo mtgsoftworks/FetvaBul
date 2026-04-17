@@ -51,8 +51,8 @@ export function Header() {
     ));
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/20 bg-background/80 backdrop-blur-sm">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:h-20">
+    <header className="sticky top-0 z-50 border-b border-border/20 bg-background/90 backdrop-blur-sm">
+      <div className="container mx-auto flex h-12 items-center justify-between px-3 sm:h-20 sm:px-4">
         <Link
           href="/"
           className="flex items-center gap-2 rounded-xl text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
@@ -61,7 +61,7 @@ export function Header() {
           <svg className="h-7 w-7" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor" />
           </svg>
-          <span className="text-lg font-semibold tracking-tight text-foreground">FetvaBul</span>
+          <span className="text-base font-semibold tracking-tight text-foreground sm:text-lg">FetvaBul</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Ana navigasyon">
@@ -85,13 +85,13 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="inline-flex h-10 w-10 rounded-full border border-border/50 md:hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="inline-flex h-8 w-8 rounded-full border border-border/50 md:hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="Menüyü aç"
               >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-xs bg-background">
+            <SheetContent side="right" className="mobile-safe-bottom w-full max-w-xs bg-background">
               <nav className="mt-12 flex flex-col gap-3" aria-label="Mobil navigasyon">
                 {renderMobileLinks()}
               </nav>

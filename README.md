@@ -9,7 +9,7 @@ Kategori filtreleme, otomatik tamamlama, sıralama ve API tabanlı etkileşim ö
 
 ## Özellikler
 
-- Hızlı arama (`/arama`) ve gelişmiş filtreleme
+- Hızlı arama (`/arama`) ve kategori filtreleme
 - Kategori sayfaları (`/kategori/[slug]`)
 - Fetva detay sayfası (`/fetva/[id]`)
 - Otomatik tamamlama ve arama istatistikleri
@@ -83,9 +83,18 @@ npm run start
 - `GET /api/categories` - kategori listesi/sayıları
 - `GET /api/categories/[slug]` - tek kategori detayları
 - `GET /api/fatwas/[id]` - fetva detayları
-- `GET /api/fatwas/[id]/view` - görüntülenme işlemi
+- `POST /api/fatwas/[id]/view` - görüntülenme işlemi
 - `POST /api/fetva/[id]/like` - beğeni işlemi
+- `GET /api/fetva/[id]/comments` - yorumları listele
+- `POST /api/fetva/[id]/comments` - yorum ekle
 - `POST /api/contact` - iletişim/soru formu
+
+## Veri Akışı
+
+- Ana veri dosyası: `data/consolidated_fetvas.jsonl`
+- Build sırasında `scripts/build.mjs`, `scripts/copy-data-file.mjs` çalıştırır
+- Bu adım `consolidated_fetvas.jsonl` dosyasını `processed_fetvas.jsonl` olarak kopyalar
+- Uygulama varsayılan olarak `DATA_FILE` ile verilen dosyayı okur; env verilmezse `consolidated_fetvas.jsonl` kullanılır
 
 ## Proje Yapısı
 

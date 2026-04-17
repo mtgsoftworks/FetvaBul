@@ -98,33 +98,33 @@ function Hero({
   const formatted = {
     fatwas: (stats?.totalFatwas ?? 0).toLocaleString('tr-TR'),
     categories: (stats?.totalCategories ?? 0).toLocaleString('tr-TR'),
-    totalViews: (stats?.homepageViews ?? 0).toLocaleString('tr-TR'),
+    totalViews: (stats?.totalViews ?? 0).toLocaleString('tr-TR'),
     totalSearches: (stats?.totalSearches ?? 0).toLocaleString('tr-TR'),
   };
 
   return (
     <section className="islamic-pattern">
-      <div className="container mx-auto flex flex-col items-center px-4 py-16 text-center sm:py-20">
-        <div className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-sm font-semibold text-primary">
+      <div className="container mx-auto flex flex-col items-center px-3 pt-3 pb-6 text-center sm:px-4 sm:py-20">
+        <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:px-4 sm:text-sm">
           Güvenilir İslami Bilgi Platformu
         </div>
-        <h1 className="mt-6 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+        <h1 className="mt-3 max-w-3xl text-3xl font-bold tracking-tight text-foreground sm:mt-6 sm:text-5xl">
           Sorularınıza güvenilir fetvalarla cevap bulun
         </h1>
-        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+        <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg">
           Uzman hocalar tarafından hazırlanan binlerce fetva içinde arama yapın, sık sorulan soruları keşfedin ve
           İslami konularda hızlıca rehberlik alın.
         </p>
 
-        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/80 px-4 py-2 text-xs font-medium text-muted-foreground">
-          <ShieldCheck className="h-4 w-4 text-primary" />
+        <div className="mt-3 flex w-full max-w-2xl items-start gap-2 rounded-2xl border border-primary/20 bg-background/80 px-4 py-2.5 text-left text-xs font-medium text-muted-foreground sm:mt-5 sm:inline-flex sm:w-auto sm:items-center sm:rounded-full sm:py-2 sm:text-center">
+          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary sm:mt-0" />
           <span>
             Son güncelleme: <strong className="text-foreground">{formatDate(latestUpdatedAt)}</strong> · Kaynak bilgisi
             şeffaf şekilde gösterilir.
           </span>
         </div>
 
-        <form action="/arama" className="mt-8 w-full max-w-2xl">
+        <form action="/arama" className="mt-4 w-full max-w-2xl sm:mt-8">
           <label htmlFor="hero-search" className="sr-only">
             Fetva ara
           </label>
@@ -135,27 +135,27 @@ function Hero({
               name="q"
               type="search"
               placeholder="Fetva veya soru arayın..."
-              className="h-14 w-full rounded-full border border-primary/20 bg-background px-12 text-base shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-12 w-full rounded-full border border-primary/20 bg-background px-11 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-14 sm:px-12 sm:text-base"
             />
           </div>
         </form>
 
-        <dl className="mt-10 grid w-full max-w-4xl gap-4 rounded-3xl bg-background/80 p-6 shadow-sm backdrop-blur sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="mt-5 grid w-full max-w-4xl grid-cols-2 gap-3 rounded-2xl bg-background/80 p-3 shadow-sm backdrop-blur sm:mt-10 sm:gap-4 sm:rounded-3xl sm:p-6 lg:grid-cols-4">
           <div className="space-y-1">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Toplam Fetva</dt>
-            <dd className="text-2xl font-semibold text-foreground">{formatted.fatwas}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Toplam Fetva</dt>
+            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.fatwas}</dd>
           </div>
           <div className="space-y-1">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Kategori</dt>
-            <dd className="text-2xl font-semibold text-foreground">{formatted.categories}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Kategori</dt>
+            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.categories}</dd>
           </div>
           <div className="space-y-1">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Toplam Görüntülenme</dt>
-            <dd className="text-2xl font-semibold text-foreground">{formatted.totalViews}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Toplam Görüntülenme</dt>
+            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.totalViews}</dd>
           </div>
           <div className="space-y-1">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Toplam Arama</dt>
-            <dd className="text-2xl font-semibold text-foreground">{formatted.totalSearches}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Toplam Arama</dt>
+            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.totalSearches}</dd>
           </div>
         </dl>
       </div>
@@ -175,7 +175,7 @@ function FeaturedCategories({
   };
 
   return (
-    <section className="container mx-auto px-4 py-16">
+    <section className="container mx-auto px-4 py-12 sm:py-16">
       <div className="flex flex-col gap-3 text-left sm:text-center">
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">Kategoriler</span>
         <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Öne çıkan konular</h2>
@@ -238,7 +238,7 @@ function RecentFatwas({
   fatwas: Awaited<ReturnType<typeof getHomepageData>>['recentFatwas'];
 }) {
   return (
-    <section className="bg-background-light py-16">
+    <section className="bg-background-light py-12 sm:py-16">
       <div className="container mx-auto px-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -299,7 +299,7 @@ function PopularQuestions({
   questions: Awaited<ReturnType<typeof getHomepageData>>['popularQuestions'];
 }) {
   return (
-    <section className="container mx-auto px-4 py-16">
+    <section className="container mx-auto px-4 py-12 sm:py-16">
       <div className="flex flex-col gap-3 text-left sm:text-center">
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">Sık Sorulanlar</span>
         <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Topluluğumuzun gündemindeki sorular</h2>
@@ -351,3 +351,4 @@ export default async function Home() {
     </div>
   );
 }
+

@@ -135,4 +135,43 @@ describe('DataService aggregate cache', () => {
     expect(getAllViewCounts).toHaveBeenCalledTimes(2);
     expect(updated.totalViews).toBe(61);
   });
+
+  it('excludes current fetva from similar results when excludeId is provided', async () => {
+    const service = DataService.getInstance();
+
+    const searchSpy = vi.spyOn(service, 'search').mockResolvedValue([
+      {
+        fetva: {
+          id: 'f1',
+          question: 'Soru 1',
+          answer: 'Cevap 1',
+          categories: ['İbadet'],
+          views: 10,
+          likes: 2,
+          date: '2024-01-01',
+        },
+        score: 1,
+        matchedTerms: ['soru'],
+      },
+      {
+        fetva: {
+          id: 'f2',
+          question: 'Soru 2',
+          answer: 'Cevap 2',
+          categories: ['İbadet'],
+          views: 20,
+          likes: 1,
+          date: '2024-01-02',
+        },
+        score: 0.8,
+        matchedTerms: ['soru'],
+      },
+    ]);
+
+    const similar = await service.findSimilarQuestions('Soru 1', 3, 'f1');
+
+    expect(similar.map((item) => item.id)).toEqual(['f2']);
+
+    searchSpy.mockRestore();
+  });
 });
