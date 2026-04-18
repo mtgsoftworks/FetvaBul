@@ -1,7 +1,8 @@
 ﻿'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
-import { BookOpen, Facebook, Mail, MapPin, Phone, Youtube } from 'lucide-react';
+import { Facebook, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -11,12 +12,15 @@ export function Footer() {
           <div className="space-y-5">
             <Link
               href="/"
-              className="flex items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="inline-flex items-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-islamic shadow-lg">
-                <BookOpen className="h-6 w-6 text-white" />
-              </span>
-              <span className="text-2xl font-bold tracking-tight text-foreground">FetvaBul</span>
+              <Image
+                src="/fetvabul_logo.png"
+                alt="FetvaBul logosu"
+                width={512}
+                height={512}
+                className="h-16 w-auto sm:h-20"
+              />
             </Link>
             <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
               Güvenilir İslami bilgi kaynağınız
@@ -68,7 +72,7 @@ export function Footer() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Mail className="h-4 w-4" />
                 </span>
-                <span>mtgsoftworks@gmail.com</span>
+                <span>support@mtgsoftworks.com</span>
               </li>
               <li className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">

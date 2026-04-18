@@ -60,7 +60,12 @@ FIREBASE_MESSAGING_SENDER_ID=...
 FIREBASE_APP_ID=...
 FIREBASE_MEASUREMENT_ID=...
 NEXT_PUBLIC_SITE_URL=https://fetvabul.com
+NEXT_PUBLIC_SYNC_BASE_URL=https://fetvabul.netlify.app
+NEXT_PUBLIC_ENABLE_DATA_SYNC=1
+NEXT_PUBLIC_DATA_SYNC_CHECK_MS=900000
 DATA_FILE=data/consolidated_fetvas.jsonl
+ENABLE_DATA_AUTO_REFRESH=true
+DATA_REFRESH_CHECK_MS=30000
 ```
 
 ## Scriptler
@@ -82,6 +87,7 @@ npm run start
 - `GET /api/autocomplete` - arama önerileri
 - `GET /api/categories` - kategori listesi/sayıları
 - `GET /api/categories/[slug]` - tek kategori detayları
+- `GET /api/data/manifest` - veri versiyonu/hash manifesti
 - `GET /api/fatwas/[id]` - fetva detayları
 - `POST /api/fatwas/[id]/view` - görüntülenme işlemi
 - `POST /api/fetva/[id]/like` - beğeni işlemi
@@ -93,7 +99,9 @@ npm run start
 
 - Ana veri dosyası: `data/consolidated_fetvas.jsonl`
 - Build sırasında `scripts/build.mjs`, `scripts/copy-data-file.mjs` çalıştırır
-- Bu adım `consolidated_fetvas.jsonl` dosyasını `processed_fetvas.jsonl` olarak kopyalar
+- Bu adım `consolidated_fetvas.jsonl` dosyasını `processed_fetvas.jsonl` ve hashli `processed_fetvas.<version>.jsonl` olarak kopyalar
+- `public/data/manifest.json` üretilir ve `/api/data/manifest` üzerinden version/hash metadata sunulur
+- Client tarafında sync aktifse (`NEXT_PUBLIC_ENABLE_DATA_SYNC=1`) yeni sürüm çevrimiçi iken IndexedDB'ye çekilir
 - Uygulama varsayılan olarak `DATA_FILE` ile verilen dosyayı okur; env verilmezse `consolidated_fetvas.jsonl` kullanılır
 
 ## Proje Yapısı
@@ -121,6 +129,12 @@ Port çakışmasında:
 ```bash
 npx next start -p 3010
 ```
+
+## Android Gerçek Cihaz Sync Testi
+
+- Android sync ve runtime doğrulama checklisti: `resources/android-runtime-sync-checklist.md`
+- `npm run mobile:android:sync` komutu varsayılan olarak remote sync kaynağını `https://fetvabul.netlify.app` olarak ayarlar.
+- Farklı bir kaynak için komutu çalıştırmadan önce `NEXT_PUBLIC_SYNC_BASE_URL` env değişkenini override edebilirsiniz.
 
 ## Sık Karşılaşılan Sorunlar
 
@@ -156,7 +170,7 @@ npm run dev -- -p 3999
 
 ## İletişim
 
-- Email: `mtgsoftworks@gmail.com`
+- Email: `support@mtgsoftworks.com`
 - YouTube: `https://www.youtube.com/@davetul_islam`
 - Web: `https://fetvabul.com`
 - GitHub: `https://github.com/mtgsoftworks/FetvaBul`

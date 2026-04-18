@@ -95,8 +95,8 @@ export default function GizlilikPage() {
               <h2 className="text-xl font-semibold text-foreground">İletişim</h2>
               <p className="text-muted-foreground">
                 Gizlilik politikamızla ilgili sorularınız için bize{' '}
-                <a href="mailto:mtgsoftworks@gmail.com" className="text-primary transition hover:underline">
-                  mtgsoftworks@gmail.com
+                <a href="mailto:support@mtgsoftworks.com" className="text-primary transition hover:underline">
+                  support@mtgsoftworks.com
                 </a>{' '}
                 adresinden ulaşabilirsiniz.
               </p>

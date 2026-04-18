@@ -8,7 +8,7 @@ export default function AramaPage({
 }: {
   searchParams?: { q?: string };
 }) {
-  const initialQuery = searchParams?.q?.trim() ?? '';
+  const initialQuery = process.env.STATIC_EXPORT === '1' ? '' : searchParams?.q?.trim() ?? '';
 
   return (
     <Suspense fallback={null}>

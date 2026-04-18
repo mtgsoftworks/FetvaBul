@@ -62,6 +62,14 @@ async function getFetvaDetail(id: string) {
   return { fetva, relatedFatwas } as const;
 }
 
+export async function generateStaticParams() {
+  const dataService = DataService.getInstance();
+  await dataService.initialize();
+
+  const fatwas = await dataService.getAllFatwas();
+  return fatwas.map((fetva) => ({ id: fetva.id }));
+}
+
 export async function generateMetadata({
   params,
 }: {

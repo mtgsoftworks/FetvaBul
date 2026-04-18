@@ -18,6 +18,7 @@ interface FetvaCardProps {
 }
 
 const STORAGE_KEY = 'fetvabul_liked_fatwas';
+const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
 
 function getStoredLikes(): Set<string> {
   if (typeof window === 'undefined') return new Set();
@@ -47,6 +48,11 @@ export function FetvaCard({ id, question, answer, category, source, date, views,
   const [pending, setPending] = useState<boolean>(false);
 
   useEffect(() => {
+    if (OFFLINE_BUILD) {
+      setCommentsCount(0);
+      return;
+    }
+
     let cancelled = false;
 
     const fetchInteraction = async () => {
@@ -75,8 +81,13 @@ export function FetvaCard({ id, question, answer, category, source, date, views,
 
   useEffect(() => {
     const stored = getStoredLikes();
-    setIsLiked(stored.has(id));
-  }, [id]);
+    const liked = stored.has(id);
+    setIsLiked(liked);
+
+    if (OFFLINE_BUILD) {
+      setLikeCount(Math.max(0, likes + (liked ? 1 : 0)));
+    }
+  }, [id, likes]);
 
   const handleLike = useCallback(async () => {
     if (pending) return;
@@ -92,6 +103,17 @@ export function FetvaCard({ id, question, answer, category, source, date, views,
     setLikeCount(prev => Math.max(0, prev + (willLike ? 1 : -1)));
 
     try {
+      if (OFFLINE_BUILD) {
+        const nextSet = new Set(stored);
+        if (willLike) {
+          nextSet.add(id);
+        } else {
+          nextSet.delete(id);
+        }
+        persistLikes(nextSet);
+        return;
+      }
+
       const res = await fetch(`/api/fetva/${encodeURIComponent(id)}/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

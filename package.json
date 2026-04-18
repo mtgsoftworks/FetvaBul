@@ -16,10 +16,10 @@
     "migrate:dev": "tsx scripts/migrate-data.ts",
     "mobile:android:assets": "npx @capacitor/assets generate --android",
     "mobile:android:add": "npx cap add android",
-    "mobile:android:sync": "npm run build && npx cap sync android",
+    "mobile:android:sync": "node scripts/mobile-android-sync.mjs",
     "mobile:android:init": "npm run mobile:android:sync",
     "mobile:android:open": "npx cap open android",
-    "mobile:android:bundle": "cd android && gradlew.bat bundleRelease"
+    "mobile:android:bundle": "npm run mobile:android:sync && cd android && gradlew.bat bundleRelease"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",

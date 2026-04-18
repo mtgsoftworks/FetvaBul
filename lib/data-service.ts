@@ -25,6 +25,7 @@ import {
 } from '@/types';
 
 const DATA_FILE_NAME = 'consolidated_fetvas.jsonl';
+const DEFAULT_DATA_REFRESH_CHECK_MS = 30_000;
 
 type RawFetvaRecord = RawFetvaData & Record<string, unknown>;
 
@@ -71,6 +72,14 @@ export class DataService {
   private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika
   private fatwaCache: Map<string, { data: Fetva[]; expiresAt: number }> = new Map();
   private readonly DATA_CACHE_TTL_MS = 2 * 60 * 1000; // 2 dakika
+  private readonly enableDataAutoRefresh = process.env.ENABLE_DATA_AUTO_REFRESH !== 'false';
+  private readonly dataRefreshCheckIntervalMs = (() => {
+    const value = Number.parseInt(process.env.DATA_REFRESH_CHECK_MS ?? `${DEFAULT_DATA_REFRESH_CHECK_MS}`, 10);
+    return Number.isFinite(value) && value >= 5000 ? value : DEFAULT_DATA_REFRESH_CHECK_MS;
+  })();
+  private lastDataFingerprint?: string;
+  private lastDataRefreshCheckAt = 0;
+  private dataRefreshPromise?: Promise<void>;
 
   private constructor() {}
 
@@ -107,7 +116,13 @@ export class DataService {
     }
 
     this.initializePromise = this.loadDataFromFile()
-      .then(() => {
+      .then(async () => {
+        try {
+          this.lastDataFingerprint = await this.getDataFileFingerprint();
+        } catch (error) {
+          console.warn('[DataService] Unable to compute initial data fingerprint:', error);
+        }
+
         this.isInitialized = true;
         globalStore.__dataServiceInitialized = true;
       })
@@ -137,7 +152,7 @@ export class DataService {
   }
 
   public async searchWithTotal(options: InternalSearchOptions): Promise<{ results: InternalSearchResult[]; total: number }> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     const {
       query,
@@ -231,7 +246,7 @@ export class DataService {
     keywords: string[],
     options: Omit<InternalSearchOptions, 'query'> = {}
   ): Promise<InternalSearchResult[]> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     const { limit = 20, offset = 0, sortBy = 'views', category } = options;
 
@@ -289,7 +304,7 @@ export class DataService {
   }
 
   public async findSimilarQuestions(question: string, limit: number = 5, excludeId?: string): Promise<Fetva[]> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     const trimmedQuestion = question.trim();
     if (!trimmedQuestion) {
@@ -323,7 +338,7 @@ export class DataService {
   }
 
   public async getAutocompleteSuggestions(query: string, limit: number = 10): Promise<string[]> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     const normalizedQuery = query.trim().toLowerCase();
     if (normalizedQuery.length < 2) {
@@ -370,14 +385,14 @@ export class DataService {
   }
 
   public async getFetvaById(id: string): Promise<Fetva | null> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     const fetva = this.fetvaById.get(id);
     return fetva ? await this.withRuntimeViews(fetva) : null;
   }
 
   public async getAllFatwas(): Promise<Fetva[]> {
-    this.ensureInitialized();
+    await this.ensureReady();
     const cacheKey = 'all';
     const cached = this.fatwaCache.get(cacheKey);
     const now = Date.now();
@@ -400,7 +415,7 @@ export class DataService {
   }
 
   public async getFatwasByCategory(categoryName: string): Promise<Fetva[]> {
-    this.ensureInitialized();
+    await this.ensureReady();
     const aggregates = await this.getAggregates();
     return this.fetvas
       .filter((fetva) => fetva.categories.includes(categoryName))
@@ -411,17 +426,17 @@ export class DataService {
   }
 
   public async getAllCategories(): Promise<Category[]> {
-    this.ensureInitialized();
+    await this.ensureReady();
     return this.categories;
   }
 
   public async getCategoryBySlug(slug: string): Promise<Category | null> {
-    this.ensureInitialized();
+    await this.ensureReady();
     return this.categoryBySlug.get(slug) ?? null;
   }
 
   public async getPopularFatwas(limit: number = 10): Promise<Fetva[]> {
-    this.ensureInitialized();
+    await this.ensureReady();
     const aggregates = await this.getAggregates();
     const ids = aggregates.popularIds.slice(0, limit);
 
@@ -447,7 +462,7 @@ export class DataService {
   }
 
   public async incrementViews(id: string): Promise<void> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     try {
       if (this.enableRealtimeViews) {
@@ -477,7 +492,7 @@ export class DataService {
   }
 
   public async incrementHomepageViews(): Promise<number> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     try {
       const latest = await incrementSiteViewCount();
@@ -496,13 +511,13 @@ export class DataService {
   }
 
   public async getHomepageViewCount(): Promise<number> {
-    this.ensureInitialized();
+    await this.ensureReady();
     const aggregates = await this.getAggregates();
     return aggregates.homepageViews;
   }
 
   public async incrementSearches(): Promise<number> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     try {
       const latest = await incrementSearchCount();
@@ -521,13 +536,13 @@ export class DataService {
   }
 
   public async getTotalSearches(): Promise<number> {
-    this.ensureInitialized();
+    await this.ensureReady();
     const aggregates = await this.getAggregates();
     return aggregates.totalSearches;
   }
 
   public async getStats(): Promise<SiteStats> {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     try {
       const aggregates = await this.getAggregates();
@@ -562,7 +577,7 @@ export class DataService {
   }
 
   public async getSearchStats() {
-    this.ensureInitialized();
+    await this.ensureReady();
 
     const totalFatwas = this.fetvas.length;
     const totalKeywords = Array.from(this.keywordFrequency.values()).reduce((sum, count) => sum + count, 0);
@@ -1027,5 +1042,56 @@ export class DataService {
         500
       );
     }
+  }
+
+  private async ensureReady(): Promise<void> {
+    this.ensureInitialized();
+    await this.refreshDataIfChanged();
+  }
+
+  private async refreshDataIfChanged(): Promise<void> {
+    if (!this.enableDataAutoRefresh || !this.isInitialized) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - this.lastDataRefreshCheckAt < this.dataRefreshCheckIntervalMs) {
+      return;
+    }
+
+    if (!this.dataRefreshPromise) {
+      this.lastDataRefreshCheckAt = now;
+      this.dataRefreshPromise = this.performDataRefreshCheck()
+        .catch((error) => {
+          console.error('[DataService] Runtime data refresh check failed:', error);
+        })
+        .finally(() => {
+          this.dataRefreshPromise = undefined;
+        });
+    }
+
+    await this.dataRefreshPromise;
+  }
+
+  private async performDataRefreshCheck(): Promise<void> {
+    const currentFingerprint = await this.getDataFileFingerprint();
+
+    if (!this.lastDataFingerprint) {
+      this.lastDataFingerprint = currentFingerprint;
+      return;
+    }
+
+    if (currentFingerprint === this.lastDataFingerprint) {
+      return;
+    }
+
+    console.log('[DataService] Detected data file change, reloading dataset...');
+    await this.loadDataFromFile();
+    this.lastDataFingerprint = currentFingerprint;
+  }
+
+  private async getDataFileFingerprint(): Promise<string> {
+    const stats = await fs.stat(this.dataFilePath);
+    return `${stats.size}:${Math.floor(stats.mtimeMs)}`;
   }
 }

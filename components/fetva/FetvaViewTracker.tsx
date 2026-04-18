@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 const STORAGE_KEY = 'fetvabul_view_events';
 const VIEW_EVENT_TTL_MS = 30 * 60 * 1000;
+const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
 
 type ViewEventMap = Record<string, number>;
 
@@ -40,6 +41,10 @@ export function FetvaViewTracker({ id }: FetvaViewTrackerProps) {
 
   useEffect(() => {
     if (!id || hasTrackedRef.current) {
+      return;
+    }
+
+    if (OFFLINE_BUILD) {
       return;
     }
 

@@ -14,6 +14,8 @@ interface FormState {
 }
 
 type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
+const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
+const OFFLINE_CONTACT_STORAGE_KEY = 'fetvabul_offline_contact_messages';
 
 const CATEGORY_OPTIONS = [
   'İbadet (Namaz, Oruç, Hac)',
@@ -47,6 +49,27 @@ export default function AskQuestionPage() {
     setErrorMessage(null);
 
     try {
+      if (OFFLINE_BUILD) {
+        if (typeof window !== 'undefined') {
+          const raw = window.localStorage.getItem(OFFLINE_CONTACT_STORAGE_KEY);
+          const existing = raw ? JSON.parse(raw) : [];
+          const next = Array.isArray(existing) ? existing : [];
+          next.push({
+            name: form.name,
+            email: form.email,
+            subject: form.subject || category,
+            message: form.message,
+            createdAt: new Date().toISOString(),
+          });
+          window.localStorage.setItem(OFFLINE_CONTACT_STORAGE_KEY, JSON.stringify(next));
+        }
+
+        setStatus('success');
+        setForm({ name: '', email: '', subject: '', message: '' });
+        setCategory('');
+        return;
+      }
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -206,7 +229,11 @@ export default function AskQuestionPage() {
             {status === 'success' && (
               <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
                 <CheckCircle2 className="h-5 w-5" />
-                <p>Sorunuz başarıyla iletildi. En kısa sürede size dönüş yapacağız.</p>
+                <p>
+                  {OFFLINE_BUILD
+                    ? 'Sorunuz çevrimdışı olarak kaydedildi. İnternet bağlantısı olduğunda tekrar gönderebilirsiniz.'
+                    : 'Sorunuz başarıyla iletildi. En kısa sürede size dönüş yapacağız.'}
+                </p>
               </div>
             )}
 

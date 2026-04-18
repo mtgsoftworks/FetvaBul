@@ -3,12 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.mtgsoftworks.fetvabulapp',
   appName: 'FetvaBul',
-  webDir: '.next',
-  server: {
-    androidScheme: 'https',
-    url: 'https://fetvabul.netlify.app',
-    cleartext: false
-  },
+  webDir: 'out',
   plugins: {
     CapacitorHttp: {
       enabled: true

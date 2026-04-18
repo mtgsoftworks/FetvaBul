@@ -24,6 +24,54 @@ interface FetvaCommentsProps {
   fetvaId: string;
 }
 
+const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
+const COMMENT_STORAGE_PREFIX = 'fetvabul_comments_';
+
+function getCommentStorageKey(fetvaId: string): string {
+  return `${COMMENT_STORAGE_PREFIX}${fetvaId}`;
+}
+
+function loadOfflineComments(fetvaId: string): FetvaComment[] {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(getCommentStorageKey(fetvaId));
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .filter((item): item is FetvaComment => {
+        if (!item || typeof item !== 'object') return false;
+        const record = item as Record<string, unknown>;
+        return typeof record.id === 'string' && typeof record.name === 'string' && typeof record.message === 'string';
+      })
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        message: item.message,
+        createdAt: typeof item.createdAt === 'string' ? item.createdAt : null,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function saveOfflineComments(fetvaId: string, comments: FetvaComment[]) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(getCommentStorageKey(fetvaId), JSON.stringify(comments));
+}
+
 function formatCommentDate(value: string | null): string {
   if (!value) return 'Az önce';
 
@@ -52,6 +100,14 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
     const fetchComments = async () => {
       setLoading(true);
       setError(null);
+
+      if (OFFLINE_BUILD) {
+        if (!cancelled) {
+          setComments(loadOfflineComments(fetvaId));
+          setLoading(false);
+        }
+        return;
+      }
 
       try {
         const response = await fetch(`/api/fetva/${encodeURIComponent(fetvaId)}/comments?limit=50`, {
@@ -100,6 +156,25 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
     setError(null);
 
     try {
+      if (OFFLINE_BUILD) {
+        const nextComment: FetvaComment = {
+          id: `local-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+          name: name.trim() || 'Anonim',
+          message: normalizedMessage,
+          createdAt: new Date().toISOString(),
+        };
+
+        setComments((prev) => {
+          const next = [nextComment, ...prev];
+          saveOfflineComments(fetvaId, next);
+          return next;
+        });
+
+        setMessage('');
+        setName('');
+        return;
+      }
+
       const response = await fetch(`/api/fetva/${encodeURIComponent(fetvaId)}/comments`, {
         method: 'POST',
         headers: {

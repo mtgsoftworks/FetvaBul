@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 const STORAGE_KEY = 'fetvabul_homepage_view';
 const TTL_MS = 10 * 60 * 1000;
+const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
 
 function shouldTrackHomepageView(): boolean {
   if (typeof window === 'undefined') {
@@ -32,6 +33,10 @@ export function HomepageViewTracker() {
 
   useEffect(() => {
     if (hasTrackedRef.current) {
+      return;
+    }
+
+    if (OFFLINE_BUILD) {
       return;
     }
 

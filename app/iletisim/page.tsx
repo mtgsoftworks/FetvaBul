@@ -14,7 +14,7 @@ const CONTACT_POINTS = [
     icon: Mail,
     title: 'E-posta',
     description: 'Genel sorular ve iş birlikleri',
-    details: ['mtgsoftworks@gmail.com'],
+    details: ['support@mtgsoftworks.com'],
   },
   {
     icon: Phone,

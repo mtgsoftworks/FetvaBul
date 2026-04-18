@@ -67,7 +67,7 @@ export default async function KategorilerPage({
 }: {
   searchParams?: { q?: string };
 }) {
-  const initialSearch = searchParams?.q?.trim() ?? '';
+  const initialSearch = process.env.STATIC_EXPORT === '1' ? '' : searchParams?.q?.trim() ?? '';
   const categories = await getCategories();
 
   const filtered = initialSearch

@@ -11,6 +11,9 @@
 # next.js
 /.next/
 /out/
+/public/data/processed_fetvas.jsonl
+/public/data/processed_fetvas.*.jsonl
+/public/data/manifest.json
 
 # production
 /build

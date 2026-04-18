@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, Search } from 'lucide-react';
@@ -55,13 +56,17 @@ export function Header() {
       <div className="container mx-auto flex h-12 items-center justify-between px-3 sm:h-20 sm:px-4">
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-xl text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="inline-flex items-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           aria-label="FetvaBul ana sayfası"
         >
-          <svg className="h-7 w-7" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor" />
-          </svg>
-          <span className="text-base font-semibold tracking-tight text-foreground sm:text-lg">FetvaBul</span>
+          <Image
+            src="/fetvabul_logo.png"
+            alt="FetvaBul logosu"
+            width={512}
+            height={512}
+            className="h-10 w-auto sm:h-14"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Ana navigasyon">

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Facebook, MessageCircle, Share2, ThumbsUp, Twitter, Eye } from 'lucide-react';
 
 const STORAGE_KEY = 'fetvabul_liked_fatwas';
+const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
 
 function getStoredLikes(): Set<string> {
   if (typeof window === 'undefined') return new Set();
@@ -42,6 +43,11 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
   const [pending, setPending] = useState<boolean>(false);
 
   useEffect(() => {
+    if (OFFLINE_BUILD) {
+      setCommentsCount(0);
+      return;
+    }
+
     let cancelled = false;
 
     const fetchEngagement = async () => {
@@ -70,8 +76,13 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
 
   useEffect(() => {
     const stored = getStoredLikes();
-    setIsLiked(stored.has(id));
-  }, [id]);
+    const liked = stored.has(id);
+    setIsLiked(liked);
+
+    if (OFFLINE_BUILD) {
+      setLikeCount(Math.max(0, initialLikes + (liked ? 1 : 0)));
+    }
+  }, [id, initialLikes]);
 
   const handleToggleLike = useCallback(async () => {
     if (pending) return;
@@ -88,6 +99,17 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
     setLikeCount(prev => Math.max(0, prev + (willLike ? 1 : -1)));
 
     try {
+      if (OFFLINE_BUILD) {
+        const nextSet = new Set(stored);
+        if (willLike) {
+          nextSet.add(id);
+        } else {
+          nextSet.delete(id);
+        }
+        persistLikes(nextSet);
+        return;
+      }
+
       const res = await fetch(`/api/fetva/${encodeURIComponent(id)}/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

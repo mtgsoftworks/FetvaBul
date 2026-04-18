@@ -14,6 +14,8 @@ interface ContactFormProps {
 }
 
 type SubmitState = 'idle' | 'success' | 'error';
+const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
+const OFFLINE_CONTACT_STORAGE_KEY = 'fetvabul_offline_contact_messages';
 
 export function ContactForm({
   className,
@@ -56,6 +58,21 @@ export function ContactForm({
     setMessage('');
 
     try {
+      if (OFFLINE_BUILD) {
+        if (typeof window !== 'undefined') {
+          const raw = window.localStorage.getItem(OFFLINE_CONTACT_STORAGE_KEY);
+          const existing = raw ? JSON.parse(raw) : [];
+          const next = Array.isArray(existing) ? existing : [];
+          next.push({ ...payload, createdAt: new Date().toISOString() });
+          window.localStorage.setItem(OFFLINE_CONTACT_STORAGE_KEY, JSON.stringify(next));
+        }
+
+        form.reset();
+        setState('success');
+        setMessage('Mesajınız çevrimdışı olarak kaydedildi. İnternet bağlantısı olduğunda tekrar gönderebilirsiniz.');
+        return;
+      }
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,7 +139,7 @@ export function ContactForm({
               name="email"
               type="email"
               required
-              placeholder="mtgsoftworks@gmail.com"
+              placeholder="support@mtgsoftworks.com"
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>

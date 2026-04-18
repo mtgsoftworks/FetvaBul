@@ -67,6 +67,14 @@ async function loadCategoryBySlug(slug: string) {
   return dataService.getCategoryBySlug(slug);
 }
 
+export async function generateStaticParams() {
+  const dataService = DataService.getInstance();
+  await dataService.initialize();
+
+  const categories = await dataService.getAllCategories();
+  return categories.map((category) => ({ slug: category.slug }));
+}
+
 async function getPageData(slug: string, sortBy: SortValue, page: number) {
   const dataService = DataService.getInstance();
   await dataService.initialize();
@@ -118,8 +126,9 @@ export default async function KategoriPage({
   params: { slug: string };
   searchParams?: { sort?: string; page?: string };
 }) {
-  const sortBy = normalizeSort(searchParams?.sort);
-  const page = normalizePage(searchParams?.page);
+  const isStaticExport = process.env.STATIC_EXPORT === '1';
+  const sortBy = isStaticExport ? 'popular' : normalizeSort(searchParams?.sort);
+  const page = isStaticExport ? 1 : normalizePage(searchParams?.page);
   const data = await getPageData(params.slug, sortBy, page);
 
   if (!data) {
