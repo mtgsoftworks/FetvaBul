@@ -1,6 +1,5 @@
 export const revalidate = 300;
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Search, ShieldCheck } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
@@ -15,12 +14,6 @@ const CATEGORY_ARTWORK: Record<string, string> = {
   Zekat: 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
   Family: 'linear-gradient(135deg, #fce4ec, #f8bbd0)',
   Daily: 'linear-gradient(135deg, #f4f4f5, #e4e4e7)',
-};
-
-const CATEGORY_IMAGES: Record<string, string> = {
-  ibadet: '/images/category-prayer.svg',
-  'helal-gida-beslenme': '/images/category-fasting.svg',
-  'muamelat-ekonomi': '/images/category-zakat.svg',
 };
 
 const FALLBACK_ART = [
@@ -188,7 +181,6 @@ function FeaturedCategories({
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         {categories.slice(0, 5).map((category, index) => {
           const Icon = getCategoryIconComponent(category.name);
-          const imageSrc = CATEGORY_IMAGES[category.slug as keyof typeof CATEGORY_IMAGES];
           return (
             <Link
               key={category.id}
@@ -196,22 +188,12 @@ function FeaturedCategories({
               className="group flex flex-col gap-4 rounded-2xl border border-border/40 bg-background/90 p-6 shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:border-primary"
             >
               <div className="overflow-hidden rounded-2xl border border-border/30 bg-primary/5">
-                {imageSrc ? (
-                  <Image
-                    src={imageSrc}
-                    alt={`${category.name} kategorisi görseli`}
-                    width={320}
-                    height={200}
-                    className="h-40 w-full rounded-2xl object-cover"
-                  />
-                ) : (
-                  <div
-                    className="flex h-40 w-full items-center justify-center text-primary"
-                    style={{ background: getStyle(category.name, index) }}
-                  >
-                    <Icon className="h-10 w-10" />
-                  </div>
-                )}
+                <div
+                  className="flex h-40 w-full items-center justify-center text-primary"
+                  style={{ background: getStyle(category.name, index) }}
+                >
+                  <Icon className="h-10 w-10" />
+                </div>
               </div>
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">

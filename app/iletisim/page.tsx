@@ -1,4 +1,5 @@
-﻿import { Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react';
+﻿import type { LucideIcon } from 'lucide-react';
+import { Clock, Mail, MapPin, MessageCircle, Phone, Youtube } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ContactForm } from '@/components/about/ContactForm';
@@ -9,18 +10,34 @@ export const metadata = {
     'FetvaBul ekibine sorularınız, iş birlikleri veya geri bildirimleriniz için ulaşın. İletişim bilgilerimize ve formumuza buradan erişin.',
 };
 
-const CONTACT_POINTS = [
+type ContactLink = {
+  label: string;
+  href: string;
+  icon?: LucideIcon;
+};
+
+type ContactPoint = {
+  icon: LucideIcon;
+  title: string;
+  description?: string;
+  details: string[];
+  links?: ContactLink[];
+};
+
+const CONTACT_POINTS: ContactPoint[] = [
   {
     icon: Mail,
     title: 'E-posta',
     description: 'Genel sorular ve iş birlikleri',
-    details: ['support@mtgsoftworks.com'],
+    details: ['Genel talepleriniz için e-posta kanalını kullanabilirsiniz.'],
+    links: [{ label: 'support@mtgsoftworks.com', href: 'mailto:support@mtgsoftworks.com', icon: Mail }],
   },
   {
     icon: Phone,
     title: 'Telefon',
     description: 'İletişim hattı',
-    details: ['0544 175 71 51'],
+    details: ['Mesai saatleri içinde telefonla doğrudan ulaşabilirsiniz.'],
+    links: [{ label: '0544 175 71 51', href: 'tel:+905441757151', icon: Phone }],
   },
   {
     icon: MapPin,
@@ -37,12 +54,9 @@ const CONTACT_POINTS = [
     title: 'Çalışma Saatleri',
     description: 'Telefon hattı çalışma saatleri',
     details: [
-      'Pazartesi: 09:00–22:00',
-      'Salı: 09:00–22:00',
-      'Çarşamba: 09:00–22:00',
-      'Perşembe: 09:00–22:00',
-      'Cuma: 09:00–22:00',
-      'Cumartesi: 09:00–17:00, 22:00–00:00',
+      'Pazartesi - Cuma: 09:00–22:00',
+      'Cumartesi (Gündüz): 09:00–17:00',
+      'Cumartesi (Gece): 22:00–00:00',
       'Pazar: 00:00–17:00',
     ],
   },
@@ -50,7 +64,14 @@ const CONTACT_POINTS = [
     icon: MessageCircle,
     title: 'Topluluk',
     description: 'Güncellemeleri takip etmek için sosyal medya hesaplarımıza katılın.',
-    details: ['https://www.youtube.com/@davetul_islam'],
+    details: ['Sosyal kanallarımızdan güncel paylaşımlarımızı takip edebilirsiniz.'],
+    links: [
+      {
+        label: 'YouTube: @davetul_islam',
+        href: 'https://www.youtube.com/@davetul_islam',
+        icon: Youtube,
+      },
+    ],
   },
 ];
 
@@ -61,22 +82,7 @@ export default function ContactPage() {
       <main className="container mx-auto max-w-6xl px-4 py-16 sm:py-24">
         <section className="text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-            <svg
-              className="h-7 w-7"
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M8 12a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V12Z"
-                fill="currentColor"
-                opacity="0.15"
-              />
-              <path
-                d="M12 8h24a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4Zm0 2a2 2 0 0 0-2 2v1.382l14 8.167 14-8.167V12a2 2 0 0 0-2-2H12Zm26 6.618-12.63 7.372a2 2 0 0 1-1.74 0L11 16.618V36a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2V16.618Z"
-                fill="currentColor"
-              />
-            </svg>
+            <MessageCircle className="h-7 w-7" aria-hidden="true" />
           </div>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Sorularınızı bekliyoruz
@@ -111,6 +117,27 @@ export default function ContactPage() {
                           {point.details.map((line) => (
                             <li key={line}>{line}</li>
                           ))}
+                        </ul>
+                      ) : null}
+                      {point.links && point.links.length > 0 ? (
+                        <ul className="mt-2 space-y-1 text-sm">
+                          {point.links.map((link) => {
+                            const isExternal = /^https?:\/\//i.test(link.href);
+                            const LinkIcon = link.icon;
+                            return (
+                              <li key={`${point.title}-${link.href}`}>
+                                <a
+                                  href={link.href}
+                                  target={isExternal ? '_blank' : undefined}
+                                  rel={isExternal ? 'noopener noreferrer' : undefined}
+                                  className="inline-flex items-center gap-2 text-primary transition hover:underline"
+                                >
+                                  {LinkIcon ? <LinkIcon className="h-4 w-4" /> : null}
+                                  <span>{link.label}</span>
+                                </a>
+                              </li>
+                            );
+                          })}
                         </ul>
                       ) : null}
                     </div>

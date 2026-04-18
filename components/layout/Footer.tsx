@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Facebook, Mail, MapPin, Phone, Youtube } from 'lucide-react';
+import { Mail, MapPin, Phone, Youtube } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -103,15 +103,6 @@ export function Footer() {
                 rel="noopener noreferrer"
               >
                 <Youtube className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://facebook.com"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="Facebook"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Facebook className="h-5 w-5" />
               </Link>
             </div>
           </div>

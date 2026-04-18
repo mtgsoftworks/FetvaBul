@@ -60,8 +60,6 @@ FIREBASE_MESSAGING_SENDER_ID=...
 FIREBASE_APP_ID=...
 FIREBASE_MEASUREMENT_ID=...
 NEXT_PUBLIC_SITE_URL=https://fetvabul.com
-NEXT_PUBLIC_SYNC_BASE_URL=https://fetvabul.netlify.app
-NEXT_PUBLIC_ENABLE_DATA_SYNC=1
 NEXT_PUBLIC_DATA_SYNC_CHECK_MS=900000
 DATA_FILE=data/consolidated_fetvas.jsonl
 ENABLE_DATA_AUTO_REFRESH=true
@@ -101,7 +99,7 @@ npm run start
 - Build sırasında `scripts/build.mjs`, `scripts/copy-data-file.mjs` çalıştırır
 - Bu adım `consolidated_fetvas.jsonl` dosyasını `processed_fetvas.jsonl` ve hashli `processed_fetvas.<version>.jsonl` olarak kopyalar
 - `public/data/manifest.json` üretilir ve `/api/data/manifest` üzerinden version/hash metadata sunulur
-- Client tarafında sync aktifse (`NEXT_PUBLIC_ENABLE_DATA_SYNC=1`) yeni sürüm çevrimiçi iken IndexedDB'ye çekilir
+- Runtime remote veri senkronu kalıcı olarak devre dışıdır; uygulama paketlenmiş/local veri ile çalışır
 - Uygulama varsayılan olarak `DATA_FILE` ile verilen dosyayı okur; env verilmezse `consolidated_fetvas.jsonl` kullanılır
 
 ## Proje Yapısı
@@ -133,8 +131,8 @@ npx next start -p 3010
 ## Android Gerçek Cihaz Sync Testi
 
 - Android sync ve runtime doğrulama checklisti: `resources/android-runtime-sync-checklist.md`
-- `npm run mobile:android:sync` komutu varsayılan olarak remote sync kaynağını `https://fetvabul.netlify.app` olarak ayarlar.
-- Farklı bir kaynak için komutu çalıştırmadan önce `NEXT_PUBLIC_SYNC_BASE_URL` env değişkenini override edebilirsiniz.
+- `npm run mobile:android:sync` yalnızca statik build + Capacitor Android sync işlemlerini çalıştırır.
+- Runtime remote veri senkronu kapalıdır.
 
 ## Sık Karşılaşılan Sorunlar
 

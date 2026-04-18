@@ -144,9 +144,9 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
   const formattedLikes = useMemo(() => likeCount.toLocaleString('tr-TR'), [likeCount]);
   const formattedViews = useMemo(() => (views ?? 0).toLocaleString('tr-TR'), [views]);
 
-  const tweetUrl = useMemo(() => {
-    const text = `${question}\n`;
-    return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+  const xShareUrl = useMemo(() => {
+    const text = `${question}\n\nFetvaBul'da inceleyin`;
+    return `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
   }, [question, shareUrl]);
 
   return (
@@ -175,6 +175,7 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
         <a
           href={shareUrl}
           className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/10"
+          aria-label="Fetva sayfasını aç"
         >
           <Share2 className="h-4 w-4" />
           Fetvaya git
@@ -183,6 +184,7 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
         <a
           href="#yorumlar"
           className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/10"
+          aria-label="Yorumlar bölümüne git"
         >
           <MessageCircle className="h-4 w-4" />
           {commentsCount.toLocaleString('tr-TR')} yorum
@@ -193,19 +195,21 @@ export function FetvaEngagement({ id, initialLikes, views, categories, shareUrl,
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-blue-200 px-5 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+          aria-label="Facebook'ta paylaş"
         >
           <Facebook className="h-4 w-4" />
           Facebook&apos;ta paylaş
         </a>
 
         <a
-          href={tweetUrl}
+          href={xShareUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-sky-200 px-5 py-2 text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
+          className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-5 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100"
+          aria-label="X'te paylaş"
         >
           <Twitter className="h-4 w-4" />
-          Twitter&apos;da paylaş
+          X&apos;te paylaş
         </a>
       </div>
 

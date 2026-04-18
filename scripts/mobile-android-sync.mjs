@@ -23,17 +23,14 @@ function run(command, args, env = process.env) {
 }
 
 async function main() {
-  const syncBaseUrl = process.env.NEXT_PUBLIC_SYNC_BASE_URL || 'https://fetvabul.netlify.app';
-
   const buildEnv = {
     ...process.env,
     STATIC_EXPORT: '1',
     NEXT_PUBLIC_OFFLINE_BUILD: '1',
-    NEXT_PUBLIC_ENABLE_DATA_SYNC: '1',
-    NEXT_PUBLIC_SYNC_BASE_URL: syncBaseUrl,
+    NEXT_PUBLIC_ENABLE_DATA_SYNC: '0',
   };
 
-  console.log(`[mobile-android-sync] Using remote sync base URL: ${syncBaseUrl}`);
+  console.log('[mobile-android-sync] Runtime remote data sync is disabled.');
 
   await run('npm', ['run', 'build'], buildEnv);
   await run('npx', ['cap', 'sync', 'android']);

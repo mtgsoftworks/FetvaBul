@@ -8,10 +8,8 @@ const DATASET_RECORD_KEY = 'fatwas-jsonl';
 const DATA_SYNC_META_KEY = 'fetvabul-data-sync-meta';
 const DATA_SYNC_LAST_CHECK_KEY = 'fetvabul-data-sync-last-check';
 const DEFAULT_DATA_SYNC_CHECK_MS = 15 * 60 * 1000;
-const DEFAULT_REMOTE_SYNC_BASE_URL = 'https://fetvabul.netlify.app';
 
-const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
-const ENABLE_DATA_SYNC = process.env.NEXT_PUBLIC_ENABLE_DATA_SYNC === '1' || OFFLINE_BUILD;
+const ENABLE_DATA_SYNC = false;
 const DATA_SYNC_CHECK_MS = (() => {
   const parsed = Number.parseInt(process.env.NEXT_PUBLIC_DATA_SYNC_CHECK_MS ?? `${DEFAULT_DATA_SYNC_CHECK_MS}`, 10);
   return Number.isFinite(parsed) && parsed >= 60_000 ? parsed : DEFAULT_DATA_SYNC_CHECK_MS;
@@ -63,21 +61,8 @@ function isIndexedDbAvailable(): boolean {
   return canUseBrowser() && typeof window.indexedDB !== 'undefined';
 }
 
-function normalizeBaseUrl(value: string): string {
-  return value.replace(/\/+$/, '');
-}
-
 function resolveSyncBaseUrl(): string | null {
-  const configured =
-    process.env.NEXT_PUBLIC_SYNC_BASE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    '';
-
-  if (!configured) {
-    return OFFLINE_BUILD ? DEFAULT_REMOTE_SYNC_BASE_URL : '';
-  }
-
-  return normalizeBaseUrl(configured);
+  return '';
 }
 
 function buildManifestUrls(baseUrl: string | null): string[] {

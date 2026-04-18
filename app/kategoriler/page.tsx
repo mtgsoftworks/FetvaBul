@@ -1,15 +1,15 @@
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { LayoutGrid, Search } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { DataService } from '@/lib/data-service';
+import { getCategoryIconComponent } from '@/lib/category-icons';
 
-const CARD_BACKGROUNDS = [
-  'linear-gradient(135deg, rgba(23,207,23,0.08), rgba(23,207,23,0.12))',
-  'linear-gradient(135deg, rgba(255,193,7,0.08), rgba(255,213,79,0.15))',
-  'linear-gradient(135deg, rgba(33,150,243,0.08), rgba(33,150,243,0.15))',
-  'linear-gradient(135deg, rgba(244,143,177,0.12), rgba(244,143,177,0.18))',
-  'linear-gradient(135deg, rgba(156,39,176,0.08), rgba(156,39,176,0.15))',
+const CARD_ICON_SURFACES = [
+  'bg-emerald-50 text-emerald-700',
+  'bg-teal-50 text-teal-700',
+  'bg-lime-50 text-lime-700',
+  'bg-green-50 text-green-700',
 ];
 
 async function getCategories() {
@@ -31,7 +31,8 @@ function CategoryCard({
   description?: string;
   index: number;
 }) {
-  const art = CARD_BACKGROUNDS[index % CARD_BACKGROUNDS.length];
+  const Icon = getCategoryIconComponent(name);
+  const iconSurface = CARD_ICON_SURFACES[index % CARD_ICON_SURFACES.length];
 
   return (
     <Link
@@ -39,11 +40,8 @@ function CategoryCard({
       className="group flex flex-col justify-between rounded-3xl border border-border/30 bg-background/90 p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary"
     >
       <div className="space-y-4">
-        <span
-          className="flex h-14 w-14 items-center justify-center rounded-2xl text-primary"
-          style={{ background: art }}
-        >
-          <span className="text-lg font-semibold">#{index + 1}</span>
+        <span className={`flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 ${iconSurface}`}>
+          <Icon className="h-6 w-6" />
         </span>
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -80,26 +78,7 @@ export default async function KategorilerPage({
       <main className="container mx-auto max-w-6xl px-4 py-16">
         <section className="text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-            <svg
-              className="h-8 w-8"
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M8 10a2 2 0 0 1 2-2h10l4 4h14a2 2 0 0 1 2 2v24a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10Z"
-                fill="currentColor"
-                opacity="0.15"
-              />
-              <path
-                d="M10 8h10l4 4h14a2 2 0 0 1 2 2v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V10a2 2 0 0 1 2-2Zm0 2v26a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2V14H23.172a2 2 0 0 1-1.414-.586L18 10H10Z"
-                fill="currentColor"
-              />
-              <path
-                d="M17 20h14v2H17v-2Zm0 6h14v2H17v-2Zm0 6h10v2H17v-2Z"
-                fill="currentColor"
-              />
-            </svg>
+            <LayoutGrid className="h-8 w-8" aria-hidden="true" />
           </div>
           <span className="mt-4 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             Kategoriler

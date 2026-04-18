@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { DATA_SYNCED_EVENT, getSyncedDatasetText } from "@/lib/data-sync";
 
 const RESULTS_PER_PAGE = 20;
 const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === "1";
@@ -235,14 +234,6 @@ function parseJsonl(content: string): LocalFetva[] {
 async function loadLocalFatwas(): Promise<LocalFetva[]> {
   if (!localFatwasPromise) {
     localFatwasPromise = (async () => {
-      const syncedDataset = await getSyncedDatasetText();
-      if (syncedDataset) {
-        const syncedParsed = parseJsonl(syncedDataset);
-        if (syncedParsed.length > 0) {
-          return syncedParsed;
-        }
-      }
-
       const response = await fetch(LOCAL_DATA_URL, { cache: "force-cache" });
       if (!response.ok) {
         throw new Error(`Local data request failed with status ${response.status}`);
@@ -762,26 +753,6 @@ export function useSearch(initialQuery = ""): UseSearchReturn {
       autocompleteAbortControllerRef.current?.abort();
     };
   }, []);
-
-  useEffect(() => {
-    const handleDataSynced = () => {
-      localFatwasPromise = null;
-      localStatsPromise = null;
-      localCategoriesPromise = null;
-
-      const hasQueryContext = query.trim().length > 0 || selectedCategory.trim().length > 0;
-      if (hasQueryContext) {
-        void performSearchInternal(1);
-      }
-
-      void loadSearchStats();
-    };
-
-    window.addEventListener(DATA_SYNCED_EVENT, handleDataSynced);
-    return () => {
-      window.removeEventListener(DATA_SYNCED_EVENT, handleDataSynced);
-    };
-  }, [loadSearchStats, performSearchInternal, query, selectedCategory]);
 
   const goToPage = useCallback(
     (page: number) => {
