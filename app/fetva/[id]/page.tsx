@@ -1,15 +1,13 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const revalidate = 300;
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, BookOpen, Clock, ShieldCheck, Tag } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { DataService } from '@/lib/data-service';
-import { FetvaCard } from '@/components/cards/FetvaCard';
-import { Badge } from '@/components/ui/badge';
 import { FetvaEngagement } from '@/components/fetva/FetvaEngagement';
 import { FetvaViewTracker } from '@/components/fetva/FetvaViewTracker';
 import { FetvaComments } from '@/components/fetva/FetvaComments';
@@ -113,9 +111,9 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
     : undefined;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-bg text-main font-sans">
       <Header />
-      <main className="container mx-auto max-w-5xl px-4 py-12">
+      <main className="max-w-editorial mx-auto w-full px-8 pt-[140px] pb-16">
         <FetvaViewTracker id={fetva.id} />
         <FetvaStructuredData
           fetva={{
@@ -127,56 +125,55 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
             date: structuredDate,
           }}
         />
-        <Link href="/arama" className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3">
+
+        {/* Back Link */}
+        <Link
+          href="/arama"
+          className="inline-flex items-center gap-2 text-[13px] font-medium uppercase tracking-[1.5px] text-muted hover:text-accent transition-colors mb-10"
+        >
           <ArrowLeft className="h-4 w-4" />
           Fetvalara geri dön
         </Link>
 
-        <article className="mt-8 space-y-10 rounded-3xl border border-border/40 bg-background/80 p-8 shadow-lg backdrop-blur">
-          <header className="space-y-6">
-            <div className="flex flex-wrap items-center gap-3">
-              <Badge className="rounded-full bg-primary/10 px-4 py-2 text-primary">
-                <Tag className="mr-2 h-4 w-4" />
-                {primaryCategory}
-              </Badge>
-              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                <BookOpen className="h-3.5 w-3.5" />
-                Kaynak: {sourceLabel}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                <Clock className="h-3.5 w-3.5" />
-                Yayın: {publishedAtLabel}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                Son güncelleme: {updatedAtLabel}
-              </span>
-            </div>
+        <article>
+          {/* Metadata Line */}
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted uppercase tracking-[1px] mb-6">
+            <span className="text-accent font-medium">{primaryCategory}</span>
+            <span className="text-clean-border">·</span>
+            <span>Kaynak: {sourceLabel}</span>
+            <span className="text-clean-border">·</span>
+            <span>{publishedAtLabel}</span>
+          </div>
 
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{fetva.question}</h1>
+          {/* Title */}
+          <h1 className="font-serif font-normal text-main leading-[1.2] mb-8">
+            {fetva.question}
+          </h1>
 
-            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
-              <div className="inline-flex items-center gap-2 font-medium text-foreground">
-                <ShieldCheck className="h-4 w-4 text-primary" />
-                Bilgilendirme Notu
-              </div>
-              <p className="mt-2">
-                Bu içerik bilgilendirme amaçlıdır. Özel ve bağlayıcı durumlar için yetkili mercilere danışmanız önerilir.
-              </p>
-            </div>
-          </header>
+          {/* Disclaimer */}
+          <div className="border-l-2 border-accent/30 pl-5 py-2 mb-10 text-sm text-muted italic">
+            Bu içerik bilgilendirme amaçlıdır. Özel ve bağlayıcı durumlar için yetkili mercilere danışmanız önerilir.
+          </div>
 
-          <section className="space-y-5 text-lg leading-relaxed text-muted-foreground">
+          {/* Answer Body */}
+          <section className="space-y-5 mb-10">
             {paragraphs.length > 0 ? (
               paragraphs.map((paragraph, index) => (
-                <p key={index} className="text-foreground leading-8">
+                <p key={index} className="text-base text-main leading-[1.8]">
                   {paragraph}
                 </p>
               ))
             ) : (
-              <p className="whitespace-pre-wrap text-foreground leading-8">{fetva.answer}</p>
+              <p className="whitespace-pre-wrap text-base text-main leading-[1.8]">{fetva.answer}</p>
             )}
           </section>
 
+          {/* Update Info */}
+          <div className="border-t border-clean-border pt-6 mb-10 text-[11px] text-muted uppercase tracking-[1px]">
+            Son güncelleme: {updatedAtLabel}
+          </div>
+
+          {/* Engagement */}
           <FetvaEngagement
             id={fetva.id}
             initialLikes={fetva.likes ?? 0}
@@ -186,31 +183,37 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
             question={fetva.question}
           />
 
+          {/* Comments */}
           <FetvaComments fetvaId={fetva.id} />
         </article>
 
+        {/* Related Fatwas */}
         {relatedFatwas.length > 0 && (
-          <section className="mt-16 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-foreground">Benzer fetvalar</h2>
-              <Link href="/arama" className="text-sm font-semibold text-primary transition hover:underline">
-                Daha fazla fetva
+          <section className="mt-16 pt-10 border-t border-clean-border">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="font-serif font-normal text-main">Benzer Fetvalar</h2>
+              <Link
+                href="/arama"
+                className="text-[13px] font-medium uppercase tracking-[1.5px] text-muted hover:text-accent transition-colors"
+              >
+                Daha fazla
               </Link>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-0">
               {relatedFatwas.map((item) => (
-                <FetvaCard
+                <Link
                   key={item.id}
-                  id={item.id}
-                  question={item.question}
-                  answer={item.answer}
-                  category={item.categories?.[0] ?? 'Genel'}
-                  source={formatSource(item.source)}
-                  date={item.updatedAt ?? item.createdAt ?? item.date}
-                  views={item.views ?? 0}
-                  likes={item.likes ?? 0}
-                />
+                  href={`/fetva/${item.id}`}
+                  className="group block py-6 border-b border-clean-border last:border-b-0"
+                >
+                  <h3 className="font-serif text-lg text-main mb-2 leading-[1.4] group-hover:text-accent transition-colors">
+                    {item.question}
+                  </h3>
+                  <p className="text-sm text-muted leading-relaxed line-clamp-2">
+                    {item.answer}
+                  </p>
+                </Link>
               ))}
             </div>
           </section>

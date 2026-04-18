@@ -1,28 +1,12 @@
 export const revalidate = 300;
 
 import Link from 'next/link';
-import { ArrowRight, Search, ShieldCheck } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { DataService } from '@/lib/data-service';
 import { getCategoryIconComponent } from '@/lib/category-icons';
 import { HomepageViewTracker } from '@/components/layout/HomepageViewTracker';
-
-const CATEGORY_ARTWORK: Record<string, string> = {
-  Prayer: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)',
-  Fasting: 'linear-gradient(135deg, #fff3e0, #ffe0b2)',
-  Zekat: 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
-  Family: 'linear-gradient(135deg, #fce4ec, #f8bbd0)',
-  Daily: 'linear-gradient(135deg, #f4f4f5, #e4e4e7)',
-};
-
-const FALLBACK_ART = [
-  'linear-gradient(135deg, #e8f5e9, #c8e6c9)',
-  'linear-gradient(135deg, #fff3e0, #ffe0b2)',
-  'linear-gradient(135deg, #e3f2fd, #bbdefb)',
-  'linear-gradient(135deg, #f3e5f5, #e1bee7)',
-  'linear-gradient(135deg, #ede7f6, #d1c4e9)',
-];
 
 function toTimestamp(value?: string | Date): number {
   if (!value) return 0;
@@ -31,9 +15,17 @@ function toTimestamp(value?: string | Date): number {
   return Number.isFinite(t) ? t : 0;
 }
 
-function formatDate(value?: string | Date): string {
+function formatRelativeDate(value?: string | Date): string {
   const ts = toTimestamp(value);
-  if (!ts) return 'Tarih belirtilmedi';
+  if (!ts) return '';
+  const now = Date.now();
+  const diffMs = now - ts;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Bugün';
+  if (diffDays === 1) return '1 Gün Önce';
+  if (diffDays < 7) return `${diffDays} Gün Önce`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} Hafta Önce`;
   return new Date(ts).toLocaleDateString('tr-TR', { dateStyle: 'long' });
 }
 
@@ -51,7 +43,7 @@ async function getHomepageData() {
   const popularCategories = categories
     .slice()
     .sort((a, b) => b.fatwaCount - a.fatwaCount)
-    .slice(0, 8);
+    .slice(0, 5);
 
   const recentFatwas = allFatwas
     .slice()
@@ -61,150 +53,72 @@ async function getHomepageData() {
   const popularQuestions = popularFatwas.map((fetva) => ({
     id: fetva.id,
     question: fetva.question,
+    answer: fetva.answer,
     source: fetva.source?.trim() || 'Kaynak belirtilmedi',
     date: fetva.updatedAt ?? fetva.createdAt ?? fetva.date,
+    categories: fetva.categories ?? [],
   }));
-
-  const latestUpdatedAt = allFatwas.reduce<string | Date | undefined>((latest, fetva) => {
-    const candidate = fetva.updatedAt ?? fetva.createdAt ?? fetva.date;
-    if (!candidate) return latest;
-    if (!latest) return candidate;
-    return toTimestamp(candidate) > toTimestamp(latest) ? candidate : latest;
-  }, undefined);
 
   return {
     stats,
     popularCategories,
     recentFatwas,
     popularQuestions,
-    latestUpdatedAt,
   } as const;
 }
 
-function Hero({
-  stats,
-  latestUpdatedAt,
-}: {
-  stats: Awaited<ReturnType<typeof getHomepageData>>['stats'];
-  latestUpdatedAt: Awaited<ReturnType<typeof getHomepageData>>['latestUpdatedAt'];
-}) {
-  const formatted = {
-    fatwas: (stats?.totalFatwas ?? 0).toLocaleString('tr-TR'),
-    categories: (stats?.totalCategories ?? 0).toLocaleString('tr-TR'),
-    totalViews: (stats?.totalViews ?? 0).toLocaleString('tr-TR'),
-    totalSearches: (stats?.totalSearches ?? 0).toLocaleString('tr-TR'),
-  };
-
+/* ─── Hero Section ─── */
+function Hero() {
   return (
-    <section className="islamic-pattern">
-      <div className="container mx-auto flex flex-col items-center px-3 pt-3 pb-6 text-center sm:px-4 sm:py-20">
-        <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:px-4 sm:text-sm">
-          Güvenilir İslami Bilgi Platformu
-        </div>
-        <h1 className="mt-3 max-w-3xl text-3xl font-bold tracking-tight text-foreground sm:mt-6 sm:text-5xl">
-          Sorularınıza güvenilir fetvalarla cevap bulun
+    <section className="relative pt-[150px] mb-[50px]">
+      <div className="max-w-[700px] mx-auto px-8 text-center">
+        <h1 className="font-serif font-normal text-main leading-[1.2] mb-6">
+          İslami Sorularınıza <br className="hidden md:block" /> Güvenilir ve Modern Rehber
         </h1>
-        <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg">
-          Uzman hocalar tarafından hazırlanan binlerce fetva içinde arama yapın, sık sorulan soruları keşfedin ve
-          İslami konularda hızlıca rehberlik alın.
-        </p>
 
-        <div className="mt-3 flex w-full max-w-2xl items-start gap-2 rounded-2xl border border-primary/20 bg-background/80 px-4 py-2.5 text-left text-xs font-medium text-muted-foreground sm:mt-5 sm:inline-flex sm:w-auto sm:items-center sm:rounded-full sm:py-2 sm:text-center">
-          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary sm:mt-0" />
-          <span>
-            Son güncelleme: <strong className="text-foreground">{formatDate(latestUpdatedAt)}</strong> · Kaynak bilgisi
-            şeffaf şekilde gösterilir.
-          </span>
-        </div>
-
-        <form action="/arama" className="mt-4 w-full max-w-2xl sm:mt-8">
+        <form action="/arama" className="relative w-full max-w-[600px] mx-auto mt-6">
           <label htmlFor="hero-search" className="sr-only">
             Fetva ara
           </label>
-          <div className="relative flex items-center">
-            <Search className="pointer-events-none absolute left-5 h-5 w-5 text-primary" />
-            <input
-              id="hero-search"
-              name="q"
-              type="search"
-              placeholder="Fetva veya soru arayın..."
-              className="h-12 w-full rounded-full border border-primary/20 bg-background px-11 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-14 sm:px-12 sm:text-base"
-            />
+          <input
+            id="hero-search"
+            name="q"
+            type="search"
+            className="w-full py-5 px-8 rounded-[40px] border-[1.5px] border-clean-border bg-card text-base text-main outline-none focus:border-accent shadow-[0_10px_30px_rgba(95,113,97,0.05)] transition-all placeholder:text-muted"
+            placeholder="Aklınızdaki soruyu buraya yazın..."
+          />
+          <div className="absolute inset-y-0 right-6 flex items-center text-muted pointer-events-none">
+            <Search size={20} />
           </div>
         </form>
-
-        <dl className="mt-5 grid w-full max-w-4xl grid-cols-2 gap-3 rounded-2xl bg-background/80 p-3 shadow-sm backdrop-blur sm:mt-10 sm:gap-4 sm:rounded-3xl sm:p-6 lg:grid-cols-4">
-          <div className="space-y-1">
-            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Toplam Fetva</dt>
-            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.fatwas}</dd>
-          </div>
-          <div className="space-y-1">
-            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Kategori</dt>
-            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.categories}</dd>
-          </div>
-          <div className="space-y-1">
-            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Toplam Görüntülenme</dt>
-            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.totalViews}</dd>
-          </div>
-          <div className="space-y-1">
-            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Toplam Arama</dt>
-            <dd className="text-xl font-semibold text-foreground sm:text-2xl">{formatted.totalSearches}</dd>
-          </div>
-        </dl>
       </div>
     </section>
   );
 }
 
+/* ─── Categories Grid ─── */
 function FeaturedCategories({
   categories,
 }: {
   categories: Awaited<ReturnType<typeof getHomepageData>>['popularCategories'];
 }) {
-  const getStyle = (name: string, index: number) => {
-    const key = Object.keys(CATEGORY_ARTWORK).find((preset) => name.toLowerCase().includes(preset.toLowerCase()));
-    const fallback = FALLBACK_ART[index % FALLBACK_ART.length];
-    return CATEGORY_ARTWORK[key ?? ''] ?? fallback;
-  };
-
   return (
-    <section className="container mx-auto px-4 py-12 sm:py-16">
-      <div className="flex flex-col gap-3 text-left sm:text-center">
-        <span className="text-sm font-semibold uppercase tracking-wide text-primary">Kategoriler</span>
-        <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Öne çıkan konular</h2>
-        <p className="max-w-3xl text-base leading-relaxed text-muted-foreground sm:mx-auto">
-          İbadet, muamelat, aile hayatı ve daha fazlası. İhtiyacınız olan fetvayı hızlıca bulmak için popüler
-          kategorileri keşfedin.
-        </p>
-      </div>
-
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-        {categories.slice(0, 5).map((category, index) => {
+    <section className="max-w-editorial mx-auto w-full px-8 mb-16">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
+        {categories.map((category) => {
           const Icon = getCategoryIconComponent(category.name);
           return (
             <Link
               key={category.id}
               href={`/kategori/${category.slug}`}
-              className="group flex flex-col gap-4 rounded-2xl border border-border/40 bg-background/90 p-6 shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:border-primary"
+              className="flex flex-col items-center py-8 px-5 bg-card rounded-[20px] border border-clean-border text-center hover:shadow-[0_10px_30px_rgba(95,113,97,0.08)] hover:-translate-y-1 transition-all"
             >
-              <div className="overflow-hidden rounded-2xl border border-border/30 bg-primary/5">
-                <div
-                  className="flex h-40 w-full items-center justify-center text-primary"
-                  style={{ background: getStyle(category.name, index) }}
-                >
-                  <Icon className="h-10 w-10" />
-                </div>
+              <div className="mb-4 text-accent">
+                <Icon className="h-6 w-6" />
               </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
-                  {category.name}
-                </h3>
-                <p className="line-clamp-2 text-sm text-muted-foreground">
-                  {category.description ?? 'Konuyu keşfetmeye başlayın.'}
-                </p>
-              </div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-primary/80">
-                {category.fatwaCount} fetva
+              <h3 className="font-serif text-lg text-main mb-2 leading-tight">{category.name}</h3>
+              <span className="text-[11px] text-muted uppercase tracking-[1px] font-medium">
+                {category.fatwaCount}+ Fetva
               </span>
             </Link>
           );
@@ -214,63 +128,85 @@ function FeaturedCategories({
   );
 }
 
-function RecentFatwas({
-  fatwas,
+/* ─── Magazine-Style Content Split ─── */
+function ContentSplit({
+  recentFatwas,
+  popularQuestions,
 }: {
-  fatwas: Awaited<ReturnType<typeof getHomepageData>>['recentFatwas'];
+  recentFatwas: Awaited<ReturnType<typeof getHomepageData>>['recentFatwas'];
+  popularQuestions: Awaited<ReturnType<typeof getHomepageData>>['popularQuestions'];
 }) {
   return (
-    <section className="bg-background-light py-12 sm:py-16">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <span className="text-sm font-semibold uppercase tracking-wide text-primary">En Yeni Fetvalar</span>
-            <h2 className="mt-2 text-3xl font-semibold text-foreground sm:text-4xl">Güncel fetvalardan öne çıkanlar</h2>
-          </div>
-          <Link href="/arama" className="text-sm font-semibold text-primary hover:underline">
-            Tüm fetvaları görüntüle
-          </Link>
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          {fatwas.map((item) => {
-            const sourceLabel = item.source?.trim() || 'Kaynak belirtilmedi';
+    <section className="max-w-editorial mx-auto w-full px-8 border-t border-clean-border pt-10 mb-16">
+      <div className="grid lg:grid-cols-2 gap-10">
+        {/* Left Column: Recent Fatwas */}
+        <div className="space-y-10">
+          {recentFatwas.map((item, idx) => {
+            const relDate = formatRelativeDate(item.updatedAt ?? item.createdAt ?? item.date);
+            const snippet =
+              item.answer.length > 120
+                ? item.answer.substring(0, 120) + '...'
+                : item.answer;
 
             return (
-              <article
-                key={item.id}
-                className="flex flex-col gap-4 rounded-2xl border border-border/40 bg-background p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="hidden h-20 w-28 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary/10 to-primary/30 md:block" />
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                      <span>{formatDate(item.updatedAt ?? item.createdAt ?? item.date)}</span>
-                      <span className="hidden md:inline">•</span>
-                      <span>{(item.views ?? 0).toLocaleString('tr-TR')} görüntülenme</span>
-                      <span className="hidden md:inline">•</span>
-                      <span>Kaynak: {sourceLabel}</span>
-                    </div>
-                    <h3 className="mt-2 text-xl font-semibold text-foreground">{item.question}</h3>
-                    <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
-                  </div>
+              <article key={item.id} className="flex gap-5 items-start group">
+                <div className="font-sans text-[12px] text-accent font-bold [writing-mode:vertical-rl] rotate-180 border-l border-accent pl-2 uppercase shrink-0 tracking-[1px]">
+                  {idx === 0 ? 'GÜNÜN SORUSU' : 'YENİ EKLENEN'}
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                    {item.categories.slice(0, 2).map((cat) => (
-                      <span key={cat} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                        {cat}
-                      </span>
-                    ))}
-                  </div>
-                  <Link
-                    href={`/fetva/${item.id}`}
-                    className="inline-flex items-center gap-2 text-primary transition hover:gap-3"
-                    aria-label={`${item.question} fetvasını oku`}
-                  >
-                    Oku
-                    <ArrowRight className="h-4 w-4" />
+                <div>
+                  <Link href={`/fetva/${item.id}`}>
+                    <h3 className="m-0 mb-2 font-serif text-lg leading-[1.4] text-main group-hover:text-accent transition-colors cursor-pointer">
+                      {item.question}
+                    </h3>
                   </Link>
+                  <p className="m-0 text-sm text-muted leading-relaxed">
+                    {snippet}
+                  </p>
+                  {relDate && (
+                    <span className="inline-block mt-2 text-[11px] text-muted/70 uppercase tracking-[1px]">
+                      {relDate}
+                    </span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {/* Right Column: Trending Questions */}
+        <div className="space-y-10">
+          {popularQuestions.slice(0, 3).map((question) => {
+            const snippet =
+              question.answer.length > 120
+                ? question.answer.substring(0, 120) + '...'
+                : question.answer;
+
+            return (
+              <article key={question.id} className="flex gap-5 items-start group">
+                <div className="font-sans text-[12px] text-accent font-bold [writing-mode:vertical-rl] rotate-180 border-l border-accent pl-2 uppercase shrink-0 tracking-[1px]">
+                  GÜNDEM
+                </div>
+                <div>
+                  <Link href={`/fetva/${question.id}`}>
+                    <h3 className="m-0 mb-2 font-serif text-lg leading-[1.4] text-main group-hover:text-accent transition-colors cursor-pointer">
+                      {question.question}
+                    </h3>
+                  </Link>
+                  <p className="m-0 text-sm text-muted leading-relaxed">
+                    {snippet}
+                  </p>
+                  {question.categories.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {question.categories.slice(0, 2).map((cat) => (
+                        <span
+                          key={cat}
+                          className="text-[11px] text-accent/80 uppercase tracking-[1px] font-medium"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </article>
             );
@@ -281,62 +217,22 @@ function RecentFatwas({
   );
 }
 
-function PopularQuestions({
-  questions,
-}: {
-  questions: Awaited<ReturnType<typeof getHomepageData>>['popularQuestions'];
-}) {
-  return (
-    <section className="container mx-auto px-4 py-12 sm:py-16">
-      <div className="flex flex-col gap-3 text-left sm:text-center">
-        <span className="text-sm font-semibold uppercase tracking-wide text-primary">Sık Sorulanlar</span>
-        <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Topluluğumuzun gündemindeki sorular</h2>
-        <p className="max-w-3xl text-base leading-relaxed text-muted-foreground sm:mx-auto">
-          Diğer kullanıcıların sıkça sorduğu soruları inceleyin, konular hakkında hızlıca bilgi edinin.
-        </p>
-      </div>
-
-      <div className="mt-10 space-y-3">
-        {questions.map((question, index) => (
-          <Link
-            key={question.id}
-            href={`/fetva/${question.id}`}
-            className="group flex items-center justify-between rounded-2xl border border-border/40 bg-background/90 px-5 py-4 transition hover:border-primary hover:bg-primary/5"
-          >
-            <div className="flex flex-1 items-center gap-4 text-left">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                #{index + 1}
-              </span>
-              <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground group-hover:text-primary">{question.question}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Kaynak: {question.source} • {formatDate(question.date)}
-                </p>
-              </div>
-            </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default async function Home() {
   const data = await getHomepageData();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-bg text-main font-sans">
       <HomepageViewTracker />
       <Header />
-      <main className="flex flex-col gap-0">
-        <Hero stats={data.stats} latestUpdatedAt={data.latestUpdatedAt} />
+      <main className="flex flex-col">
+        <Hero />
         <FeaturedCategories categories={data.popularCategories} />
-        <RecentFatwas fatwas={data.recentFatwas} />
-        <PopularQuestions questions={data.popularQuestions} />
+        <ContentSplit
+          recentFatwas={data.recentFatwas}
+          popularQuestions={data.popularQuestions}
+        />
       </main>
       <Footer />
     </div>
   );
 }
-

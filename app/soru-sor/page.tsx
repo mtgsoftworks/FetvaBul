@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Button } from '@/components/ui/button';
 
 interface FormState {
   name: string;
@@ -103,148 +102,132 @@ export default function AskQuestionPage() {
   };
 
   const disabled = status === 'submitting';
+  const inputClass = 'w-full h-12 rounded-full border-[1.5px] border-clean-border bg-card px-5 text-sm text-main outline-none focus:border-accent transition-all placeholder:text-muted';
+  const labelClass = 'text-[11px] font-medium uppercase tracking-[1px] text-muted';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-bg text-main font-sans">
       <Header />
-      <main className="container mx-auto max-w-3xl px-4 py-16">
-        <section className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-            <svg
-              className="h-8 w-8"
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M10 10a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v28l-8-5-8 5-8-5-8 5V10Z"
-                fill="currentColor"
-                opacity="0.15"
-              />
-              <path
-                d="M14 6h20a4 4 0 0 1 4 4v28a1 1 0 0 1-1.52.85L28 34.118l-8.48 4.732A1 1 0 0 1 18 38V28h-4a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4Zm-2 6v8a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v7.764l7.48-4.17a1 1 0 0 1 1.04 0L38 31.764V10a2 2 0 0 0-2-2H14a2 2 0 0 0-2 2Zm10 2h8v2h-8v-2Zm0 4h8v2h-8v-2Z"
-                fill="currentColor"
-              />
-            </svg>
-          </div>
-          <span className="mt-4 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            Soru Sor
-          </span>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Sorularınızı uzman ekibimize iletin
-          </h1>
-          <p className="mt-3 mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground">
-            İbadet, aile hayatı ve ekonomi gibi konulardaki sorularınızı bize gönderebilirsiniz. Her mesaj alanında uzman hocalarımız tarafından titizlikle değerlendirilir.
+      <main className="max-w-[700px] mx-auto w-full px-8 pt-[140px] pb-16">
+        <section className="mb-10">
+          <h1 className="font-serif font-normal text-main mb-3">Soru Sor</h1>
+          <p className="text-sm text-muted leading-relaxed">
+            İbadet, aile hayatı ve ekonomi gibi konulardaki sorularınızı bize gönderebilirsiniz.
+            Her mesaj alanında uzman hocalarımız tarafından titizlikle değerlendirilir.
           </p>
         </section>
 
-        <section className="mt-12">
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6 rounded-3xl border border-border/30 bg-background/95 p-8 shadow-sm"
-          >
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="name" className="text-sm font-semibold text-foreground">Adınız (isteğe bağlı)</label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={form.name}
-                  onChange={handleChange('name')}
-                  placeholder="Adınızı giriniz"
-                  className="h-12 rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="email" className="text-sm font-semibold text-foreground">E-posta adresiniz *</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={form.email}
-                  onChange={handleChange('email')}
-                  placeholder="ornek@eposta.com"
-                  className="h-12 rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="subject" className="text-sm font-semibold text-foreground">Konu Başlığı</label>
-                <input
-                  id="subject"
-                  name="subject"
-                  type="text"
-                  value={form.subject}
-                  onChange={handleChange('subject')}
-                  placeholder="Sorunuz için kısa bir başlık"
-                  className="h-12 rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="category" className="text-sm font-semibold text-foreground">Kategori</label>
-                <select
-                  id="category"
-                  name="category"
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="h-12 rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value="">Kategori seçin</option>
-                  {CATEGORY_OPTIONS.map(option => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
+          <div className="grid gap-6 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <label htmlFor="message" className="text-sm font-semibold text-foreground">Sorunuz *</label>
-              <textarea
-                id="message"
-                name="message"
-                required
-                value={form.message}
-                onChange={handleChange('message')}
-                rows={6}
-                placeholder="Sorunuzu ayrıntılı şekilde yazınız. Durumunuzu, size özel koşulları ve varsa önceki fetva kaynaklarını belirtin."
-                className="rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              <label htmlFor="name" className={labelClass}>Adınız (isteğe bağlı)</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={form.name}
+                onChange={handleChange('name')}
+                placeholder="Adınızı giriniz"
+                className={inputClass}
               />
-              <p className="text-xs text-muted-foreground">Sorularınızı arşivimize eklemeden önce anonimize eder, kişisel bilgilerinizi üçüncü kişilerle paylaşmayız.</p>
             </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">* İşaretli alanların doldurulması zorunludur.</p>
-              <Button type="submit" disabled={disabled} className="inline-flex items-center gap-2 rounded-full px-6 py-2">
-                {status === 'submitting' && <Loader2 className="h-4 w-4 animate-spin" />}
-                Sorumu Gönder
-              </Button>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className={labelClass}>E-posta adresiniz *</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={form.email}
+                onChange={handleChange('email')}
+                placeholder="ornek@eposta.com"
+                className={inputClass}
+              />
             </div>
+          </div>
 
-            {status === 'success' && (
-              <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
-                <CheckCircle2 className="h-5 w-5" />
-                <p>
-                  {OFFLINE_BUILD
-                    ? 'Sorunuz çevrimdışı olarak kaydedildi. İnternet bağlantısı olduğunda tekrar gönderebilirsiniz.'
-                    : 'Sorunuz başarıyla iletildi. En kısa sürede size dönüş yapacağız.'}
-                </p>
-              </div>
-            )}
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="subject" className={labelClass}>Konu Başlığı</label>
+              <input
+                id="subject"
+                name="subject"
+                type="text"
+                value={form.subject}
+                onChange={handleChange('subject')}
+                placeholder="Sorunuz için kısa bir başlık"
+                className={inputClass}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="category" className={labelClass}>Kategori</label>
+              <select
+                id="category"
+                name="category"
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                className={inputClass}
+              >
+                <option value="">Kategori seçin</option>
+                {CATEGORY_OPTIONS.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-            {status === 'error' && (
-              <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-                <AlertCircle className="h-5 w-5" />
-                <p>{errorMessage ?? 'Sorunuz gönderilirken bir sorun oluştu.'}</p>
-              </div>
-            )}
-          </form>
-        </section>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="message" className={labelClass}>Sorunuz *</label>
+            <textarea
+              id="message"
+              name="message"
+              required
+              value={form.message}
+              onChange={handleChange('message')}
+              rows={6}
+              placeholder="Sorunuzu ayrıntılı şekilde yazınız..."
+              className="w-full rounded-[20px] border-[1.5px] border-clean-border bg-card px-5 py-4 text-sm text-main outline-none focus:border-accent transition-all placeholder:text-muted resize-none"
+            />
+            <p className="text-[11px] text-muted tracking-wide">
+              Sorularınızı arşivimize eklemeden önce anonimize eder, kişisel bilgilerinizi üçüncü kişilerle paylaşmayız.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-clean-border">
+            <p className="text-[11px] text-muted uppercase tracking-[1px]">* İşaretli alanlar zorunludur</p>
+            <button
+              type="submit"
+              disabled={disabled}
+              className="inline-flex items-center gap-2 rounded-full bg-accent text-white px-6 py-3 text-[13px] font-medium uppercase tracking-[1.5px] hover:bg-accent-hover transition-colors disabled:opacity-60"
+            >
+              {status === 'submitting' && <Loader2 className="h-4 w-4 animate-spin" />}
+              Sorumu Gönder
+            </button>
+          </div>
+
+          {status === 'success' && (
+            <div className="flex items-center gap-3 border-l-2 border-accent pl-5 py-3 text-sm text-accent">
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+              <p>
+                {OFFLINE_BUILD
+                  ? 'Sorunuz çevrimdışı olarak kaydedildi.'
+                  : 'Sorunuz başarıyla iletildi. En kısa sürede size dönüş yapacağız.'}
+              </p>
+            </div>
+          )}
+
+          {status === 'error' && (
+            <div className="flex items-center gap-3 border-l-2 border-red-400 pl-5 py-3 text-sm text-red-600">
+              <AlertCircle className="h-5 w-5 shrink-0" />
+              <p>{errorMessage ?? 'Sorunuz gönderilirken bir sorun oluştu.'}</p>
+            </div>
+          )}
+        </form>
       </main>
       <Footer />
     </div>

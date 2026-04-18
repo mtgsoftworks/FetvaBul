@@ -1,17 +1,15 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useState, useEffect } from 'react';
 
 const NAVIGATION = [
-  { label: 'Ana Sayfa', href: '/' },
-  { label: 'Soru Sor', href: '/soru-sor' },
+  { label: 'Anasayfa', href: '/' },
   { label: 'Kategoriler', href: '/kategoriler' },
+  { label: 'Soru Sor', href: '/soru-sor' },
   { label: 'Hakkında', href: '/hakkinda' },
   { label: 'İletişim', href: '/iletisim' },
 ];
@@ -19,96 +17,108 @@ const NAVIGATION = [
 export function Header() {
   const pathname = usePathname();
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const renderDesktopLinks = () =>
-    NAVIGATION.map((item) => (
-      <Link
-        key={item.href}
-        href={item.href}
-        className={cn(
-          'rounded-md px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          isActive(item.href) && 'text-primary'
-        )}
-        aria-current={isActive(item.href) ? 'page' : undefined}
-      >
-        {item.label}
-      </Link>
-    ));
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const renderMobileLinks = () =>
-    NAVIGATION.map((item) => (
-      <SheetClose asChild key={item.href}>
-        <Link
-          href={item.href}
-          className={cn(
-            'rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-            isActive(item.href) && 'text-primary'
-          )}
-          aria-current={isActive(item.href) ? 'page' : undefined}
-        >
-          {item.label}
-        </Link>
-      </SheetClose>
-    ));
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/20 bg-background/90 backdrop-blur-sm">
-      <div className="container mx-auto flex h-12 items-center justify-between px-3 sm:h-20 sm:px-4">
-        <Link
-          href="/"
-          className="inline-flex items-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          aria-label="FetvaBul ana sayfası"
-        >
-          <Image
-            src="/fetvabul_logo.png"
-            alt="FetvaBul logosu"
-            width={512}
-            height={512}
-            className="h-10 w-auto sm:h-14"
-            priority
-          />
-        </Link>
-
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Ana navigasyon">
-          {renderDesktopLinks()}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className="hidden h-10 w-10 rounded-full border border-primary/20 text-primary sm:inline-flex focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+    <>
+      <header
+        className={cn(
+          'fixed top-0 inset-x-0 z-50 transition-all duration-300',
+          isScrolled
+            ? 'bg-card/95 backdrop-blur-sm shadow-[0_2px_10px_rgba(0,0,0,0.05)] py-5'
+            : 'bg-transparent py-8'
+        )}
+      >
+        <div className="max-w-editorial mx-auto px-8 flex justify-between items-center w-full">
+          <Link
+            href="/"
+            className="font-serif text-[28px] font-bold tracking-[-0.5px] text-accent no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
+            aria-label="FetvaBul ana sayfası"
           >
-            <Link href="/arama" aria-label="Arama sayfasına git">
-              <Search className="h-5 w-5" />
-            </Link>
-          </Button>
+            FetvaBul
+          </Link>
 
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="inline-flex h-8 w-8 rounded-full border border-border/50 md:hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="Menüyü aç"
+          <nav className="hidden md:flex items-center space-x-8" aria-label="Ana navigasyon">
+            {NAVIGATION.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'text-[13px] font-medium uppercase tracking-[1.5px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded',
+                  isActive(item.href) ? 'text-accent' : 'text-muted hover:text-accent'
+                )}
+                aria-current={isActive(item.href) ? 'page' : undefined}
               >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="mobile-safe-bottom w-full max-w-xs bg-background">
-              <nav className="mt-12 flex flex-col gap-3" aria-label="Mobil navigasyon">
-                {renderMobileLinks()}
-              </nav>
-              <SheetClose asChild>
-                <Button asChild className="mt-8 w-full rounded-full border border-primary/20 bg-primary/10 text-primary">
-                  <Link href="/arama">Ara</Link>
-                </Button>
-              </SheetClose>
-            </SheetContent>
-          </Sheet>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <button
+            className="flex items-center justify-center p-2 text-muted hover:text-main md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[60] bg-bg/98 backdrop-blur-sm md:hidden">
+          <div className="flex justify-between items-center px-8 py-8">
+            <Link
+              href="/"
+              className="font-serif text-[28px] font-bold tracking-[-0.5px] text-accent no-underline"
+              onClick={() => setMobileOpen(false)}
+            >
+              FetvaBul
+            </Link>
+            <button
+              className="flex items-center justify-center p-2 text-muted hover:text-main"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Menüyü kapat"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <nav className="flex flex-col items-center gap-6 pt-12 mobile-safe-bottom" aria-label="Mobil navigasyon">
+            {NAVIGATION.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  'text-[15px] font-medium uppercase tracking-[2px] transition-colors',
+                  isActive(item.href) ? 'text-accent' : 'text-muted hover:text-accent'
+                )}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              href="/arama"
+              onClick={() => setMobileOpen(false)}
+              className="mt-4 text-[13px] font-medium uppercase tracking-[1.5px] border border-clean-border rounded-full px-6 py-3 text-muted hover:text-accent hover:border-accent transition-colors"
+            >
+              Ara
+            </Link>
+          </nav>
+        </div>
+      )}
+    </>
   );
 }

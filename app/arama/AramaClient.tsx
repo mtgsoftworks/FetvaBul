@@ -1,11 +1,9 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { Loader2, Search, X } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useCategories, useSearch } from '@/hooks/use-search';
 
 type AramaClientProps = {
@@ -62,68 +60,65 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
   const displayedResultCount = searchResults.length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-bg text-main font-sans">
       <Header />
 
-      <main className="container mx-auto max-w-6xl px-4 py-12">
-        <section className="rounded-3xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
-          <span className="inline-block rounded-full border border-primary/20 bg-background px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            Arama
-          </span>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Fetva arama merkezi</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+      <main className="max-w-editorial mx-auto w-full px-8 pt-[140px] pb-16">
+        {/* Search Header */}
+        <section className="mb-10">
+          <h1 className="font-serif font-normal text-main mb-3">Fetva Arama</h1>
+          <p className="text-sm text-muted leading-relaxed max-w-lg">
             Soru, cevap veya kategoriye göre arama yaparak ilgili fetvaları hızlıca bulabilirsiniz.
           </p>
 
           <form
-            className="mt-6 space-y-4"
+            className="mt-6"
             onSubmit={(event) => {
               event.preventDefault();
               performSearch();
             }}
           >
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+            <div className="relative max-w-[600px]">
               <input
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Örn: zekat kimlere verilir?"
-                className="h-14 w-full rounded-full border border-primary/20 bg-background pl-12 pr-28 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full py-4 px-7 pr-24 rounded-[40px] border-[1.5px] border-clean-border bg-card text-base text-main outline-none focus:border-accent shadow-[0_10px_30px_rgba(95,113,97,0.05)] transition-all placeholder:text-muted"
                 aria-label="Fetva arama kutusu"
               />
               {query ? (
                 <button
                   type="button"
                   onClick={clearSearch}
-                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border/50 text-muted-foreground transition hover:text-foreground"
+                  className="absolute right-14 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-main transition-colors"
                   aria-label="Aramayı temizle"
                 >
-                  <X className="h-4 w-4" />
+                  <X size={16} />
                 </button>
-              ) : (
-                <Button
-                  type="submit"
-                  className="absolute right-2 top-1/2 h-10 -translate-y-1/2 rounded-full px-5"
-                  disabled={isSearching}
-                >
-                  {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ara'}
-                </Button>
-              )}
+              ) : null}
+              <button
+                type="submit"
+                disabled={isSearching}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-accent transition-colors"
+                aria-label="Ara"
+              >
+                {isSearching ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
+              </button>
             </div>
 
             {isAutocompleteLoading && query.trim().length >= 2 ? (
-              <p className="text-xs text-muted-foreground" role="status" aria-live="polite">
+              <p className="mt-2 text-xs text-muted" role="status" aria-live="polite">
                 Öneriler yükleniyor...
               </p>
             ) : autocompleteSuggestions.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {autocompleteSuggestions.map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
                     onClick={() => setQuery(suggestion)}
-                    className="rounded-full border border-primary/20 bg-background px-3 py-1 text-xs text-muted-foreground transition hover:border-primary hover:text-primary"
+                    className="rounded-full border border-clean-border bg-card px-3 py-1 text-xs text-muted transition hover:border-accent hover:text-accent"
                   >
                     {suggestion}
                   </button>
@@ -133,22 +128,16 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
           </form>
         </section>
 
-        <section className="mt-6 grid gap-4 rounded-3xl border border-border/40 bg-background/90 p-5 shadow-sm sm:grid-cols-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Toplam Sonuç</p>
-            <p className="mt-1 text-2xl font-semibold text-foreground" aria-live="polite">
-              {totalResults.toLocaleString('tr-TR')}
-            </p>
+        {/* Filters Row */}
+        <section className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-8 pb-8 border-b border-clean-border">
+          <div className="text-sm text-muted">
+            <span className="font-medium text-main">{totalResults.toLocaleString('tr-TR')}</span> sonuç
           </div>
-          <div>
-            <label htmlFor="category-filter" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Kategori
-            </label>
+          <div className="flex gap-3 sm:ml-auto">
             <select
-              id="category-filter"
               value={selectedCategory}
               onChange={(event) => setSelectedCategory(event.target.value)}
-              className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-10 rounded-full border border-clean-border bg-card px-4 text-sm text-muted outline-none focus:border-accent transition"
               disabled={categoriesLoading}
             >
               <option value="">Tüm kategoriler</option>
@@ -158,16 +147,10 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
                 </option>
               ))}
             </select>
-          </div>
-          <div>
-            <label htmlFor="sort-filter" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Sıralama
-            </label>
             <select
-              id="sort-filter"
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as 'relevance' | 'date' | 'popular' | 'views')}
-              className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-10 rounded-full border border-clean-border bg-card px-4 text-sm text-muted outline-none focus:border-accent transition"
             >
               <option value="relevance">Alaka</option>
               <option value="date">Tarih</option>
@@ -177,28 +160,17 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
           </div>
         </section>
 
-        {hasAnyFilter && (
-          <section
-            className="mt-4 rounded-2xl border border-border/40 bg-background/90 px-4 py-3 text-sm text-muted-foreground"
-            role="status"
-            aria-live="polite"
-          >
-            {isSearching
-              ? 'Arama devam ediyor...'
-              : `${displayedResultCount.toLocaleString('tr-TR')} sonuç gösteriliyor.`}
-          </section>
-        )}
-
+        {/* Keywords */}
         {topKeywords.length > 0 ? (
-          <section className="mt-4 rounded-2xl border border-border/40 bg-background/90 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Öne çıkan anahtar kelimeler</p>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <section className="mb-8">
+            <p className="text-[11px] font-medium uppercase tracking-[1px] text-muted mb-3">Öne çıkan kelimeler</p>
+            <div className="flex flex-wrap gap-2">
               {topKeywords.map((item) => (
                 <button
                   key={item.keyword}
                   type="button"
                   onClick={() => setQuery(item.keyword)}
-                  className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs text-primary transition hover:bg-primary/10"
+                  className="rounded-full border border-clean-border bg-card px-3 py-1 text-xs text-accent transition hover:bg-accent-light"
                 >
                   {item.keyword} ({item.count})
                 </button>
@@ -207,40 +179,33 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
           </section>
         ) : null}
 
+        {/* Error */}
         {searchError ? (
-          <section className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="status" aria-live="polite">
+          <section className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="status" aria-live="polite">
             {searchError}
           </section>
         ) : null}
 
-        <section className="mt-6 space-y-4">
+        {/* Results */}
+        <section className="space-y-0">
           {isSearching && searchResults.length === 0 ? (
-            <div
-              className="flex items-center gap-3 rounded-2xl border border-border/40 bg-background/90 px-4 py-6 text-muted-foreground"
-              role="status"
-              aria-live="polite"
-            >
+            <div className="flex items-center gap-3 py-12 text-muted" role="status" aria-live="polite">
               <Loader2 className="h-5 w-5 animate-spin" />
               <span>Sonuçlar yükleniyor...</span>
             </div>
           ) : null}
 
           {!isSearching && searchResults.length === 0 && hasAnyFilter ? (
-            <div className="rounded-2xl border border-border/40 bg-background/90 px-4 py-8 text-center">
-              <h2 className="text-lg font-semibold text-foreground">Sonuç bulunamadı</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Farklı bir sorgu yazın veya kategori filtresini sıfırlayın.</p>
-              <ul className="mt-4 space-y-1 text-sm text-muted-foreground">
-                <li>Arama ifadesini kısaltmayı deneyin.</li>
-                <li>Daha genel anahtar kelimeler kullanın.</li>
-                <li>Kategori filtresini kaldırıp tekrar arayın.</li>
-              </ul>
+            <div className="py-16 text-center">
+              <h2 className="font-serif text-xl text-main mb-2">Sonuç bulunamadı</h2>
+              <p className="text-sm text-muted">Farklı bir sorgu yazın veya kategori filtresini sıfırlayın.</p>
             </div>
           ) : null}
 
           {!hasAnyFilter ? (
-            <div className="rounded-2xl border border-border/40 bg-background/90 px-4 py-8 text-center">
-              <h2 className="text-lg font-semibold text-foreground">Aramaya başlayın</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
+            <div className="py-16 text-center">
+              <h2 className="font-serif text-xl text-main mb-2">Aramaya başlayın</h2>
+              <p className="text-sm text-muted">
                 Üstteki arama kutusuna bir soru veya anahtar kelime yazarak sonuçları görüntüleyin.
               </p>
             </div>
@@ -254,54 +219,59 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
             return (
               <article
                 key={fetva.id}
-                className="rounded-2xl border border-border/40 bg-background/95 p-5 shadow-sm transition hover:border-primary"
+                className="group py-8 border-b border-clean-border last:border-b-0"
               >
-                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted uppercase tracking-[1px] mb-3">
                   <span>{displayDate}</span>
-                  <span>•</span>
+                  <span className="text-clean-border">·</span>
                   <span>{(fetva.views ?? 0).toLocaleString('tr-TR')} görüntülenme</span>
-                  <span>•</span>
-                  <span>Kaynak: {sourceLabel}</span>
+                  <span className="text-clean-border">·</span>
+                  <span>{sourceLabel}</span>
                 </div>
 
-                <h2 className="mt-2 text-xl font-semibold text-foreground">
-                  <Link href={`/fetva/${fetva.id}`} className="transition hover:text-primary">
+                <Link href={`/fetva/${fetva.id}`}>
+                  <h2 className="font-serif text-xl text-main mb-3 group-hover:text-accent transition-colors cursor-pointer">
                     {fetva.question}
-                  </Link>
-                </h2>
+                  </h2>
+                </Link>
 
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{truncate(fetva.answer)}</p>
+                <p className="text-sm text-muted leading-relaxed mb-4">{truncate(fetva.answer)}</p>
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    {fetva.categories.slice(0, 3).map((category) => (
-                      <Badge key={`${fetva.id}-${category}`} variant="secondary" className="bg-primary/10 text-primary">
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-                  <Button asChild size="sm" className="rounded-full px-4">
-                    <Link href={`/fetva/${fetva.id}`}>Detay</Link>
-                  </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {fetva.categories.slice(0, 3).map((category) => (
+                    <span
+                      key={`${fetva.id}-${category}`}
+                      className="text-[11px] text-accent uppercase tracking-[1px] font-medium"
+                    >
+                      {category}
+                    </span>
+                  ))}
                 </div>
               </article>
             );
           })}
         </section>
 
+        {/* Pagination */}
         {hasAnyFilter && (currentPage > 1 || hasMoreResults || totalPages > 1) ? (
-          <section className="mt-8 flex items-center justify-center gap-3">
-            <Button variant="outline" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage <= 1 || isSearching}>
+          <section className="mt-10 flex items-center justify-center gap-4">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage <= 1 || isSearching}
+              className="text-[13px] font-medium uppercase tracking-[1.5px] text-muted hover:text-accent disabled:opacity-30 transition-colors"
+            >
               Önceki
-            </Button>
-            <span className="text-sm text-muted-foreground">Sayfa {currentPage} / {Math.max(1, totalPages)}</span>
-            <Button
-              variant="outline"
+            </button>
+            <span className="text-sm text-muted">
+              {currentPage} / {Math.max(1, totalPages)}
+            </span>
+            <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={isSearching || (!hasMoreResults && currentPage >= totalPages)}
+              className="text-[13px] font-medium uppercase tracking-[1.5px] text-muted hover:text-accent disabled:opacity-30 transition-colors"
             >
               Sonraki
-            </Button>
+            </button>
           </section>
         ) : null}
       </main>

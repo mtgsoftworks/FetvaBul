@@ -1,63 +1,13 @@
 import Link from 'next/link';
-import { LayoutGrid, Search } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { DataService } from '@/lib/data-service';
 import { getCategoryIconComponent } from '@/lib/category-icons';
 
-const CARD_ICON_SURFACES = [
-  'bg-emerald-50 text-emerald-700',
-  'bg-teal-50 text-teal-700',
-  'bg-lime-50 text-lime-700',
-  'bg-green-50 text-green-700',
-];
-
 async function getCategories() {
   const dataService = DataService.getInstance();
   await dataService.initialize();
   return dataService.getAllCategories();
-}
-
-function CategoryCard({
-  name,
-  slug,
-  count,
-  description,
-  index,
-}: {
-  name: string;
-  slug: string;
-  count: number;
-  description?: string;
-  index: number;
-}) {
-  const Icon = getCategoryIconComponent(name);
-  const iconSurface = CARD_ICON_SURFACES[index % CARD_ICON_SURFACES.length];
-
-  return (
-    <Link
-      href={`/kategori/${slug}`}
-      className="group flex flex-col justify-between rounded-3xl border border-border/30 bg-background/90 p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary"
-    >
-      <div className="space-y-4">
-        <span className={`flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 ${iconSurface}`}>
-          <Icon className="h-6 w-6" />
-        </span>
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-            {name}
-          </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {description ?? 'Bu kategoriye ait fetvaları inceleyin.'}
-          </p>
-        </div>
-      </div>
-      <div className="mt-6 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-primary/80">
-        <span>{count.toLocaleString('tr-TR')} fetva</span>
-        <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">Keşfet</span>
-      </div>
-    </Link>
-  );
 }
 
 export default async function KategorilerPage({
@@ -73,67 +23,61 @@ export default async function KategorilerPage({
     : categories;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-bg text-main font-sans">
       <Header />
-      <main className="container mx-auto max-w-6xl px-4 py-16">
-        <section className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-            <LayoutGrid className="h-8 w-8" aria-hidden="true" />
-          </div>
-          <span className="mt-4 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            Kategoriler
-          </span>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            İslami konuları kolayca keşfedin
-          </h1>
-          <p className="mt-3 mx-auto max-w-3xl text-base leading-relaxed text-muted-foreground">
-            İbadet, muamelat, aile hayatı ve günlük yaşama dair binlerce fetvayı kategoriler halinde sunuyoruz. Hızlı arama ile ihtiyacınız olan konuyu bulun.
+      <main className="max-w-editorial mx-auto w-full px-8 pt-[140px] pb-16">
+        <section className="mb-10">
+          <h1 className="font-serif font-normal text-main mb-3">Kategoriler</h1>
+          <p className="text-sm text-muted leading-relaxed max-w-lg">
+            İbadet, muamelat, aile hayatı ve günlük yaşama dair binlerce fetvayı kategoriler halinde keşfedin.
           </p>
         </section>
 
-        <form action="/kategoriler" className="relative mx-auto mt-10 w-full max-w-xl">
+        <form action="/kategoriler" className="relative max-w-[400px] mb-12">
           <label htmlFor="category-search" className="sr-only">
             Kategori ara
           </label>
-          <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
           <input
             id="category-search"
             name="q"
             defaultValue={initialSearch}
-            placeholder="Örn: aile, ibadet, ekonomi..."
-            className="h-14 w-full rounded-full border border-primary/20 bg-background pl-14 pr-24 text-base shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+            placeholder="Kategori ara..."
+            className="w-full py-3 px-5 rounded-full border-[1.5px] border-clean-border bg-card text-sm text-main outline-none focus:border-accent transition-all placeholder:text-muted"
           />
-          <button
-            type="submit"
-            className="absolute right-2 top-1/2 flex h-11 -translate-y-1/2 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:scale-[1.02] hover:bg-primary/90"
-          >
-            Ara
-          </button>
         </form>
 
-        <section className="mt-12">
-          {filtered.length === 0 ? (
-            <div className="rounded-3xl border border-border/40 bg-background/90 p-12 text-center shadow-sm">
-              <h2 className="text-xl font-semibold text-foreground">Aramanızla eşleşen kategori bulunamadı</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Farklı bir anahtar kelimeyle aramayı deneyebilir veya tüm kategorileri gözden geçirebilirsiniz.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((category, index) => (
-                <CategoryCard
+        {filtered.length === 0 ? (
+          <div className="py-16 text-center">
+            <h2 className="font-serif text-xl text-main mb-2">Sonuç bulunamadı</h2>
+            <p className="text-sm text-muted">Farklı bir anahtar kelimeyle aramayı deneyin.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
+            {filtered.map((category) => {
+              const Icon = getCategoryIconComponent(category.name);
+              return (
+                <Link
                   key={category.id}
-                  name={category.name}
-                  slug={category.slug}
-                  count={category.fatwaCount}
-                  description={category.description}
-                  index={index}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+                  href={`/kategori/${category.slug}`}
+                  className="group flex flex-col py-8 px-6 bg-card rounded-[20px] border border-clean-border hover:shadow-[0_10px_30px_rgba(95,113,97,0.08)] hover:-translate-y-1 transition-all"
+                >
+                  <div className="mb-4 text-accent">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-serif text-lg text-main mb-2 leading-tight group-hover:text-accent transition-colors">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-muted line-clamp-2 mb-4">
+                    {category.description ?? 'Bu kategoriye ait fetvaları inceleyin.'}
+                  </p>
+                  <span className="mt-auto text-[11px] text-accent uppercase tracking-[1px] font-medium">
+                    {category.fatwaCount.toLocaleString('tr-TR')} fetva
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </main>
       <Footer />
     </div>

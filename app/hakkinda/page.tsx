@@ -32,7 +32,7 @@ async function getAboutStats() {
   return [
     { value: formatNumber(stats.totalFatwas), label: 'Fetva Kaydı' },
     { value: stats.totalCategories.toLocaleString('tr-TR'), label: 'Ana Kategori' },
-    { value: formatNumber(searchStats.totalKeywords), label: 'Anahtar Kelime Dizini' },
+    { value: formatNumber(searchStats.totalKeywords), label: 'Anahtar Kelime' },
     { value: '%100', label: 'Mobil Uyumluluk' },
   ] as const;
 }
@@ -77,121 +77,82 @@ export default async function AboutPage() {
   const stats = await getAboutStats();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-bg text-main font-sans">
       <Header />
-      <main className="container mx-auto px-4 py-16 sm:py-24">
-        <section className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-            <svg
-              className="h-8 w-8"
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M12 10h24a2 2 0 0 1 2 2v28l-14-8-14 8V12a2 2 0 0 1 2-2Z"
-                fill="currentColor"
-                opacity="0.2"
-              />
-              <path
-                d="M12 10h24a2 2 0 0 1 2 2v26.667L24 32l-14 6.667V12a2 2 0 0 1 2-2Zm0-2a4 4 0 0 0-4 4v28a2 2 0 0 0 2.92 1.79L24 35.382l13.08 6.408A2 2 0 0 0 40 40V12a4 4 0 0 0-4-4H12Z"
-                fill="currentColor"
-              />
-              <path
-                d="M17 17h14v2H17v-2Zm0 6h14v2H17v-2Zm0 6h10v2H17v-2Z"
-                fill="currentColor"
-              />
-            </svg>
-          </div>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">FetvaBul Hakkında</h1>
-          <p className="mt-4 mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground">
+      <main className="max-w-editorial mx-auto w-full px-8 pt-[140px] pb-16">
+        {/* Hero */}
+        <section className="mb-16">
+          <h1 className="font-serif font-normal text-main mb-4">Hakkımızda</h1>
+          <p className="text-base text-muted leading-relaxed max-w-lg">
             FetvaBul, güvenilir İslami bilgiye kolay erişim sağlamak için oluşturulmuş dijital bir rehber.
             Teknoloji ve ilmi bir araya getirerek binlerce fetvayı tek platformda buluşturuyoruz.
           </p>
         </section>
 
-        <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Stats */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-16 pb-16 border-b border-clean-border">
           {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-3xl border border-border/30 bg-background/80 p-6 text-center shadow-sm backdrop-blur"
-            >
-              <div className="text-2xl font-semibold text-primary">{stat.value}</div>
-              <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
+            <div key={stat.label} className="text-center">
+              <div className="font-serif text-2xl text-accent mb-1">{stat.value}</div>
+              <p className="text-[11px] text-muted uppercase tracking-[1px] font-medium">{stat.label}</p>
             </div>
           ))}
         </section>
 
-        <section className="mt-20 grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-5">
-            <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Misyonumuz & Vizyonumuz</h2>
-            <p className="text-base leading-relaxed text-muted-foreground">
-              Kullanıcılarımızın aradıkları fetvaya hızlı, güvenilir ve anlaşılır biçimde ulaşabilmeleri için çalışıyoruz.
-              Arama teknolojilerimizi sürekli geliştirerek bilgiye erişim bariyerlerini ortadan kaldırıyoruz.
-            </p>
-            <p className="text-base leading-relaxed text-muted-foreground">
-              Hedefimiz, dünyanın her yerindeki Müslümanların sorularına kaynak odaklı çözümler bulabilecekleri bir platform sunmak.
-              Bilgiye erişimi demokratikleştirirken, güvenilirliği ve ilmî titizliği koruyoruz.
-            </p>
-          </div>
-          <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-primary/20 bg-primary/10 p-10 text-center text-primary">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-background text-primary">
-              <svg
-                className="h-10 w-10"
-                viewBox="0 0 48 48"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <circle cx="24" cy="24" r="16" fill="currentColor" opacity="0.1" />
-                <path
-                  d="M24 14c.552 0 1 .448 1 1v4.382l3.535-3.536a1 1 0 1 1 1.414 1.415L26.414 20H30a1 1 0 1 1 0 2h-4a2 2 0 0 1-2-2v-6a1 1 0 0 1 1-1Zm-5.657 6.757a1 1 0 0 1 1.414 0L24 24.001l4.243-4.244a1 1 0 0 1 1.414 1.415L25.414 25.414l2.829 2.829a1 1 0 0 1-1.414 1.414L24 26.828l-2.829 2.829a1 1 0 1 1-1.414-1.414l2.829-2.829-4.243-4.243a1 1 0 0 1 0-1.414Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M15 32a1 1 0 0 1 1-1h16a1 1 0 1 1 0 2H16a1 1 0 0 1-1-1Z"
-                  fill="currentColor"
-                  opacity="0.4"
-                />
-              </svg>
+        {/* Mission */}
+        <section className="mb-16 pb-16 border-b border-clean-border">
+          <h2 className="font-serif font-normal text-main mb-6">Misyonumuz ve Vizyonumuz</h2>
+          <div className="grid lg:grid-cols-2 gap-10">
+            <div className="space-y-4">
+              <p className="text-sm text-muted leading-relaxed">
+                Kullanıcılarımızın aradıkları fetvaya hızlı, güvenilir ve anlaşılır biçimde ulaşabilmeleri için çalışıyoruz.
+                Arama teknolojilerimizi sürekli geliştirerek bilgiye erişim bariyerlerini ortadan kaldırıyoruz.
+              </p>
+              <p className="text-sm text-muted leading-relaxed">
+                Hedefimiz, dünyanın her yerindeki Müslümanların sorularına kaynak odaklı çözümler bulabilecekleri bir platform sunmak.
+                Bilgiye erişimi demokratikleştirirken, güvenilirliği ve ilmî titizliği koruyoruz.
+              </p>
             </div>
-            <p className="text-base font-medium text-primary/80">
-              İman, ilim ve teknolojiyi aynı çizgide buluşturarak bilgiye erişimi kolaylaştırıyoruz.
-            </p>
+            <div className="border-l-2 border-accent/30 pl-6 flex items-center">
+              <p className="text-base text-accent/80 italic font-serif leading-relaxed">
+                İman, ilim ve teknolojiyi aynı çizgide buluşturarak bilgiye erişimi kolaylaştırıyoruz.
+              </p>
+            </div>
           </div>
         </section>
 
-        <section className="mt-20">
-          <div className="text-center">
-            <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Uzman Ekibimiz</h2>
-            <p className="mt-3 mx-auto max-w-2xl text-sm text-muted-foreground">
-              İlmî titizliği ve kullanıcı odaklı yaklaşımı benimseyen kadromuz, sorularınızı titizlikle değerlendiriyor.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Team */}
+        <section className="mb-16 pb-16 border-b border-clean-border">
+          <h2 className="font-serif font-normal text-main mb-3">Uzman Ekibimiz</h2>
+          <p className="text-sm text-muted mb-10">
+            İlmî titizliği ve kullanıcı odaklı yaklaşımı benimseyen kadromuz.
+          </p>
+          <div className="grid gap-6 sm:grid-cols-3">
             {TEAM.map((member) => (
-              <div key={member.name} className="rounded-3xl border border-border/30 bg-background/90 p-6 text-center shadow-sm">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-2xl font-semibold text-primary">
+              <div key={member.name} className="bg-card rounded-[20px] border border-clean-border p-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent text-lg font-serif font-bold mb-4">
                   {member.name.slice(0, 1)}
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-foreground">{member.name}</h3>
-                <p className="text-sm font-medium text-primary/80">{member.role}</p>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
+                <h3 className="font-serif text-lg text-main mb-1">{member.name}</h3>
+                <p className="text-[11px] text-accent uppercase tracking-[1px] font-medium mb-3">{member.role}</p>
+                <p className="text-sm text-muted leading-relaxed">{member.bio}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mt-20">
-          <div className="text-center">
-            <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">Yolculuğumuz</h2>
-            <p className="mt-3 text-sm text-muted-foreground">FetvaBul’un gelişim sürecine kısa bir bakış.</p>
-          </div>
-          <div className="mt-12 space-y-10">
+        {/* Journey */}
+        <section>
+          <h2 className="font-serif font-normal text-main mb-3">Yolculuğumuz</h2>
+          <p className="text-sm text-muted mb-10">FetvaBul&apos;un gelişim sürecine kısa bir bakış.</p>
+          <div className="space-y-0">
             {JOURNEY.map((item) => (
-              <div key={item.year} className="relative rounded-3xl border border-border/30 bg-background/90 p-6 shadow-sm">
-                <span className="text-sm font-semibold uppercase tracking-wide text-primary">{item.year}</span>
-                <h3 className="mt-2 text-xl font-semibold text-foreground">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+              <div key={item.year} className="flex gap-6 py-6 border-b border-clean-border last:border-b-0">
+                <span className="font-serif text-xl text-accent shrink-0 w-16">{item.year}</span>
+                <div>
+                  <h3 className="font-serif text-lg text-main mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted leading-relaxed">{item.description}</p>
+                </div>
               </div>
             ))}
           </div>

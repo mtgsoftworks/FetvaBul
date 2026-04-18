@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Tag, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { DataService } from '@/lib/data-service';
-import { getCategoryIconInfo } from '@/lib/category-icons';
 import type { Fetva } from '@/types';
 
 export const revalidate = 300;
@@ -136,138 +135,116 @@ export default async function KategoriPage({
   }
 
   const { category, fatwas, total, hasMore } = data;
-  const icon = getCategoryIconInfo(category.name).emoji || '🕌';
   const prevPage = page > 1 ? page - 1 : null;
   const nextPage = hasMore ? page + 1 : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-bg text-main font-sans">
       <Header />
 
-      <div className="container mx-auto px-4 py-8">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-primary transition-colors">Ana Sayfa</Link>
+      <main className="max-w-editorial mx-auto w-full px-8 pt-[140px] pb-16">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-[11px] text-muted uppercase tracking-[1px] mb-8">
+          <Link href="/" className="hover:text-accent transition-colors">Anasayfa</Link>
           <span>/</span>
-          <Link href="/kategoriler" className="hover:text-primary transition-colors">Kategoriler</Link>
+          <Link href="/kategoriler" className="hover:text-accent transition-colors">Kategoriler</Link>
           <span>/</span>
-          <span>{category.name}</span>
+          <span className="text-main">{category.name}</span>
         </nav>
 
-        <section className="mt-6 rounded-3xl border border-border/30 bg-background/95 p-8 shadow-sm">
-          <div className="flex flex-col gap-6 text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-3xl lg:mx-0" aria-hidden="true">
-              {icon}
-            </div>
-            <div className="flex-1 space-y-4">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                {category.name}
-              </h1>
-              <p className="text-base text-muted-foreground">
-                {category.description || 'Bu kategoriye ait fetvaları keşfedin ve güncel cevaplara ulaşın.'}
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground lg:justify-start">
-                <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 font-semibold text-primary">
-                  <Tag className="h-4 w-4" />
-                  {total.toLocaleString('tr-TR')} fetva
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* Category Header */}
+        <section className="mb-10 pb-10 border-b border-clean-border">
+          <h1 className="font-serif font-normal text-main mb-3">{category.name}</h1>
+          <p className="text-sm text-muted leading-relaxed max-w-lg mb-4">
+            {category.description || 'Bu kategoriye ait fetvaları keşfedin ve güncel cevaplara ulaşın.'}
+          </p>
+          <span className="text-[11px] text-accent uppercase tracking-[1px] font-medium">
+            {total.toLocaleString('tr-TR')} fetva
+          </span>
         </section>
 
-        <section className="mt-12 space-y-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground">Fetva listesi</h2>
-              <p className="text-sm text-muted-foreground">
-                Toplam {total.toLocaleString('tr-TR')} fetvadan {(fatwas.length + (page - 1) * LIMIT).toLocaleString('tr-TR')} gösteriliyor.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {SORT_OPTIONS.map((option) => {
-                const isActive = sortBy === option.value;
-                return (
-                  <Link
-                    key={option.value}
-                    href={`/kategori/${category.slug}?sort=${option.value}&page=1`}
-                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                      isActive
-                        ? 'border-primary bg-primary text-primary-foreground shadow-sm'
-                        : 'border-border text-muted-foreground hover:border-primary hover:text-primary'
-                    }`}
-                  >
-                    {option.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {fatwas.length === 0 ? (
-            <div className="rounded-3xl border border-border/30 bg-background/90 p-12 text-center shadow-sm">
-              <h3 className="text-lg font-semibold text-foreground">Bu kategoriye ait fetva bulunamadı</h3>
-              <p className="mt-2 text-sm text-muted-foreground">Yeni fetvalar eklendiğinde burada görünecektir.</p>
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
-              {fatwas.map((fetva) => (
-                <Link
-                  key={fetva.id}
-                  href={`/fetva/${fetva.id}`}
-                  className="group flex h-full flex-col rounded-3xl border border-border/30 bg-background/95 p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-primary"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>
-                        {parseDate(fetva.updatedAt ?? fetva.createdAt ?? fetva.date) > 0
-                          ? new Date((fetva.updatedAt ?? fetva.createdAt ?? fetva.date) as string | Date).toLocaleDateString('tr-TR')
-                          : 'Tarih belirtilmedi'}
-                      </span>
-                      <span>{(fetva.views || 0).toLocaleString('tr-TR')} görüntülenme</span>
-                    </div>
-                    <h3 className="line-clamp-2 text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
-                      {fetva.question}
-                    </h3>
-                    <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{fetva.answer}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Kaynak: {fetva.source?.trim() || 'Kaynak belirtilmedi'}
-                    </p>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{(fetva.likes || 0).toLocaleString('tr-TR')} beğeni</span>
-                    <span className="inline-flex items-center gap-2 text-primary">
-                      İncele
-                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-10 flex items-center justify-center gap-3">
-            {prevPage ? (
+        {/* Sort Options */}
+        <div className="flex flex-wrap gap-2 mb-10">
+          {SORT_OPTIONS.map((option) => {
+            const isActive = sortBy === option.value;
+            return (
               <Link
-                href={`/kategori/${category.slug}?sort=${sortBy}&page=${prevPage}`}
-                className="rounded-full border border-border px-5 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-primary"
+                key={option.value}
+                href={`/kategori/${category.slug}?sort=${option.value}&page=1`}
+                className={`rounded-full border px-4 py-2 text-[12px] font-medium uppercase tracking-[1px] transition ${
+                  isActive
+                    ? 'border-accent bg-accent text-white'
+                    : 'border-clean-border text-muted hover:border-accent hover:text-accent'
+                }`}
               >
-                Önceki
+                {option.label}
               </Link>
-            ) : null}
-            <span className="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-              Sayfa {page}
-            </span>
-            {nextPage ? (
-              <Link
-                href={`/kategori/${category.slug}?sort=${sortBy}&page=${nextPage}`}
-                className="rounded-full border border-primary/30 bg-primary/10 px-5 py-2 text-sm font-semibold text-primary transition hover:bg-primary/20"
-              >
-                Sonraki
-              </Link>
-            ) : null}
+            );
+          })}
+        </div>
+
+        {/* Fetwa List */}
+        {fatwas.length === 0 ? (
+          <div className="py-16 text-center">
+            <h2 className="font-serif text-xl text-main mb-2">Fetva bulunamadı</h2>
+            <p className="text-sm text-muted">Yeni fetvalar eklendiğinde burada görünecektir.</p>
           </div>
-        </section>
-      </div>
+        ) : (
+          <div className="space-y-0">
+            {fatwas.map((fetva) => (
+              <Link
+                key={fetva.id}
+                href={`/fetva/${fetva.id}`}
+                className="group block py-8 border-b border-clean-border last:border-b-0"
+              >
+                <div className="flex items-center gap-3 text-[11px] text-muted uppercase tracking-[1px] mb-3">
+                  <span>
+                    {parseDate(fetva.updatedAt ?? fetva.createdAt ?? fetva.date) > 0
+                      ? new Date((fetva.updatedAt ?? fetva.createdAt ?? fetva.date) as string | Date).toLocaleDateString('tr-TR')
+                      : 'Tarih belirtilmedi'}
+                  </span>
+                  <span className="text-clean-border">·</span>
+                  <span>{(fetva.views || 0).toLocaleString('tr-TR')} görüntülenme</span>
+                </div>
+                <h3 className="font-serif text-lg text-main mb-2 leading-[1.4] group-hover:text-accent transition-colors">
+                  {fetva.question}
+                </h3>
+                <p className="text-sm text-muted leading-relaxed line-clamp-2 mb-3">{fetva.answer}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-muted">
+                    Kaynak: {fetva.source?.trim() || 'Kaynak belirtilmedi'}
+                  </span>
+                  <span className="inline-flex items-center gap-2 text-[12px] text-accent uppercase tracking-[1px] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    İncele
+                    <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        <div className="mt-10 flex items-center justify-center gap-4">
+          {prevPage ? (
+            <Link
+              href={`/kategori/${category.slug}?sort=${sortBy}&page=${prevPage}`}
+              className="text-[13px] font-medium uppercase tracking-[1.5px] text-muted hover:text-accent transition-colors"
+            >
+              Önceki
+            </Link>
+          ) : null}
+          <span className="text-sm text-muted">Sayfa {page}</span>
+          {nextPage ? (
+            <Link
+              href={`/kategori/${category.slug}?sort=${sortBy}&page=${nextPage}`}
+              className="text-[13px] font-medium uppercase tracking-[1.5px] text-muted hover:text-accent transition-colors"
+            >
+              Sonraki
+            </Link>
+          ) : null}
+        </div>
+      </main>
       <Footer />
     </div>
   );
