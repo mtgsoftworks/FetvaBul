@@ -11,14 +11,28 @@ interface FetvaCardProps {
   question: string;
   answer: string;
   category: string;
-  source: string;
-  date: string;
+  source?: string;
+  date?: string | Date;
   views: number;
   likes: number;
 }
 
 const STORAGE_KEY = 'fetvabul_liked_fatwas';
 const OFFLINE_BUILD = process.env.NEXT_PUBLIC_OFFLINE_BUILD === '1';
+
+function formatSource(value?: string): string {
+  const clean = value?.trim();
+  return clean && clean.length > 0 ? clean : 'Kaynak belirtilmedi';
+}
+
+function formatDate(value?: string | Date): string {
+  if (!value) return 'Tarih belirtilmedi';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Tarih belirtilmedi';
+  }
+  return date.toLocaleDateString('tr-TR', { dateStyle: 'long' });
+}
 
 function getStoredLikes(): Set<string> {
   if (typeof window === 'undefined') return new Set();
@@ -46,6 +60,8 @@ export function FetvaCard({ id, question, answer, category, source, date, views,
   const [commentsCount, setCommentsCount] = useState<number>(0);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
+  const sourceLabel = formatSource(source);
+  const dateLabel = formatDate(date);
 
   useEffect(() => {
     if (OFFLINE_BUILD) {
@@ -156,7 +172,12 @@ export function FetvaCard({ id, question, answer, category, source, date, views,
             <Tag className="w-3 h-3 mr-1" />
             {category}
           </Badge>
-          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-label="Fetvayı paylaş"
+          >
             <Share2 className="w-4 h-4" />
           </Button>
         </div>
@@ -178,11 +199,11 @@ export function FetvaCard({ id, question, answer, category, source, date, views,
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
               <BookOpen className="w-4 h-4" />
-              <span>{source}</span>
+              <span>{sourceLabel}</span>
             </div>
             <div className="flex items-center space-x-1">
               <Calendar className="w-4 h-4" />
-              <span>{date}</span>
+              <span>{dateLabel}</span>
             </div>
           </div>
 

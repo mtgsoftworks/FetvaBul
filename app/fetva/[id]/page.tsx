@@ -15,11 +15,11 @@ import { FetvaViewTracker } from '@/components/fetva/FetvaViewTracker';
 import { FetvaComments } from '@/components/fetva/FetvaComments';
 import { FetvaStructuredData } from '@/components/seo/StructuredData';
 
-function formatDate(value?: string | Date | null) {
-  if (!value) return null;
+function formatDate(value?: string | Date | null): string {
+  if (!value) return 'Tarih belirtilmedi';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return null;
+    return 'Tarih belirtilmedi';
   }
   return date.toLocaleDateString('tr-TR', { dateStyle: 'long' });
 }
@@ -101,8 +101,8 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
 
   const { fetva, relatedFatwas } = data;
   const paragraphs = extractParagraphs(fetva.answer);
-  const createdAt = formatDate(fetva.createdAt ?? fetva.date);
-  const updatedAt = formatDate(fetva.updatedAt);
+  const publishedAtLabel = formatDate(fetva.createdAt ?? fetva.date);
+  const updatedAtLabel = formatDate(fetva.updatedAt ?? fetva.createdAt ?? fetva.date);
   const sourceLabel = formatSource(fetva.source);
   const primaryCategory = fetva.categories?.[0] ?? 'Genel';
   const shareBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fetvabul.com';
@@ -143,17 +143,13 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
                 <BookOpen className="h-3.5 w-3.5" />
                 Kaynak: {sourceLabel}
               </span>
-              {createdAt && (
-                <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  Yayın: {createdAt}
-                </span>
-              )}
-              {updatedAt && (
-                <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                  Güncellendi: {updatedAt}
-                </span>
-              )}
+              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" />
+                Yayın: {publishedAtLabel}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                Son güncelleme: {updatedAtLabel}
+              </span>
             </div>
 
             <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{fetva.question}</h1>
@@ -211,7 +207,7 @@ export default async function FetvaDetailPage({ params }: { params: { id: string
                   answer={item.answer}
                   category={item.categories?.[0] ?? 'Genel'}
                   source={formatSource(item.source)}
-                  date={item.date ?? ''}
+                  date={item.updatedAt ?? item.createdAt ?? item.date}
                   views={item.views ?? 0}
                   likes={item.likes ?? 0}
                 />

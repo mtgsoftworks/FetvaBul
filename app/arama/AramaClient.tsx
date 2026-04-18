@@ -13,12 +13,17 @@ type AramaClientProps = {
 };
 
 function formatDate(value?: string | Date): string {
-  if (!value) return 'Tarih yok';
+  if (!value) return 'Tarih belirtilmedi';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Tarih yok';
+    return 'Tarih belirtilmedi';
   }
   return date.toLocaleDateString('tr-TR', { dateStyle: 'long' });
+}
+
+function formatSource(value?: string): string {
+  const clean = value?.trim();
+  return clean && clean.length > 0 ? clean : 'Kaynak belirtilmedi';
 }
 
 function truncate(value: string, maxLength = 260): string {
@@ -243,6 +248,8 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
 
           {searchResults.map((result) => {
             const fetva = result.fetva;
+            const displayDate = formatDate(fetva.updatedAt ?? fetva.createdAt ?? fetva.date);
+            const sourceLabel = formatSource(fetva.source);
 
             return (
               <article
@@ -250,15 +257,11 @@ export default function AramaClient({ initialQuery }: AramaClientProps) {
                 className="rounded-2xl border border-border/40 bg-background/95 p-5 shadow-sm transition hover:border-primary"
               >
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span>{formatDate(fetva.createdAt ?? fetva.updatedAt ?? fetva.date)}</span>
+                  <span>{displayDate}</span>
                   <span>•</span>
                   <span>{(fetva.views ?? 0).toLocaleString('tr-TR')} görüntülenme</span>
-                  {fetva.source ? (
-                    <>
-                      <span>•</span>
-                      <span>{fetva.source}</span>
-                    </>
-                  ) : null}
+                  <span>•</span>
+                  <span>Kaynak: {sourceLabel}</span>
                 </div>
 
                 <h2 className="mt-2 text-xl font-semibold text-foreground">

@@ -62,14 +62,14 @@ async function getHomepageData() {
 
   const recentFatwas = allFatwas
     .slice()
-    .sort((a, b) => toTimestamp(b.createdAt ?? b.updatedAt) - toTimestamp(a.createdAt ?? a.updatedAt))
+    .sort((a, b) => toTimestamp(b.updatedAt ?? b.createdAt ?? b.date) - toTimestamp(a.updatedAt ?? a.createdAt ?? a.date))
     .slice(0, 4);
 
   const popularQuestions = popularFatwas.map((fetva) => ({
     id: fetva.id,
     question: fetva.question,
     source: fetva.source?.trim() || 'Kaynak belirtilmedi',
-    date: fetva.date ?? fetva.createdAt,
+    date: fetva.updatedAt ?? fetva.createdAt ?? fetva.date,
   }));
 
   const latestUpdatedAt = allFatwas.reduce<string | Date | undefined>((latest, fetva) => {
@@ -251,42 +251,48 @@ function RecentFatwas({
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          {fatwas.map((item) => (
-            <article
-              key={item.id}
-              className="flex flex-col gap-4 rounded-2xl border border-border/40 bg-background p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary"
-            >
-              <div className="flex items-start gap-4">
-                <div className="hidden h-20 w-28 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary/10 to-primary/30 md:block" />
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span>{formatDate(item.createdAt ?? item.updatedAt)}</span>
-                    <span className="hidden md:inline">•</span>
-                    <span>{(item.views ?? 0).toLocaleString('tr-TR')} görüntülenme</span>
+          {fatwas.map((item) => {
+            const sourceLabel = item.source?.trim() || 'Kaynak belirtilmedi';
+
+            return (
+              <article
+                key={item.id}
+                className="flex flex-col gap-4 rounded-2xl border border-border/40 bg-background p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="hidden h-20 w-28 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary/10 to-primary/30 md:block" />
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      <span>{formatDate(item.updatedAt ?? item.createdAt ?? item.date)}</span>
+                      <span className="hidden md:inline">•</span>
+                      <span>{(item.views ?? 0).toLocaleString('tr-TR')} görüntülenme</span>
+                      <span className="hidden md:inline">•</span>
+                      <span>Kaynak: {sourceLabel}</span>
+                    </div>
+                    <h3 className="mt-2 text-xl font-semibold text-foreground">{item.question}</h3>
+                    <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
                   </div>
-                  <h3 className="mt-2 text-xl font-semibold text-foreground">{item.question}</h3>
-                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
                 </div>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                  {item.categories.slice(0, 2).map((cat) => (
-                    <span key={cat} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                      {cat}
-                    </span>
-                  ))}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                    {item.categories.slice(0, 2).map((cat) => (
+                      <span key={cat} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                  <Link
+                    href={`/fetva/${item.id}`}
+                    className="inline-flex items-center gap-2 text-primary transition hover:gap-3"
+                    aria-label={`${item.question} fetvasını oku`}
+                  >
+                    Oku
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
-                <Link
-                  href={`/fetva/${item.id}`}
-                  className="inline-flex items-center gap-2 text-primary transition hover:gap-3"
-                  aria-label={`${item.question} fetvasını oku`}
-                >
-                  Oku
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

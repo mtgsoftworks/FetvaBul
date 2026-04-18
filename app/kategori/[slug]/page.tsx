@@ -219,8 +219,8 @@ export default async function KategoriPage({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>
-                        {parseDate(fetva.createdAt ?? fetva.date) > 0
-                          ? new Date((fetva.createdAt ?? fetva.date) as string | Date).toLocaleDateString('tr-TR')
+                        {parseDate(fetva.updatedAt ?? fetva.createdAt ?? fetva.date) > 0
+                          ? new Date((fetva.updatedAt ?? fetva.createdAt ?? fetva.date) as string | Date).toLocaleDateString('tr-TR')
                           : 'Tarih belirtilmedi'}
                       </span>
                       <span>{(fetva.views || 0).toLocaleString('tr-TR')} görüntülenme</span>
@@ -229,6 +229,9 @@ export default async function KategoriPage({
                       {fetva.question}
                     </h3>
                     <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{fetva.answer}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Kaynak: {fetva.source?.trim() || 'Kaynak belirtilmedi'}
+                    </p>
                   </div>
                   <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
                     <span>{(fetva.likes || 0).toLocaleString('tr-TR')} beğeni</span>

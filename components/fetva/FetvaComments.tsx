@@ -91,6 +91,7 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
 
@@ -154,6 +155,7 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
 
     setSubmitting(true);
     setError(null);
+    setNotice(null);
 
     try {
       if (OFFLINE_BUILD) {
@@ -172,6 +174,7 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
 
         setMessage('');
         setName('');
+        setNotice('Yorumunuz kaydedildi ve bu cihazda görüntüleniyor.');
         return;
       }
 
@@ -198,8 +201,10 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
 
       setMessage('');
       setName('');
+      setNotice('Yorumunuz paylaşıldı. Topluluk kurallarına aykırı içerikler moderasyonla kaldırılabilir.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Yorum gönderilemedi');
+      setNotice(null);
     } finally {
       setSubmitting(false);
     }
@@ -234,8 +239,11 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
             required
           />
         </div>
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">Yorumlar yayımlanmadan önce kontrol edilebilir.</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">Yorum politikası</p>
+            <p className="mt-1">Yorumlar gönderildikten sonra görünür. Uygunsuz içerikler moderasyonla kaldırılabilir.</p>
+          </div>
           <button
             type="submit"
             disabled={submitting}
@@ -251,12 +259,16 @@ export function FetvaComments({ fetvaId }: FetvaCommentsProps) {
         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
       )}
 
+      {notice && (
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{notice}</div>
+      )}
+
       <div className="mt-6 space-y-3">
         {loading ? (
           <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">Yorumlar yükleniyor...</div>
         ) : comments.length === 0 ? (
           <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-            Henüz yorum yok. İlk yorumu siz bırakın.
+            Henüz yorum yok. İlk yorumu saygılı ve konuya odaklı şekilde siz paylaşabilirsiniz.
           </div>
         ) : (
           comments.map((comment) => (
